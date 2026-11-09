@@ -1,4 +1,5 @@
 import '../../core/storage/local_catalog_db.dart';
+import '../../core/util/uuid_helper.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/network/api_client.dart';
@@ -180,7 +181,7 @@ class ReservationController extends ChangeNotifier {
 
     try {
       final now = DateTime.now();
-      final clientReservationId = 'offline-${now.millisecondsSinceEpoch}-${items.length}';
+      final clientReservationId = UuidHelper.generateV4();
       final offlineRes = PendingOfflineReservation(
         clientReservationId: clientReservationId,
         branchId: branchId,

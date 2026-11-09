@@ -136,7 +136,7 @@ class _CatalogPageState extends State<CatalogPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Modo Offline Activo (CU09)',
+                  'Modo Offline Activo (CU08)',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
@@ -188,7 +188,7 @@ class _CatalogPageState extends State<CatalogPage> {
     try {
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('Descargando catálogo local para modo offline (CU08)...'),
+          content: Text('Descargando catálogo local (CU07)...'),
           duration: Duration(seconds: 1),
         ),
       );
@@ -223,7 +223,7 @@ class _CatalogPageState extends State<CatalogPage> {
             IconButton(
               tooltip: _controller.isOffline
                   ? 'Modo Offline activo (SQLite CU08)'
-                  : 'Descargar catálogo offline (CU08)',
+                  : 'Descargar catálogo local (CU07)',
               icon: Icon(
                 _controller.isOffline
                     ? Icons.cloud_off_rounded

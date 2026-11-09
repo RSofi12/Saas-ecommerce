@@ -73,7 +73,7 @@ class OrderApi {
 
   Future<OrderResult> trackOrder({required String trackingNumber}) async {
     final response = await _client.get<Order>(
-      'orders/tracking/',
+      'orders/tracking/$trackingNumber',
       parser: _parseOrder,
     );
     return _orderResult(response.data, response.message);

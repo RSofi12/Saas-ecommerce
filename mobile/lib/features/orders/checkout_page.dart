@@ -148,7 +148,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           title: _isOrderPayment ? 'Finalizar pedido' : 'Finalizar compra',
           subtitle: _isOrderPayment
               ? 'Completa el pago para continuar con el despacho.'
-              : 'Elige modalidad de entrega y método de pago (CU12).',
+              : 'Elige modalidad de entrega y método de pago (CU09).',
         ),
         const SizedBox(height: 16),
         if (order != null) ...[

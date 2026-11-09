@@ -40,21 +40,21 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
     final garmentImageUrl = widget.garmentImageUrl.trim();
 
     if (frontendUrl.isEmpty) {
-      _errorMessage = 'The frontend URL is not configured.';
+      _errorMessage = 'La URL del frontend no está configurada.';
       return;
     }
     if (apiKey.isEmpty) {
-      _errorMessage = 'The Decart API key is not configured.';
+      _errorMessage = 'La clave de API de Decart no está configurada.';
       return;
     }
     if (garmentImageUrl.isEmpty) {
-      _errorMessage = 'This product has no image available for try-on.';
+      _errorMessage = 'Esta prenda no tiene una imagen disponible para el probador virtual.';
       return;
     }
 
     final uri = Uri.tryParse(AppConfig.decartTryOnUrl);
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
-      _errorMessage = 'The frontend URL is invalid.';
+      _errorMessage = 'La URL del frontend no es válida.';
       return;
     }
 
@@ -65,7 +65,7 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not request camera access for virtual try-on.';
+        _errorMessage = 'No se pudo solicitar acceso a la cámara para el probador virtual.';
       });
       return;
     }
@@ -75,8 +75,8 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
       setState(() {
         _isLoading = false;
         _errorMessage = cameraStatus.isPermanentlyDenied
-            ? 'Camera access is disabled. Enable it in Settings to use virtual try-on.'
-            : 'Camera access is required to use virtual try-on.';
+            ? 'El acceso a la cámara está desactivado. Actívalo en Ajustes para usar el probador virtual.'
+            : 'Se requiere acceso a la cámara para usar el probador virtual.';
       });
       return;
     }
@@ -98,7 +98,7 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
             if (!mounted) return;
             setState(() {
               _isLoading = false;
-              _errorMessage = 'Could not load the virtual try-on page.';
+              _errorMessage = 'No se pudo cargar la interfaz del probador virtual.';
             });
           },
         ),
@@ -145,7 +145,7 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not configure the virtual try-on page.';
+        _errorMessage = 'No se pudo inicializar la sesión del probador virtual.';
       });
     }
   }
