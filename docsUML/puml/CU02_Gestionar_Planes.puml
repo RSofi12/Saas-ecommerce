@@ -1,0 +1,66 @@
+@startuml CU02_Gestionar_Planes
+title Diagrama de Comunicación / Robustez ICONIX - CU02: Gestionar Planes y Límites
+
+top to bottom direction
+skinparam actorStyle hollow
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #000000
+skinparam ArrowFontColor #000000
+skinparam ArrowFontSize 10
+
+actor ":Superadmin" as Act
+
+package "Frontend (Angular PWA)" {
+  boundary ":TenantsPageComponent" as Page
+  boundary ":SubscriptionModalComponent" as Modal
+  boundary ":CompanyService" as Srv
+}
+
+package "Backend (FastAPI)" {
+  control ":PlanRoutes" as PlanR
+  control ":SubscriptionRoutes" as SubR
+  control ":QuotaService" as Quota
+  
+  entity ":Company" as EntComp
+  entity ":Plan" as EntPlan
+  entity ":Subscription" as EntSub
+  entity ":Branch" as EntBranch
+}
+
+' -------------------------------------------------------------
+' ENLACES Y MENSAJES DE COMUNICACIÓN
+' -------------------------------------------------------------
+
+' 1. Actor <--> Frontend
+Act --> Page : 1: openSubscriptionModal()
+Page --> Modal : 1.1: loadData()\n2.10: onSubscriptionUpdated()
+Act --> Modal : 2: onSubmit()\n3: onSubmit()
+Modal --> Act : 3.5: showErrorToast()
+
+' 2. Frontend Boundaries
+Modal --> Srv : 1.2: getPlans()\n1.5: getCompanySubscription()\n2.1: assignSubscription()\n3.1: assignSubscription()
+
+' 3. Frontend <--> Backend Routes
+Srv --> PlanR : 1.3: list_plans()
+PlanR --> EntPlan : 1.4: query()
+
+Srv --> SubR : 1.6: get_company_subscription()\n2.2: assign_subscription()\n2.9: response()\n3.2: assign_subscription()\n3.4: raise_http_exception()
+
+' 4. Backend Routes <--> Entities & Services
+SubR --> EntComp : 2.3: query()
+SubR --> EntPlan : 2.4: query()
+
+SubR --> Quota : 1.7: get_active_subscription()\n2.5: validate_branch_quota()\n3.3: validate_branch_quota()
+
+' 5. SELF-LOOP (Validación interna en QuotaService)
+Quota --> Quota : 2.5: validate_branch_quota() [OK: sucursales <= max_branches]\n3.3: validate_branch_quota() [FAIL: sucursales > max_branches]
+
+' 6. Queries y Persistencia
+Quota --> EntSub : 1.8: query()
+Quota --> EntBranch : 2.6: query() [conteo sucursales activas]
+
+SubR --> EntSub : 2.7: update() [marca CANCELADA]\n2.8: create() [nueva ACTIVA]
+
+@enduml

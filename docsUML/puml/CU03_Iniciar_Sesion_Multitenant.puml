@@ -1,0 +1,60 @@
+@startuml CU03_Iniciar_Sesion_Multitenant
+title Diagrama de Comunicación / Robustez ICONIX - CU03: Iniciar Sesión Multitenant
+
+top to bottom direction
+skinparam actorStyle hollow
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #0284c7
+skinparam ArrowFontColor #0369a1
+skinparam ArrowFontSize 10
+
+actor ":Usuario" as Act
+
+package "Frontend (Angular PWA)" {
+  boundary ":LoginPageComponent" as LoginUI
+  boundary ":SessionService" as SessionSvc
+  boundary ":AuthApiService" as AuthApi
+}
+
+package "Backend (FastAPI)" {
+  control ":AuthRoutes" as AuthR
+  control ":AuthSecurity" as Sec
+  
+  entity ":User" as EntUser
+  entity ":Company" as EntComp
+  entity ":JwtToken" as EntJwt
+}
+
+' -------------------------------------------------------------
+' ENLACES Y MENSAJES DE COMUNICACIÓN
+' -------------------------------------------------------------
+
+' 1. Actor <--> LoginPageComponent
+Act --> LoginUI : 1: selectActor()\n1.2: submit()\n2: submit() [Credenciales inválidas]\n3: submit() [Empresa inactiva]\n4: submit() [Usuario inactivo]
+
+' 2. SELF-LOOP 1 (Normalización en LoginPageComponent)
+LoginUI --> LoginUI : 1.1: normalizeEmailInput() [Trim y minúsculas]
+
+' 3. Frontend Boundaries
+LoginUI --> SessionSvc : 1.3: login()\n2.1: login()\n3.1: login()\n4.1: login()
+SessionSvc --> AuthApi : 1.4: login()\n2.2: login()\n3.2: login()\n4.2: login()
+SessionSvc --> LoginUI : 1.12: navigateByUrl() [Redirección según rol]
+LoginUI --> Act : 2.6: showErrorToast()\n3.6: showErrorToast()\n4.6: showErrorToast()
+
+' 4. Frontend <--> Backend Controller
+AuthApi --> AuthR : 1.5: login()\n2.3: login()\n3.3: login()\n4.3: login()
+AuthR --> AuthApi : 1.10: response() [HTTP 200 + token]\n2.5: raise_http_exception() [401 Unauthorized]\n3.5: raise_http_exception() [403 Tenant Suspendido]\n4.5: raise_http_exception() [403 Usuario Desactivado]
+
+' 5. Backend Logic & Entities
+AuthR --> EntUser : 1.6: query() [por email]\n4.4: query() [is_active==False]
+AuthR --> Sec : 1.7: verify_password()\n1.9: create_access_token()\n2.4: verify_password()
+Sec --> EntJwt : create() [Firma token JWT]
+
+AuthR --> EntComp : 1.8: query() [valida tenant ACTIVO]\n3.4: query() [status!=ACTIVO]
+
+' 6. SELF-LOOP 2 (Persistencia de sesión en SessionService)
+SessionSvc --> SessionSvc : 1.11: setSession() [localStorage + tokenSignal + userSignal]
+
+@enduml

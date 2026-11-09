@@ -1,0 +1,107 @@
+@startuml CU22_secuencia_dataset_sintetico_ml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "AdministradorTenant" as Admin
+participant "«Interface»\n:AdminMlDatasetPageComponent" as UIDatasetPage
+participant "«Interface»\n:SyntheticDatasetApiService" as UIDatasetApi
+participant "«Controller»\n:SyntheticDatasetRoutes" as CtrlRoutes
+participant "«Controller»\n:SyntheticDatasetService" as CtrlService
+participant "«Entity»\n:Plan" as EntPlan
+participant "«Entity»\n:Product" as EntProduct
+participant "«Entity»\n:ProductVariant" as EntVariant
+participant "«Entity»\n:SyntheticDataset" as EntDataset
+
+' Fase 1: Solicitud en Interfaz
+Admin -> UIDatasetPage: accederModuloDataset()
+activate UIDatasetPage
+Admin -> UIDatasetPage: configurarParametrosGeneracion()
+Admin -> UIDatasetPage: solicitarGeneracionDataset()
+UIDatasetPage -> UIDatasetApi: generateDataset()
+activate UIDatasetApi
+UIDatasetApi -> CtrlRoutes: POST_generate_dataset()
+activate CtrlRoutes
+
+' Fase 2: Validación de Permisos y Suscripción a IA
+CtrlRoutes -> CtrlRoutes: validarPermisosAdministrador()
+CtrlRoutes -> CtrlService: generate_synthetic_dataset()
+activate CtrlService
+
+alt Plan Pro/Enterprise (IA Activa)
+    CtrlService -> CtrlService: validate_ai_access()
+    CtrlService -> EntPlan: checkSubscriptionTier()
+    activate EntPlan
+    EntPlan --> CtrlService: returnSubscriptionDetails()
+    deactivate EntPlan
+else Plan Básico (HTTP 403 Forbidden)
+    CtrlService --> CtrlRoutes: raiseForbiddenException()
+end
+
+' Fase 3: Lectura y Validación de Catálogo
+alt Catálogo > 0 Productos
+    CtrlService -> EntProduct: getTenantProducts()
+    activate EntProduct
+    EntProduct --> CtrlService: returnProductList()
+    deactivate EntProduct
+    CtrlService -> EntVariant: getProductVariantsWithPrices()
+    activate EntVariant
+    EntVariant --> CtrlService: returnVariantList()
+    deactivate EntVariant
+    CtrlService -> CtrlService: validarExistenciaCatalogo()
+else Catálogo Vacío (HTTP 400 Bad Request)
+    CtrlService --> CtrlRoutes: raiseBadRequestException()
+end
+
+' Fase 4: Simulación Estocástica con Estacionalidad Textil
+loop Por cada variante de prenda y rango de fechas
+    CtrlService -> CtrlService: calcularPonderacionesEstacionales()
+    CtrlService -> CtrlService: simularTransaccionesEstocasticas()
+    CtrlService -> CtrlService: aplicarPoliticasCambioYDevolucion()
+end
+
+' Fase 5: Persistencia en Disco y Base de Datos
+CtrlService -> CtrlService: guardarCsvEnDisco()
+CtrlService -> EntDataset: persistirMetadataDataset()
+activate EntDataset
+EntDataset --> CtrlService: returnDatasetEntity()
+deactivate EntDataset
+
+' Fase 6: Retorno de Métricas a la Interfaz
+CtrlService --> CtrlRoutes: returnDatasetMetrics()
+deactivate CtrlService
+CtrlRoutes --> UIDatasetApi: returnJsonSuccess()
+deactivate CtrlRoutes
+UIDatasetApi --> UIDatasetPage: returnObservableResult()
+deactivate UIDatasetApi
+UIDatasetPage --> Admin: renderizarResumenYMuestras()
+deactivate UIDatasetPage
+@enduml

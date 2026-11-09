@@ -1,0 +1,179 @@
+<mxGraphModel dx="2742" dy="1318" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO DEL DIAGRAMA -->
+    <mxCell id="CU02-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:6pt;&quot;&gt;&lt;span style=&quot;font-size:14pt;font-family:Arial,sans-serif;color:#000000;font-weight:700;&quot;&gt;CU02 – Gestionar Planes de Suscripción y Límites (RF-03, RF-04)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:10pt;color:#555555;margin:0;&quot;&gt;Diagrama de Clases de Análisis • ICONIX Robustness Analysis (Componentes en Blanco Neutro)&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="50" width="700" x="50" y="25" as="geometry" />
+    </mxCell>
+
+    <!-- ACTOR: Superadministrador -->
+    <mxCell id="CU02-A" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontStyle=0;fontSize=12;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="Superadministrador" vertex="1">
+      <mxGeometry height="60" width="40" x="50" y="320" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Actor - Interface -->
+    <mxCell id="CU02-e0" edge="1" parent="1" source="CU02-A" target="CU02-I1" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;labelBackgroundColor=none;strokeColor=#000000;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU02-e0-act" connectable="0" parent="CU02-e0" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="gestiona planes y cuotas" vertex="1">
+      <mxGeometry relative="1" x="-0.15" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e0-c1" connectable="0" parent="CU02-e0" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e0-c2" connectable="0" parent="CU02-e0" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- INTERFACE / BOUNDARY 1: TenantsPageComponent -->
+    <mxCell id="CU02-I1" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;TenantsPageComponent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ companies: Signal&amp;lt;Company[]&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ isSubscriptionModalOpen: Signal&amp;lt;Boolean&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ selectedCompanyForSubscription: Signal&amp;lt;Company&amp;gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ openSubscriptionModal(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ onSubscriptionUpdated(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ loadCompanies(): void&lt;/p&gt;" vertex="1">
+      <mxGeometry height="220" width="230" x="180" y="220" as="geometry" />
+    </mxCell>
+
+    <!-- INTERFACE / BOUNDARY 2: SubscriptionModalComponent -->
+    <mxCell id="CU02-I2" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;SubscriptionModalComponent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ isOpen: Boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ company: Company&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ plans: Signal&amp;lt;Plan[]&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ currentSubscription: Signal&amp;lt;Subscription&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ selectedPlanId: Signal&amp;lt;String&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ saving: Signal&amp;lt;Boolean&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ errorMessage: Signal&amp;lt;String&amp;gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ loadData(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ onSubmit(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ onClose(): void&lt;/p&gt;" vertex="1">
+      <mxGeometry height="260" width="240" x="180" y="520" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Interface 1 - Interface 2 -->
+    <mxCell id="CU02-e_i1_i2" edge="1" parent="1" source="CU02-I1" target="CU02-I2" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;endArrow=open;endFill=0;fontSize=10;labelBackgroundColor=none;strokeColor=#000000;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU02-e_i1_i2_lbl" connectable="0" parent="CU02-e_i1_i2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abre y recibe callback" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- BOUNDARY 3: CompanyService -->
+    <mxCell id="CU02-I3" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Boundary / Service&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;CompanyService&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- api: ApiService&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getPlans(): Observable&amp;lt;Plan[]&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getCompanySubscription(): Observable&amp;lt;Subscription&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ assignSubscription(): Observable&amp;lt;Subscription&amp;gt;&lt;/p&gt;" vertex="1">
+      <mxGeometry height="180" width="240" x="470" y="380" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Interface 1 - CompanyService -->
+    <mxCell id="CU02-e_i1_srv" edge="1" parent="1" source="CU02-I1" target="CU02-I3" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=#000000;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Interface 2 - CompanyService -->
+    <mxCell id="CU02-e_i2_srv" edge="1" parent="1" source="CU02-I2" target="CU02-I3" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=#000000;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER: SubscriptionController (SubscriptionRoutes + PlanRoutes + QuotaService) -->
+    <mxCell id="CU02-C" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Controller&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;SubscriptionController&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_company_subscription(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ assign_subscription(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ list_plans(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ create_plan(): Response&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_active_subscription(): Subscription&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ validate_branch_quota(): tuple[Int, Int]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ validate_ai_access(): Boolean&lt;/p&gt;" vertex="1">
+      <mxGeometry height="240" width="260" x="760" y="350" as="geometry" />
+    </mxCell>
+
+    <!-- Relación CompanyService - Controller -->
+    <mxCell id="CU02-e_srv_c" edge="1" parent="1" source="CU02-I3" target="CU02-C" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=#000000;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU02-e_srv_c_c1" connectable="0" parent="CU02-e_srv_c" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e_srv_c_c2" connectable="0" parent="CU02-e_srv_c" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ENTITY 1: Company (companies) -->
+    <mxCell id="CU02-E_COMP" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Company&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String(150)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ subdomain: String(63)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ status: String(20)&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="160" width="220" x="1100" y="80" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 2: Plan (plans) -->
+    <mxCell id="CU02-E_PLAN" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Plan&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String(50) [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ code: String(30) [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ max_branches: Int [2, 10]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ has_ai_access: Boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ price_monthly: Numeric(10,2)&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="200" width="230" x="1400" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 3: Subscription (subscriptions) -->
+    <mxCell id="CU02-E_SUB" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Subscription&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ company_id: UUID [FK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ plan_id: UUID [FK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ start_date: DateTime&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ end_date: DateTime [null]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ status: String(20) [ACTIVA, CANCELADA]&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ create(): Subscription&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ update(): Subscription&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="230" width="240" x="1100" y="320" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 4: Branch (branches - Downgrade Guard) -->
+    <mxCell id="CU02-E_BRANCH" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;fillColor=#ffffff;strokeColor=#000000;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Branch (Downgrade Guard)&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ tenant_id: UUID [FK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ is_active: Boolean&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="160" width="220" x="1100" y="620" as="geometry" />
+    </mxCell>
+
+    <!-- RELACIONES CONTROLLER A ENTIDADES -->
+    <!-- Controller - Company -->
+    <mxCell id="CU02-ce_comp" edge="1" parent="1" source="CU02-C" target="CU02-E_COMP" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Controller - Subscription -->
+    <mxCell id="CU02-ce_sub" edge="1" parent="1" source="CU02-C" target="CU02-E_SUB" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Controller - Branch -->
+    <mxCell id="CU02-ce_branch" edge="1" parent="1" source="CU02-C" target="CU02-E_BRANCH" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- RELACIONES Y CARDINALIDADES ENTRE ENTIDADES -->
+    <!-- Company - Subscription -->
+    <mxCell id="CU02-e_comp_sub" edge="1" parent="1" source="CU02-E_COMP" target="CU02-E_SUB" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#000000;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU02-e_comp_sub_c1" connectable="0" parent="CU02-e_comp_sub" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.65" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e_comp_sub_c2" connectable="0" parent="CU02-e_comp_sub" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.65" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Subscription - Plan -->
+    <mxCell id="CU02-e_sub_plan" edge="1" parent="1" source="CU02-E_SUB" target="CU02-E_PLAN" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU02-e_sub_plan_c1" connectable="0" parent="CU02-e_sub_plan" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.7" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e_sub_plan_c2" connectable="0" parent="CU02-e_sub_plan" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.7" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Company - Branch -->
+    <mxCell id="CU02-e_comp_br" edge="1" parent="1" source="CU02-E_COMP" target="CU02-E_BRANCH" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1060" y="192" />
+          <mxPoint x="1060" y="700" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e_comp_br_c1" connectable="0" parent="CU02-e_comp_br" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU02-e_comp_br_c2" connectable="0" parent="CU02-e_comp_br" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

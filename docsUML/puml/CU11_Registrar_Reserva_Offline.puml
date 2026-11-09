@@ -1,0 +1,31 @@
+@startuml CU11_Registrar_Reserva_Offline
+title sd CU11 - Registrar Reserva Offline (Comunicacion)
+
+left to right direction
+skinparam actorStyle hollow
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #333333
+skinparam ArrowFontColor #222222
+skinparam ArrowFontSize 10
+
+actor ":Cliente" as Act
+boundary ":ReservationCreateController" as Bound
+control ":ReservationOfflineController" as Ctrl
+entity ":LocalPendingReservation" as EntPending
+entity ":LocalInventory" as EntInv
+
+' Actor <--> Boundary
+Act --> Bound : 1: prepararReserva()\n2: confirmarReservaOffline()\n3: sincronizarBandejaOutbox()
+Bound --> Act : 1.4: renderizarFormularioApartado()\n2.5: mostrarComprobanteOfflineConExito()\n3.5: renderizarEstadoSincronizado()
+
+' Boundary <--> Control
+Bound --> Ctrl : 1.1: getLocalCatalog()\n2.1: saveOfflineReservation()\n3.1: syncAllPending()
+Ctrl --> Bound : 1.3: _to_response()\n2.4: _to_response()\n3.4: _to_response()
+
+' Control <--> Entities
+Ctrl --> EntPending : 1.2: list_local_products()\n2.2: generate_uuidv4_and_save()\n3.2: get_pending_reservations()
+Ctrl --> EntInv : 2.3: lock_provisional_stock()\n3.3: update_sync_status()
+
+@enduml

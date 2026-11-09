@@ -1,0 +1,302 @@
+<mxGraphModel dx="1422" dy="790" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="850" background="#ffffff">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TITULO DEL DIAGRAMA -->
+    <mxCell id="CU05-TITLE" value="&lt;b style=&quot;font-size:14pt;&quot;&gt;CU05 — Gestionar Prendas y Variantes de Precio por Talla (RF-11, RF-12)&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:9pt;color:#555555;&quot;&gt;Diagrama de Comunicación / Robustez ICONIX (UML 2.5+) — Arquitectura Multitenant SaaS&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry x="250" y="20" width="850" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- LEYENDA DE FLUJOS -->
+    <mxCell id="CU05-LEGEND" value="&lt;b&gt;Flujos del Caso de Uso CU05 (ICONIX):&lt;/b&gt;&lt;br&gt;&lt;b style=&quot;color:#003366;&quot;&gt;Secuencia 1 (Azul):&lt;/b&gt; Consultar Catálogo y Listar Prendas con Tallas/Precios&lt;br&gt;&lt;b style=&quot;color:#005522;&quot;&gt;Secuencia 2 (Verde):&lt;/b&gt; Crear Prenda con Matriz de Precios Diferenciados por Talla&lt;br&gt;&lt;b style=&quot;color:#8B0000;&quot;&gt;Secuencia 3 (Rojo):&lt;/b&gt; Flujo Alternativo A1 — Rechazo por SKU Duplicado en Variantes&lt;br&gt;&lt;b style=&quot;color:#4B0082;&quot;&gt;Secuencia 4 (Morado):&lt;/b&gt; Flujo Alternativo A2 — Rechazo por Descuento Superior al Precio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;fontSize=9;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="40" y="20" width="380" height="85" as="geometry" />
+    </mxCell>
+
+    <!-- ACTOR: :AdministradorTenant -->
+    <mxCell id="CU05-ACT" value=":AdministradorTenant" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="260" width="40" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY 1: :AdminCatalogPageComponent -->
+    <mxCell id="CU05-BND-PAGE" value=":AdminCatalogPageComponent" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="220" y="265" width="80" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY 2: :CatalogApiService -->
+    <mxCell id="CU05-BND-API" value=":CatalogApiService" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="450" y="265" width="80" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER 1: :CatalogRoutes -->
+    <mxCell id="CU05-CTRL-ROUTES" value=":CatalogRoutes" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="690" y="260" width="70" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER 2: :CatalogService -->
+    <mxCell id="CU05-CTRL-SVC" value=":CatalogService" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="920" y="260" width="70" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 1: :Product -->
+    <mxCell id="CU05-ENT-PROD" value=":Product" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1140" y="160" width="70" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 2: :ProductVariant -->
+    <mxCell id="CU05-ENT-VAR" value=":ProductVariant" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1140" y="265" width="70" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 3: :Category -->
+    <mxCell id="CU05-ENT-CAT" value=":Category" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1140" y="370" width="70" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 4: :Size -->
+    <mxCell id="CU05-ENT-SIZE" value=":Size" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1140" y="475" width="70" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== ENLACES ESTRUCTURALES ==================== -->
+    <mxCell id="CU05-LNK-ACT-PAGE" edge="1" source="CU05-ACT" target="CU05-BND-PAGE" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-LNK-PAGE-API" edge="1" source="CU05-BND-PAGE" target="CU05-BND-API" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-LNK-API-ROUTES" edge="1" source="CU05-BND-API" target="CU05-CTRL-ROUTES" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-LNK-ROUTES-SVC" edge="1" source="CU05-CTRL-ROUTES" target="CU05-CTRL-SVC" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-LNK-SVC-PROD" edge="1" source="CU05-CTRL-SVC" target="CU05-ENT-PROD" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;exitX=0.9;exitY=0.2;entryX=0;entryY=0.5;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-LNK-SVC-VAR" edge="1" source="CU05-CTRL-SVC" target="CU05-ENT-VAR" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-LNK-ROUTES-CAT" edge="1" source="CU05-CTRL-ROUTES" target="CU05-ENT-CAT" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;exitX=0.8;exitY=0.9;entryX=0;entryY=0.5;" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="820" y="405" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU05-LNK-ROUTES-SIZE" edge="1" source="CU05-CTRL-ROUTES" target="CU05-ENT-SIZE" style="rounded=1;html=1;endArrow=none;strokeColor=#000000;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="725" y="510" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- BUCLES REFLEXIVOS (SELF-LOOPS) -->
+    <!-- Bucle en AdminCatalogPageComponent: loadData() -->
+    <mxCell id="CU05-LOOP-PAGE" edge="1" source="CU05-BND-PAGE" target="CU05-BND-PAGE" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;strokeColor=#005522;strokeWidth=1.5;exitX=0.25;exitY=0;entryX=0.75;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="240" y="235" />
+          <mxPoint x="280" y="235" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Bucle en CatalogService: Validaciones de negocio -->
+    <mxCell id="CU05-LOOP-SVC" edge="1" source="CU05-CTRL-SVC" target="CU05-CTRL-SVC" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;strokeColor=#005522;strokeWidth=1.5;exitX=0.5;exitY=0;entryX=1;entryY=0.25;" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="955" y="215" />
+          <mxPoint x="1015" y="215" />
+          <mxPoint x="1015" y="280" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ==================== MENSAJES: SECUENCIA 1 (CONSULTA CATÁLOGO) ==================== -->
+    <mxCell id="CU05-M1" value="1: loadData()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="270" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A1" edge="1" source="CU05-M1" target="CU05-M1" style="endArrow=classic;html=1;strokeColor=#003366;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M11" value="1.1: listProducts()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="325" y="250" width="100" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A11" edge="1" source="CU05-M11" target="CU05-M11" style="endArrow=classic;html=1;strokeColor=#003366;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M12" value="1.2: list_products_route()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="550" y="250" width="120" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A12" edge="1" source="CU05-M12" target="CU05-M12" style="endArrow=classic;html=1;strokeColor=#003366;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M13" value="1.3: query()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="800" y="270" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A13" edge="1" source="CU05-M13" target="CU05-M13" style="endArrow=classic;html=1;strokeColor=#003366;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M14" value="1.4: query()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1030" y="165" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A14" edge="1" source="CU05-M14" target="CU05-M14" style="endArrow=classic;html=1;strokeColor=#003366;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M15" value="1.5: setProducts()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="325" y="320" width="100" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A15" edge="1" source="CU05-M15" target="CU05-M15" style="endArrow=classic;html=1;strokeColor=#003366;strokeWidth=1;dashed=1;exitX=0.8;exitY=1;entryX=0.2;entryY=1;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== MENSAJES: SECUENCIA 2 (CREACIÓN PRENDA Y PRECIOS TALLA) ==================== -->
+    <mxCell id="CU05-M2" value="2: onSubmit()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="295" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A2" edge="1" source="CU05-M2" target="CU05-M2" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M21" value="2.1: createProduct()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="325" y="275" width="110" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A21" edge="1" source="CU05-M21" target="CU05-M21" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M22" value="2.2: create_product_route()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="545" y="275" width="130" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A22" edge="1" source="CU05-M22" target="CU05-M22" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M23" value="2.3: create_product()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="790" y="295" width="110" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A23" edge="1" source="CU05-M23" target="CU05-M23" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- 2.4: validate_variant_payload() [Self-loop en CatalogService] -->
+    <mxCell id="CU05-M24" value="2.4: validate_variant_payload()" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="965" y="195" width="165" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- 2.5: validate_discount() [Self-loop en CatalogService] -->
+    <mxCell id="CU05-M25" value="2.5: validate_discount()" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="965" y="220" width="140" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- 2.6: create() en Product -->
+    <mxCell id="CU05-M26" value="2.6: create()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1030" y="190" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A26" edge="1" source="CU05-M26" target="CU05-M26" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- 2.7: create() en ProductVariant (Precios diferenciados) -->
+    <mxCell id="CU05-M27" value="2.7: create()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="1030" y="295" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A27" edge="1" source="CU05-M27" target="CU05-M27" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- 2.8: response() HTTP 201 -->
+    <mxCell id="CU05-M28" value="2.8: response()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="555" y="320" width="90" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A28" edge="1" source="CU05-M28" target="CU05-M28" style="endArrow=classic;html=1;strokeColor=#005522;strokeWidth=1;dashed=1;exitX=0.8;exitY=1;entryX=0.2;entryY=1;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- 2.9: loadData() [Refresco reactivo en Page] -->
+    <mxCell id="CU05-M29" value="2.9: loadData()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="220" y="215" width="80" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== MENSAJES: SECUENCIA 3 (RECHAZO SKU DUPLICADO - A1) ==================== -->
+    <mxCell id="CU05-M3" value="3: onSubmit()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="335" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A3" edge="1" source="CU05-M3" target="CU05-M3" style="endArrow=classic;html=1;strokeColor=#8B0000;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M31" value="3.1: createProduct()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="325" y="295" width="110" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A31" edge="1" source="CU05-M31" target="CU05-M31" style="endArrow=classic;html=1;strokeColor=#8B0000;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M32" value="3.2: create_product_route()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="545" y="295" width="130" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A32" edge="1" source="CU05-M32" target="CU05-M32" style="endArrow=classic;html=1;strokeColor=#8B0000;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M33" value="3.3: validate_variant_payload()" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="965" y="245" width="165" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M34" value="3.4: raise_http_exception()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="540" y="340" width="135" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A34" edge="1" source="CU05-M34" target="CU05-M34" style="endArrow=classic;html=1;strokeColor=#8B0000;strokeWidth=1;dashed=1;exitX=0.8;exitY=1;entryX=0.2;entryY=1;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M35" value="3.5: showErrorToast()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="100" y="365" width="120" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A35" edge="1" source="CU05-M35" target="CU05-M35" style="endArrow=classic;html=1;strokeColor=#8B0000;strokeWidth=1;dashed=1;exitX=0.8;exitY=1;entryX=0.2;entryY=1;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== MENSAJES: SECUENCIA 4 (DESCUENTO INVALIDO - A2) ==================== -->
+    <mxCell id="CU05-M4" value="4: onSubmit()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="110" y="405" width="80" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A4" edge="1" source="CU05-M4" target="CU05-M4" style="endArrow=classic;html=1;strokeColor=#4B0082;strokeWidth=1.5;exitX=0.2;exitY=0;entryX=0.8;entryY=0;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M41" value="4.1: validate_discount()" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="965" y="325" width="140" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M42" value="4.2: raise_http_exception()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="540" y="365" width="135" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A42" edge="1" source="CU05-M42" target="CU05-M42" style="endArrow=classic;html=1;strokeColor=#4B0082;strokeWidth=1;dashed=1;exitX=0.8;exitY=1;entryX=0.2;entryY=1;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU05-M43" value="4.3: showErrorToast()" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="100" y="430" width="120" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="CU05-A43" edge="1" source="CU05-M43" target="CU05-M43" style="endArrow=classic;html=1;strokeColor=#4B0082;strokeWidth=1;dashed=1;exitX=0.8;exitY=1;entryX=0.2;entryY=1;" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

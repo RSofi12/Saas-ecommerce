@@ -1,0 +1,116 @@
+@startuml CU23_secuencia_prediccion_demanda_talla
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "AdministradorTenant" as Admin
+participant "«Interface»\n:AdminDemandForecastPageComponent" as UIForecast
+participant "«Interface»\n:DemandForecastApiService" as APIService
+participant "«Controller»\n:DemandForecastRoutes" as CtrlRoutes
+participant "«Controller»\n:DemandForecastingService" as CtrlML
+participant "«Controller»\n:RandomForestRegressorModel" as ModRF
+participant "«Entity»\n:Plan" as EntPlan
+participant "«Entity»\n:ProductVariant" as EntCatalog
+participant "«Entity»\n:Inventory" as EntInventory
+participant "«Entity»\n:MLModel" as EntMLModel
+participant "«Entity»\n:DemandForecast" as EntForecast
+
+' Fase 1: Interacción de Usuario y Selección
+Admin -> UIForecast: accederModuloPrediccion()
+activate UIForecast
+Admin -> UIForecast: seleccionarPrendaYSucursal()
+Admin -> UIForecast: solicitarPrediccionDemanda()
+UIForecast -> APIService: getForecast()
+activate APIService
+APIService -> CtrlRoutes: POST_forecast()
+activate CtrlRoutes
+
+' Fase 2: Validación de Permisos y Acceso a IA
+CtrlRoutes -> CtrlRoutes: validarPermisosAdministrador()
+CtrlRoutes -> CtrlML: predict_demand_by_size()
+activate CtrlML
+
+alt Plan Pro/Enterprise (IA Activa)
+    CtrlML -> CtrlML: validate_ai_access()
+    CtrlML -> EntPlan: checkSubscriptionTier()
+    activate EntPlan
+    EntPlan --> CtrlML: returnSubscriptionDetails()
+    deactivate EntPlan
+else Plan Básico (HTTP 403 Forbidden)
+    CtrlML --> CtrlRoutes: raiseForbiddenException()
+end
+
+' Fase 3: Consulta de Variantes e Inventario
+CtrlML -> EntCatalog: getVariantsBySize()
+activate EntCatalog
+EntCatalog --> CtrlML: returnVariantList()
+deactivate EntCatalog
+CtrlML -> EntInventory: getCurrentStockPerBranch()
+activate EntInventory
+EntInventory --> CtrlML: returnCurrentStock()
+deactivate EntInventory
+
+' Fase 4: Opcional - Re-entrenamiento con Dataset Sintético CU22
+opt Re-entrenamiento con Dataset Sintético CU22
+    CtrlML -> EntMLModel: getSyntheticDatasetReference()
+    activate EntMLModel
+    EntMLModel --> CtrlML: returnDatasetMatrix()
+    deactivate EntMLModel
+    CtrlML -> ModRF: fitRandomForestRegressor()
+    activate ModRF
+    ModRF --> CtrlML: returnTrainedModelMetrics()
+    deactivate ModRF
+end
+
+' Fase 5: Inferencia por Talla e Intervalos de Confianza
+loop Por cada variante de talla S, M, L, XL a 4 semanas
+    CtrlML -> ModRF: predictWeeklyDemand()
+    activate ModRF
+    ModRF --> CtrlML: returnPredictedValues()
+    deactivate ModRF
+    CtrlML -> CtrlML: calcularIntervaloConfianza95()
+    CtrlML -> CtrlML: evaluarAlertaQuiebreStock()
+end
+
+' Fase 6: Persistencia y Retorno
+CtrlML -> EntForecast: persistirPronosticos()
+activate EntForecast
+EntForecast --> CtrlML: returnSavedForecasts()
+deactivate EntForecast
+CtrlML --> CtrlRoutes: returnForecastResponse()
+deactivate CtrlML
+CtrlRoutes --> APIService: returnJsonSuccess()
+deactivate CtrlRoutes
+APIService --> UIForecast: returnObservableData()
+deactivate APIService
+UIForecast --> Admin: renderizarCurvasDemandaYAlertas()
+deactivate UIForecast
+@enduml

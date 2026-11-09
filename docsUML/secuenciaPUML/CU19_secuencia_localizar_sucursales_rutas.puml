@@ -1,0 +1,132 @@
+@startuml CU19_secuencia_localizar_sucursales_rutas
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "Cliente" as ActorCliente
+participant "«Interface»\n:ManagementPage" as UIManagement
+participant "«Interface»\n:BranchesMapPage" as UIMapPage
+participant "«Controller»\n:BranchesMapController" as CtrlMap
+participant "«Controller»\n:CatalogApi" as CtrlCatalogApi
+participant "«Controller»\n:BranchRoutes" as CtrlRoutes
+participant "«Controller»\n:BranchService" as CtrlService
+participant "«Controller»\n:RoutingService" as CtrlRoutingSvc
+participant "«Interface»\n:OpenStreetMapServer" as GwOsmTiles
+participant "«Interface»\n:OSRM_RoutingEngine" as GwOsrmEngine
+participant "«Entity»\n:Branch" as EntBranch
+participant "«Entity»\n:RouteInfo" as EntRouteInfo
+
+' Fase 1: Navegación y Apertura de Pantalla
+ActorCliente -> UIManagement: tapNuestrasBoutiques()
+activate UIManagement
+UIManagement -> UIMapPage: pushNamed()
+activate UIMapPage
+UIMapPage -> CtrlMap: initialize()
+activate CtrlMap
+
+' Fase 2: Gestión de Geolocalización GPS
+alt Permiso GPS Concedido
+    CtrlMap -> CtrlMap: _initLocation()
+    CtrlMap -> CtrlMap: getCurrentPosition()
+else Permiso GPS Denegado
+    CtrlMap -> CtrlMap: defaultFallbackPosition()
+end
+
+' Fase 3: Recuperación de Sucursales Georreferenciadas
+CtrlMap -> CtrlCatalogApi: getBranches()
+activate CtrlCatalogApi
+CtrlCatalogApi -> CtrlRoutes: GET_public_branches()
+activate CtrlRoutes
+CtrlRoutes -> CtrlService: get_public_branches()
+activate CtrlService
+CtrlService -> EntBranch: filterActiveBranches()
+activate EntBranch
+EntBranch --> CtrlService: returnBranchRecords()
+deactivate EntBranch
+CtrlService --> CtrlRoutes: returnBranchDTOs()
+deactivate CtrlService
+CtrlRoutes --> CtrlCatalogApi: returnJsonSuccess()
+deactivate CtrlRoutes
+CtrlCatalogApi --> CtrlMap: returnBranchList()
+deactivate CtrlCatalogApi
+CtrlMap -> CtrlMap: filterBranchesWithCoordinates()
+CtrlMap --> UIMapPage: notifyListeners()
+
+' Fase 4: Renderizado de Mapa y Marcadores
+UIMapPage -> GwOsmTiles: loadTiles()
+activate GwOsmTiles
+GwOsmTiles --> UIMapPage: returnOsmTiles()
+deactivate GwOsmTiles
+
+loop Por cada sucursal con coordenadas válidas
+    UIMapPage -> UIMapPage: addMarker()
+end
+
+' Fase 5: Selección de Sucursal
+ActorCliente -> UIMapPage: tapMarker()
+UIMapPage -> CtrlMap: selectBranch()
+CtrlMap --> UIMapPage: notifyListeners()
+UIMapPage --> ActorCliente: renderModalDetalle()
+
+' Fase 6: Modo de Viaje y Ruteo Híbrido
+ActorCliente -> UIMapPage: selectTravelMode()
+UIMapPage -> CtrlMap: setTravelMode()
+ActorCliente -> UIMapPage: tapComoLlegar()
+UIMapPage -> CtrlMap: calculateRoute()
+CtrlMap -> CtrlRoutingSvc: getRoute()
+activate CtrlRoutingSvc
+
+alt Nivel 1: OSRM Público
+    CtrlRoutingSvc -> GwOsrmEngine: requestRouteOSRM()
+    activate GwOsrmEngine
+    GwOsrmEngine --> CtrlRoutingSvc: returnOsrmJson()
+    deactivate GwOsrmEngine
+    CtrlRoutingSvc -> CtrlRoutingSvc: parseOsrmResponse()
+else Nivel 2: Fallback Haversine (Sin red / Timeout)
+    CtrlRoutingSvc -> CtrlRoutingSvc: buildHaversineFallback()
+end
+
+CtrlRoutingSvc -> EntRouteInfo: createRouteInfo()
+activate EntRouteInfo
+EntRouteInfo --> CtrlRoutingSvc: returnRouteInfo()
+deactivate EntRouteInfo
+CtrlRoutingSvc --> CtrlMap: returnRouteInfo()
+deactivate CtrlRoutingSvc
+
+CtrlMap -> CtrlMap: fitCamera()
+CtrlMap --> UIMapPage: notifyListeners()
+UIMapPage -> UIMapPage: drawPolyline()
+UIMapPage --> ActorCliente: renderRutaYMetricas()
+
+deactivate CtrlMap
+deactivate UIMapPage
+deactivate UIManagement
+@enduml

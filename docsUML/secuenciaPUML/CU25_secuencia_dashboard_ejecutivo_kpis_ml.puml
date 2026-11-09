@@ -1,0 +1,134 @@
+@startuml CU25_secuencia_dashboard_ejecutivo_kpis_ml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "AdministradorTenant" as Admin
+participant "«Interface»\n:AdminHomePageComponent" as UIHomePage
+participant "«Interface»\n:DashboardApiService" as UIDashboardApi
+participant "«Interface»\n:CatalogApiService" as UICatalogApi
+participant "«Controller»\n:CatalogRoutes" as CtrlCatRoutes
+participant "«Controller»\n:DashboardRoutes" as CtrlDashRoutes
+participant "«Controller»\n:DashboardService" as CtrlDashService
+participant "«Entity»\n:Branch" as EntBranch
+participant "«Entity»\n:Sale" as EntSale
+participant "«Entity»\n:SaleItem" as EntSaleItem
+participant "«Entity»\n:Inventory" as EntInventory
+participant "«Entity»\n:InventoryMovement" as EntMovement
+participant "«Entity»\n:Reservation" as EntReservation
+participant "«Entity»\n:DemandForecast" as EntForecast
+participant "«Entity»\n:CustomerSegment" as EntSegment
+
+' Fase 1: Carga de Sucursales Disponibles
+Admin -> UIHomePage: accederDashboardPrincipal()
+activate UIHomePage
+UIHomePage -> UICatalogApi: getBranches()
+activate UICatalogApi
+UICatalogApi -> CtrlCatRoutes: GET_branches()
+activate CtrlCatRoutes
+CtrlCatRoutes -> EntBranch: getTenantActiveBranches()
+activate EntBranch
+EntBranch --> CtrlCatRoutes: returnBranchDTOs()
+deactivate EntBranch
+CtrlCatRoutes --> UICatalogApi: returnJsonSuccess()
+deactivate CtrlCatRoutes
+UICatalogApi --> UIHomePage: returnBranchList()
+deactivate UICatalogApi
+
+' Fase 2: Consulta de Métricas y KPIs Consolidados
+Admin -> UIHomePage: aplicarFiltrosPeriodoYSucursal()
+UIHomePage -> UIDashboardApi: getDashboard()
+activate UIDashboardApi
+UIDashboardApi -> CtrlDashRoutes: GET_dashboard()
+activate CtrlDashRoutes
+CtrlDashRoutes -> CtrlDashRoutes: validarPermisosDirectivos()
+CtrlDashRoutes -> CtrlDashService: get_dashboard()
+activate CtrlDashService
+
+' Fase 3: Consultas Agregadas de Base de Datos
+alt Filtro Sucursal Activo
+    CtrlDashService -> EntSale: consultarTotalVentasYOrdenes()
+    activate EntSale
+    EntSale --> CtrlDashService: returnSalesTotals()
+    deactivate EntSale
+else Consolidado Global Multisucursal
+    CtrlDashService -> EntSaleItem: consultarUnidadesVendidas()
+    activate EntSaleItem
+    EntSaleItem --> CtrlDashService: returnUnitsTotal()
+    deactivate EntSaleItem
+end
+
+CtrlDashService -> EntInventory: consultarConsolidadoInventario()
+activate EntInventory
+EntInventory --> CtrlDashService: returnInventoryTotals()
+deactivate EntInventory
+
+CtrlDashService -> EntMovement: consultarMovimientosKardex()
+activate EntMovement
+EntMovement --> CtrlDashService: returnMovementBreakdown()
+deactivate EntMovement
+
+CtrlDashService -> EntReservation: consultarReservasActivas()
+activate EntReservation
+EntReservation --> CtrlDashService: returnActiveReservations()
+deactivate EntReservation
+
+' Métricas de Machine Learning (CU23 y CU24)
+CtrlDashService -> EntForecast: consultarProyeccionesDemanda()
+activate EntForecast
+EntForecast --> CtrlDashService: returnDemandProjections()
+deactivate EntForecast
+
+CtrlDashService -> EntSegment: consultarDistribucionClusters()
+activate EntSegment
+EntSegment --> CtrlDashService: returnClusterDistribution()
+deactivate EntSegment
+
+' Fase 4: Procesamiento de Series Temporales y Sucursales
+loop Por cada fecha/semana en la serie temporal
+    CtrlDashService -> CtrlDashService: compilarResumenEjecutivo()
+    CtrlDashService -> CtrlDashService: calcularSeriesEvolucionVentas()
+end
+
+loop Por cada sucursal configurada del tenant
+    CtrlDashService -> CtrlDashService: desglosarKpisPorSucursal()
+end
+
+' Fase 5: Retorno y Renderizado Reactivo
+CtrlDashService --> CtrlDashRoutes: returnDashboardResponse()
+deactivate CtrlDashService
+CtrlDashRoutes --> UIDashboardApi: returnJsonSuccess()
+deactivate CtrlDashRoutes
+UIDashboardApi --> UIHomePage: returnObservableData()
+deactivate UIDashboardApi
+UIHomePage --> Admin: renderizarKpisYGraficosChrts()
+deactivate UIHomePage
+@enduml

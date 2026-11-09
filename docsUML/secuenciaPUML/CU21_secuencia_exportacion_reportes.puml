@@ -1,0 +1,131 @@
+@startuml CU21_secuencia_exportacion_reportes
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "Administrador" as Admin
+actor "Encargado" as Encargado
+participant "«Interface»\n:AdminReportsPageComponent" as UIReportsPage
+participant "«Interface»\n:ReportsApiService" as UIReportsApi
+participant "«Controller»\n:ReportRoutes" as CtrlRoutes
+participant "«Controller»\n:ReportService" as CtrlService
+participant "«Controller»\n:ReportExportEngine" as CtrlEngine
+participant "«Entity»\n:Sale" as EntSale
+participant "«Entity»\n:Inventory" as EntInventory
+participant "«Entity»\n:InventoryMovement" as EntMovement
+participant "«Entity»\n:Company" as EntCompany
+
+' Fase 1: Carga y Vista Previa
+Admin -> UIReportsPage: accederSeccionReportes()
+activate UIReportsPage
+UIReportsPage -> UIReportsApi: fetchReport()
+activate UIReportsApi
+UIReportsApi -> CtrlRoutes: GET_sales_report()
+activate CtrlRoutes
+CtrlRoutes -> CtrlService: get_sales_report()
+activate CtrlService
+CtrlService -> EntSale: filterTenantSales()
+activate EntSale
+EntSale --> CtrlService: returnSalesData()
+deactivate EntSale
+CtrlService --> CtrlRoutes: returnSalesData()
+deactivate CtrlService
+CtrlRoutes --> UIReportsApi: returnApiResponse()
+deactivate CtrlRoutes
+UIReportsApi --> UIReportsPage: returnObservableResult()
+deactivate UIReportsApi
+
+' Fase 2: Configuración de Filtros
+Admin -> UIReportsPage: seleccionarPestanaYFiltros()
+Admin -> UIReportsPage: configurarColumnasVisibles()
+
+' Fase 3: Solicitud de Exportación y Validaciones
+Admin -> UIReportsPage: exportReport()
+UIReportsPage -> UIReportsApi: exportReport()
+activate UIReportsApi
+UIReportsApi -> CtrlRoutes: GET_export_report()
+activate CtrlRoutes
+
+CtrlRoutes -> CtrlRoutes: validarTokenJWT()
+
+alt Rol Encargado (Ámbito sucursal)
+    CtrlRoutes -> CtrlRoutes: forzar_sucursal()
+else Rol Administrador (Multisucursal)
+    CtrlRoutes -> CtrlRoutes: permitir_multisucursal()
+end
+
+CtrlRoutes -> CtrlRoutes: parsearColumnasSeleccionadas()
+CtrlRoutes -> CtrlService: get_export_data()
+activate CtrlService
+
+alt Dominio Ventas
+    CtrlService -> EntSale: filterTenantSales()
+    activate EntSale
+    EntSale --> CtrlService: returnReportRecords()
+    deactivate EntSale
+else Dominio Inventario
+    CtrlService -> EntInventory: get_inventory_report()
+    activate EntInventory
+    EntInventory --> CtrlService: returnReportRecords()
+    deactivate EntInventory
+else Dominio Movimientos
+    CtrlService -> EntMovement: get_movements_report()
+    activate EntMovement
+    EntMovement --> CtrlService: returnReportRecords()
+    deactivate EntMovement
+end
+
+' Fase 4: Generación Documental en Motor de Exportación
+CtrlService -> CtrlEngine: despacharGenerador()
+activate CtrlEngine
+
+alt Formato Excel (.xlsx)
+    CtrlEngine -> CtrlEngine: generate_excel()
+    loop Por cada columna seleccionada
+        CtrlEngine -> CtrlEngine: aplicarEstilosYFormulas()
+    end
+else Formato PDF Formal
+    CtrlEngine -> CtrlEngine: generate_pdf()
+else Formato CSV Plano
+    CtrlEngine -> CtrlEngine: generate_csv()
+end
+
+CtrlEngine --> CtrlService: returnByteBuffer()
+deactivate CtrlEngine
+CtrlService --> CtrlRoutes: returnStreamingResponse()
+deactivate CtrlService
+CtrlRoutes --> UIReportsApi: downloadBlob()
+deactivate CtrlRoutes
+UIReportsApi --> UIReportsPage: descargarArchivoEnNavegador()
+deactivate UIReportsApi
+
+deactivate UIReportsPage
+@enduml

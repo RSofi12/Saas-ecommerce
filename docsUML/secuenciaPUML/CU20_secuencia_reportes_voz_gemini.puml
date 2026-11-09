@@ -1,0 +1,111 @@
+@startuml CU20_secuencia_reportes_voz_gemini
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "AdministradorTenant" as Admin
+participant "«Interface»\n:ReportsPageComponent" as UIReports
+participant "«Interface»\n:VoiceAssistantModalComponent" as UIVoiceModal
+participant "«Interface»\n:WebSpeechAPI_Recognition" as APISpeechRec
+participant "«Controller»\n:VoiceReportRoutes" as CtrlRoutes
+participant "«Controller»\n:GeminiRagService" as CtrlRagSvc
+participant "«Controller»\n:Google_GeminiClient" as ExtGemini
+participant "«Interface»\n:WebSpeechAPI_Synthesis" as APISpeechSyn
+participant "«Entity»\n:Plan" as EntPlan
+participant "«Entity»\n:PostgreSQL_TenantData" as EntDbData
+
+' Fase 1: Apertura de Asistente de Voz
+Admin -> UIReports: clickBotonAsistenteVoz()
+activate UIReports
+UIReports -> UIVoiceModal: openModal()
+activate UIVoiceModal
+UIVoiceModal --> Admin: renderInterfazEscucha()
+
+' Fase 2: Captura y Reconocimiento de Voz
+Admin -> UIVoiceModal: tapBotonHablar()
+UIVoiceModal -> APISpeechRec: startSpeechRecognition()
+activate APISpeechRec
+Admin -> APISpeechRec: dictarConsultaVoz()
+APISpeechRec --> UIVoiceModal: onResult()
+deactivate APISpeechRec
+UIVoiceModal -> UIVoiceModal: mostrarTextoCapturado()
+
+' Fase 3: Despacho HTTP y Validación de Suscripción a IA
+UIVoiceModal -> CtrlRoutes: POST_chat_message()
+activate CtrlRoutes
+CtrlRoutes -> CtrlRoutes: validarPermisosAdministrador()
+CtrlRoutes -> CtrlRagSvc: process_rag_query()
+activate CtrlRagSvc
+
+alt Plan Pro/Enterprise (IA Activa)
+    CtrlRagSvc -> CtrlRagSvc: validate_ai_access()
+    CtrlRagSvc -> EntPlan: checkSubscriptionTier()
+    activate EntPlan
+    EntPlan --> CtrlRagSvc: returnSubscriptionDetails()
+    deactivate EntPlan
+else Plan Básico (HTTP 403 Forbidden)
+    CtrlRagSvc --> CtrlRoutes: raiseForbiddenException()
+end
+
+' Fase 4: Extracción de Contexto Multitenant Seguro
+loop Por cada KPI: Ventas, Stock Crítico, Devoluciones
+    CtrlRagSvc -> EntDbData: queryTenantMetricsSecurely()
+    activate EntDbData
+    EntDbData --> CtrlRagSvc: returnAggregateData()
+    deactivate EntDbData
+    CtrlRagSvc -> CtrlRagSvc: buildGroundingContext()
+end
+
+' Fase 5: Inferencia LLM con Gemini o Fallback Local
+alt Gemini API Online (200 OK)
+    CtrlRagSvc -> ExtGemini: generateContent()
+    activate ExtGemini
+    ExtGemini --> CtrlRagSvc: returnGeminiResponse()
+    deactivate ExtGemini
+else Fallback Heurístico Local (Sin red / Cuota)
+    CtrlRagSvc -> CtrlRagSvc: generateLocalHeuristicFallback()
+end
+
+' Fase 6: Retorno de Texto y Síntesis de Voz
+CtrlRagSvc --> CtrlRoutes: returnRagResult()
+deactivate CtrlRagSvc
+CtrlRoutes --> UIVoiceModal: returnJsonSuccess()
+deactivate CtrlRoutes
+
+UIVoiceModal -> UIVoiceModal: renderRespuestaVisual()
+UIVoiceModal -> APISpeechSyn: speak()
+activate APISpeechSyn
+APISpeechSyn --> Admin: locutarRespuestaAuditiva()
+deactivate APISpeechSyn
+
+deactivate UIVoiceModal
+deactivate UIReports
+@enduml

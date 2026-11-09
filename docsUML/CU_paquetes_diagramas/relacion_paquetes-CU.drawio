@@ -1,0 +1,117 @@
+<mxGraphModel dx="3410" dy="1600" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2600" pageHeight="1800" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO -->
+    <mxCell id="title" parent="1" style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;shadow=1;fontFamily=Helvetica;" value="&lt;b&gt;&lt;font style=&#39;font-size: 18px;&#39;&gt;FashionStore SaaS Multitenant — Trazabilidad de 7 Paquetes de Dominio y 25 Casos de Uso (UML 2.5)&lt;/font&gt;&lt;/b&gt;&lt;br/&gt;&lt;font style=&#39;font-size: 11px; color: #555555;&#39;&gt;Correspondencia exacta con los 7 paquetes canónicos y relaciones &amp;laquo;include&amp;raquo; / &amp;laquo;extend&amp;raquo;&lt;/font&gt;" vertex="1">
+      <mxGeometry height="55" width="2450" x="50" y="20" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== P0: Plataforma SaaS y Suscripciones ==================== -->
+    <mxCell id="pkg_p0" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P0: Plataforma SaaS y&#xa;Suscripciones" vertex="1">
+      <mxGeometry height="85" width="210" x="60" y="130" as="geometry" />
+    </mxCell>
+    <mxCell id="cu01" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU01. Registrar y gestionar&#xa;empresas (tenants)" vertex="1"><mxGeometry height="65" width="185" x="330" y="95" as="geometry" /></mxCell>
+    <mxCell id="cu02" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU02. Gestionar planes y&#xa;cuotas de sucursales" vertex="1"><mxGeometry height="65" width="185" x="540" y="130" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p0_cu01" edge="1" parent="1" source="pkg_p0" target="cu01" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p0_cu02" edge="1" parent="1" source="pkg_p0" target="cu02" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ==================== P1: Gestión de Usuarios y Acceso ==================== -->
+    <mxCell id="pkg_p1" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P1: Gestión de Usuarios&#xa;y Acceso" vertex="1">
+      <mxGeometry height="85" width="210" x="60" y="270" as="geometry" />
+    </mxCell>
+    <mxCell id="cu03" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU03. Iniciar sesión&#xa;multitenant con JWT" vertex="1"><mxGeometry height="65" width="185" x="330" y="240" as="geometry" /></mxCell>
+    <mxCell id="cu04" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU04. Gestionar sucursales&#xa;bajo límites del plan" vertex="1"><mxGeometry height="65" width="185" x="540" y="270" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p1_cu03" edge="1" parent="1" source="pkg_p1" target="cu03" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p1_cu04" edge="1" parent="1" source="pkg_p1" target="cu04" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="inc_cu04_cu02" edge="1" parent="1" source="cu04" target="cu02" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#004c99;strokeWidth=1.2;" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ==================== P2: Gestión de Catálogo Textil ==================== -->
+    <mxCell id="pkg_p2" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P2: Gestión de Catálogo&#xa;Textil" vertex="1">
+      <mxGeometry height="85" width="210" x="60" y="440" as="geometry" />
+    </mxCell>
+    <mxCell id="cu05" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU05. Gestionar prendas y&#xa;variantes precio/talla" vertex="1"><mxGeometry height="65" width="185" x="330" y="405" as="geometry" /></mxCell>
+    <mxCell id="cu06" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU06. Consultar catálogo&#xa;online con búsqueda" vertex="1"><mxGeometry height="65" width="185" x="330" y="495" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p2_cu05" edge="1" parent="1" source="pkg_p2" target="cu05" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p2_cu06" edge="1" parent="1" source="pkg_p2" target="cu06" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ==================== P3: Inventario y Disponibilidad Offline ==================== -->
+    <mxCell id="pkg_p3" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P3: Inventario y&#xa;Disponibilidad Offline" vertex="1">
+      <mxGeometry height="85" width="210" x="60" y="650" as="geometry" />
+    </mxCell>
+    <mxCell id="cu07" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU07. Sincronizar catálogo&#xa;a local (IDB/SQLite)" vertex="1"><mxGeometry height="65" width="185" x="330" y="615" as="geometry" /></mxCell>
+    <mxCell id="cu08" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU08. Consultar catálogo&#xa;offline desconectado" vertex="1"><mxGeometry height="65" width="185" x="540" y="660" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p3_cu07" edge="1" parent="1" source="pkg_p3" target="cu07" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p3_cu08" edge="1" parent="1" source="pkg_p3" target="cu08" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="ext_cu08_cu06" edge="1" parent="1" source="cu08" target="cu06" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ==================== P4: Compras Digitales y Reservas ==================== -->
+    <mxCell id="pkg_p4" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P4: Compras Digitales&#xa;y Reservas" vertex="1">
+      <mxGeometry height="85" width="210" x="850" y="160" as="geometry" />
+    </mxCell>
+    <mxCell id="cu09" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU09. Comprar con Stripe y&#xa;despacho condicionado" vertex="1"><mxGeometry height="65" width="185" x="1110" y="90" as="geometry" /></mxCell>
+    <mxCell id="cu10" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU10. Crear reserva online&#xa;de prendas con vencimiento" vertex="1"><mxGeometry height="65" width="185" x="1110" y="170" as="geometry" /></mxCell>
+    <mxCell id="cu11" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU11. Registrar reserva&#xa;offline desconectada" vertex="1"><mxGeometry height="65" width="185" x="1350" y="170" as="geometry" /></mxCell>
+    <mxCell id="cu12" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU12. Atender y resolver&#xa;conflictos de reservas" vertex="1"><mxGeometry height="65" width="185" x="1110" y="260" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p4_cu09" edge="1" parent="1" source="pkg_p4" target="cu09" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p4_cu10" edge="1" parent="1" source="pkg_p4" target="cu10" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p4_cu11" edge="1" parent="1" source="pkg_p4" target="cu11" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p4_cu12" edge="1" parent="1" source="pkg_p4" target="cu12" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="ext_cu11_cu10" edge="1" parent="1" source="cu11" target="cu10" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="inc_cu12_cu10" edge="1" parent="1" source="cu12" target="cu10" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#004c99;strokeWidth=1.2;" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ==================== P5: Ventas POS y Sincronización ==================== -->
+    <mxCell id="pkg_p5" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P5: Ventas POS y&#xa;Sincronización" vertex="1">
+      <mxGeometry height="85" width="210" x="850" y="520" as="geometry" />
+    </mxCell>
+    <mxCell id="cu13" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU13. Registrar venta POS&#xa;offline efectivo UUIDv4" vertex="1"><mxGeometry height="65" width="185" x="1110" y="410" as="geometry" /></mxCell>
+    <mxCell id="cu14" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU14. Gestionar bandeja local&#xa;de operaciones (outbox)" vertex="1"><mxGeometry height="65" width="185" x="1350" y="410" as="geometry" /></mxCell>
+    <mxCell id="cu15" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU15. Sincronizar lotes de&#xa;ventas con idempotencia" vertex="1"><mxGeometry height="65" width="185" x="1350" y="500" as="geometry" /></mxCell>
+    <mxCell id="cu16" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU16. Resolver conflictos&#xa;de ventas offline y stock" vertex="1"><mxGeometry height="65" width="185" x="1110" y="500" as="geometry" /></mxCell>
+    <mxCell id="cu17" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU17. Procesar cambio de&#xa;prenda por talla y cobro" vertex="1"><mxGeometry height="65" width="185" x="1110" y="590" as="geometry" /></mxCell>
+    <mxCell id="cu18" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU18. Procesar devolución&#xa;con retención y nota crédito" vertex="1"><mxGeometry height="65" width="185" x="1110" y="680" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p5_cu13" edge="1" parent="1" source="pkg_p5" target="cu13" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p5_cu14" edge="1" parent="1" source="pkg_p5" target="cu14" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p5_cu15" edge="1" parent="1" source="pkg_p5" target="cu15" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p5_cu16" edge="1" parent="1" source="pkg_p5" target="cu16" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p5_cu17" edge="1" parent="1" source="pkg_p5" target="cu17" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p5_cu18" edge="1" parent="1" source="pkg_p5" target="cu18" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="ext_cu14_cu13" edge="1" parent="1" source="cu14" target="cu13" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="ext_cu15_cu14" edge="1" parent="1" source="cu15" target="cu14" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="inc_cu16_cu15" edge="1" parent="1" source="cu16" target="cu15" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#004c99;strokeWidth=1.2;" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ==================== P6: Inteligencia Analítica y Geolocalización ==================== -->
+    <mxCell id="pkg_p6" parent="1" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=45;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontFamily=Helvetica;" value="P6: Inteligencia Analítica&#xa;y Geolocalización" vertex="1">
+      <mxGeometry height="85" width="220" x="1650" y="440" as="geometry" />
+    </mxCell>
+    <mxCell id="cu19" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU19. Localizar sucursales&#xa;y trazar rutas (OSM/ORS)" vertex="1"><mxGeometry height="65" width="185" x="1940" y="160" as="geometry" /></mxCell>
+    <mxCell id="cu20" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU20. Generar reportes por&#xa;voz y lenguaje natural" vertex="1"><mxGeometry height="65" width="185" x="1940" y="270" as="geometry" /></mxCell>
+    <mxCell id="cu21" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU21. Exportar reportes&#xa;a PDF y Excel" vertex="1"><mxGeometry height="65" width="185" x="2200" y="270" as="geometry" /></mxCell>
+    <mxCell id="cu25" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU25. Visualizar dashboard&#xa;ejecutivo con KPIs y ML" vertex="1"><mxGeometry height="65" width="185" x="2070" y="380" as="geometry" /></mxCell>
+    <mxCell id="cu22" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU22. Generar dataset sintético&#xa;de ventas y estacionalidad" vertex="1"><mxGeometry height="65" width="185" x="1940" y="560" as="geometry" /></mxCell>
+    <mxCell id="cu23" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU23. Predecir demanda de&#xa;ropa (ML supervisado)" vertex="1"><mxGeometry height="65" width="185" x="2220" y="520" as="geometry" /></mxCell>
+    <mxCell id="cu24" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#333333;fontFamily=Helvetica;" value="CU24. Segmentar clientes&#xa;con K-Means (no supervisado)" vertex="1"><mxGeometry height="65" width="185" x="2220" y="620" as="geometry" /></mxCell>
+
+    <mxCell id="trace_p6_cu19" edge="1" parent="1" source="pkg_p6" target="cu19" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p6_cu20" edge="1" parent="1" source="pkg_p6" target="cu20" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p6_cu21" edge="1" parent="1" source="pkg_p6" target="cu21" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p6_cu22" edge="1" parent="1" source="pkg_p6" target="cu22" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p6_cu23" edge="1" parent="1" source="pkg_p6" target="cu23" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p6_cu24" edge="1" parent="1" source="pkg_p6" target="cu24" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="trace_p6_cu25" edge="1" parent="1" source="pkg_p6" target="cu25" style="endArrow=open;endSize=8;dashed=1;html=1;strokeColor=#4c4c4c;" value="&amp;lt;&amp;lt;trace&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <mxCell id="ext_cu19_cu06" edge="1" parent="1" source="cu19" target="cu06" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="ext_cu20_cu25" edge="1" parent="1" source="cu20" target="cu25" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="ext_cu21_cu25" edge="1" parent="1" source="cu21" target="cu25" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#800080;strokeWidth=1.2;" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="inc_cu23_cu22" edge="1" parent="1" source="cu23" target="cu22" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#004c99;strokeWidth=1.2;" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="inc_cu24_cu22" edge="1" parent="1" source="cu24" target="cu22" style="endArrow=open;endFill=0;dashed=1;html=1;strokeColor=#004c99;strokeWidth=1.2;" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+  </root>
+</mxGraphModel>

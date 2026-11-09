@@ -1,0 +1,646 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxGraphModel dx="2800" dy="2000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1800" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;p style=&quot;line-height:1.4;margin:0;&quot;&gt;&lt;span style=&quot;font-size: 20px;&quot;&gt;&lt;b&gt;Modelo de Dominio Conceptual — FashionStore SaaS Multitenant&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 13px; color: #555555;&quot;&gt;&lt;b&gt;ICONIX Process — Espacio del Problema: Clases de Dominio, Relaciones y Multiplicidades (Sin Atributos)&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 11px; color: #777777;&quot;&gt;Vista estructural pura de conceptos de negocio, límites de contexto y cardinalidades&lt;/span&gt;&lt;/p&gt;" vertex="1">
+      <mxGeometry height="60" width="1200" x="50" y="20" as="geometry" />
+    </mxCell>
+    <mxCell id="grp_saas" parent="1" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=28;horizontal=1;fontStyle=1;fontSize=12;fillColor=#f0f9ff;strokeColor=#0284c7;swimlaneFillColor=#ffffff;" value="Dominio: Plataforma SaaS y Gestión Multitenant" vertex="1">
+      <mxGeometry height="390" width="580" x="50" y="90" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Empresa" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;" value="&lt;b&gt;Empresa (Tenant)&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="230" x="70" y="178" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_PlanSuscripcion" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;" value="&lt;b&gt;PlanSuscripcion&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="230" x="370" y="178" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Suscripcion" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;" value="&lt;b&gt;Suscripcion&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="230" x="220" y="362" as="geometry" />
+    </mxCell>
+    <mxCell id="rel_emp_susc" edge="1" parent="1" source="ent_Empresa" target="ent_Suscripcion" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_emp_susc" connectable="0" parent="rel_emp_susc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="contrata &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_emp_susc" connectable="0" parent="rel_emp_susc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_emp_susc" connectable="0" parent="rel_emp_susc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_plan_susc" edge="1" parent="1" source="ent_PlanSuscripcion" target="ent_Suscripcion" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_plan_susc" connectable="0" parent="rel_plan_susc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt; estipula" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_plan_susc" connectable="0" parent="rel_plan_susc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_plan_susc" connectable="0" parent="rel_plan_susc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="grp_org" parent="1" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=28;horizontal=1;fontStyle=1;fontSize=12;fillColor=#fff1f2;strokeColor=#e11d48;swimlaneFillColor=#ffffff;" value="Dominio: Estructura Organizacional, Usuarios y Proveedores" vertex="1">
+      <mxGeometry height="390" width="860" x="670" y="90" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Sucursal" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;" value="&lt;b&gt;Sucursal&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="220" x="690" y="192" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Usuario" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;" value="&lt;b&gt;Usuario&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="250" x="970" y="182" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_PerfilCorporal" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;" value="&lt;b&gt;PerfilCorporal&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="220" x="1280" y="178" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Proveedor" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;" value="&lt;b&gt;Proveedor&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="250" x="970" y="362" as="geometry" />
+    </mxCell>
+    <mxCell id="rel_emp_suc" edge="1" parent="1" source="ent_Empresa" target="ent_Sucursal" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_emp_suc" connectable="0" parent="rel_emp_suc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="opera &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_emp_suc" connectable="0" parent="rel_emp_suc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_emp_suc" connectable="0" parent="rel_emp_suc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_emp_usr" edge="1" parent="1" source="ent_Empresa" target="ent_Usuario" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=1;exitY=0.7;entryX=0;entryY=0.5;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_emp_usr" connectable="0" parent="rel_emp_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="emplea &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_suc_usr" edge="1" parent="1" source="ent_Sucursal" target="ent_Usuario" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_suc_usr" connectable="0" parent="rel_suc_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="asigna personal &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_usr_perf" edge="1" parent="1" source="ent_Usuario" target="ent_PerfilCorporal" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_usr_perf" connectable="0" parent="rel_usr_perf" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="registra &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_usr_perf" connectable="0" parent="rel_usr_perf" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_usr_perf" connectable="0" parent="rel_usr_perf" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_usr_prov" edge="1" parent="1" source="ent_Usuario" target="ent_Proveedor" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_usr_prov" connectable="0" parent="rel_usr_prov" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="representa &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="grp_cat" parent="1" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=28;horizontal=1;fontStyle=1;fontSize=12;fillColor=#fefce8;strokeColor=#ca8a04;swimlaneFillColor=#ffffff;" value="Dominio: Catálogo de Prendas, Variantes y Precios por Talla" vertex="1">
+      <mxGeometry height="430" width="580" x="50" y="510" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Prenda" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef9c3;strokeColor=#ca8a04;strokeWidth=1.5;" value="&lt;b&gt;Prenda&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="230" x="70" y="592" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Categoria" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef9c3;strokeColor=#ca8a04;strokeWidth=1.5;" value="&lt;b&gt;Categoria&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="210" x="380" y="562" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Coleccion" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef9c3;strokeColor=#ca8a04;strokeWidth=1.5;" value="&lt;b&gt;Coleccion&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="210" x="380" y="662" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_VariantePrenda" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef9c3;strokeColor=#ca8a04;strokeWidth=1.5;" value="&lt;b&gt;VariantePrenda&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="240" x="70" y="798" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Talla" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef9c3;strokeColor=#ca8a04;strokeWidth=1.5;" value="&lt;b&gt;Talla&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="210" x="380" y="760" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_Color" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef9c3;strokeColor=#ca8a04;strokeWidth=1.5;" value="&lt;b&gt;Color&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="210" x="380" y="840" as="geometry" />
+    </mxCell>
+    <mxCell id="rel_prn_cat" edge="1" parent="1" source="ent_Prenda" target="ent_Categoria" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_prn_cat" connectable="0" parent="rel_prn_cat" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="se clasifica en &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_prn_col" edge="1" parent="1" source="ent_Prenda" target="ent_Coleccion" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_prn_col" connectable="0" parent="rel_prn_col" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="se agrupa en &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_prn_var" edge="1" parent="1" source="ent_Prenda" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_prn_var" connectable="0" parent="rel_prn_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="se desglosa en &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_prn_var" connectable="0" parent="rel_prn_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_prn_var" connectable="0" parent="rel_prn_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_var_tal" edge="1" parent="1" source="ent_VariantePrenda" target="ent_Talla" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_var_tal" connectable="0" parent="rel_var_tal" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="tiene talla &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_var_col" edge="1" parent="1" source="ent_VariantePrenda" target="ent_Color" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_var_col" connectable="0" parent="rel_var_col" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="tiene color &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="grp_inv" parent="1" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=28;horizontal=1;fontStyle=1;fontSize=12;fillColor=#f0fdf4;strokeColor=#16a34a;swimlaneFillColor=#ffffff;" value="Dominio: Inventario Multisede, Traspasos de Ropa y Modo Offline" vertex="1">
+      <mxGeometry height="430" width="860" x="670" y="510" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_InventarioSucursal" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;" value="&lt;b&gt;InventarioSucursal&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="240" x="690" y="592" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_MovimientoInventario" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;" value="&lt;b&gt;MovimientoInventario&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="240" x="970" y="592" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_TraspasoMercaderia" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;" value="&lt;b&gt;TraspasoMercaderia&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="250" x="1260" y="602" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_ItemTraspaso" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;" value="&lt;b&gt;ItemTraspaso&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="250" x="1260" y="762" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_OperacionOffline" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;" value="&lt;b&gt;OperacionOffline (Idempotencia)&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="250" x="970" y="778" as="geometry" />
+    </mxCell>
+    <mxCell id="rel_suc_inv" edge="1" parent="1" source="ent_Sucursal" target="ent_InventarioSucursal" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_suc_inv" connectable="0" parent="rel_suc_inv" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="almacena &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_var_inv" edge="1" parent="1" source="ent_VariantePrenda" target="ent_InventarioSucursal" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_var_inv" connectable="0" parent="rel_var_inv" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="posee existencias en &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_inv_mov" edge="1" parent="1" source="ent_InventarioSucursal" target="ent_MovimientoInventario" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_inv_mov" connectable="0" parent="rel_inv_mov" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="registra movimiento &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_suc_trasp_orig" edge="1" parent="1" source="ent_Sucursal" target="ent_TraspasoMercaderia" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=1;exitY=0.9;entryX=0.2;entryY=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_suc_trasp_orig" connectable="0" parent="rel_suc_trasp_orig" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="despacha desde (origen) &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_trasp_item" edge="1" parent="1" source="ent_TraspasoMercaderia" target="ent_ItemTraspaso" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_trasp_item" connectable="0" parent="rel_trasp_item" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="contiene &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_item_var" edge="1" parent="1" source="ent_ItemTraspaso" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0;exitY=0.5;entryX=1;entryY=0.9;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_item_var" connectable="0" parent="rel_item_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="&lt; transfiere" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_suc_off" edge="1" parent="1" source="ent_Sucursal" target="ent_OperacionOffline" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0.5;exitY=1;entryX=0.2;entryY=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_suc_off" connectable="0" parent="rel_suc_off" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="emite en contingencia &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="grp_comp" parent="1" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=28;horizontal=1;fontStyle=1;fontSize=12;fillColor=#faf5ff;strokeColor=#9333ea;swimlaneFillColor=#ffffff;" value="Dominio: Carrito Web, Reservas con Temporizador y Pedidos Stripe" vertex="1">
+      <mxGeometry height="420" width="580" x="50" y="970" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_CarritoCompra" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#f3e8ff;strokeColor=#9333ea;strokeWidth=1.5;" value="&lt;b&gt;CarritoCompra&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="230" x="70" y="1048" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_ItemCarrito" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#f3e8ff;strokeColor=#9333ea;strokeWidth=1.5;" value="&lt;b&gt;ItemCarrito&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="210" x="380" y="1022" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_ReservaPrenda" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#f3e8ff;strokeColor=#9333ea;strokeWidth=1.5;" value="&lt;b&gt;ReservaPrenda&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="240" x="70" y="1222" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_PedidoOnline" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#f3e8ff;strokeColor=#9333ea;strokeWidth=1.5;" value="&lt;b&gt;PedidoOnline (Stripe)&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="250" x="360" y="1222" as="geometry" />
+    </mxCell>
+    <mxCell id="rel_car_item" edge="1" parent="1" source="ent_CarritoCompra" target="ent_ItemCarrito" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_car_item" connectable="0" parent="rel_car_item" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="contiene &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_item_var_car" edge="1" parent="1" source="ent_ItemCarrito" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0;exitY=0;entryX=1;entryY=1;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_item_var_car" connectable="0" parent="rel_item_var_car" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="incluye prenda &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_res_suc" edge="1" parent="1" source="ent_ReservaPrenda" target="ent_Sucursal" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=1;exitY=0;entryX=0;entryY=1;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_res_suc" connectable="0" parent="rel_res_suc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="retiene en &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_ped_var" edge="1" parent="1" source="ent_PedidoOnline" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0;exitY=0;entryX=1;entryY=0.7;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_ped_var" connectable="0" parent="rel_ped_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="factura &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="grp_pos" parent="1" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=28;horizontal=1;fontStyle=1;fontSize=12;fillColor=#fffbeb;strokeColor=#d97706;swimlaneFillColor=#ffffff;" value="Dominio: Terminal POS en Sucursal y Políticas Comerciales" vertex="1">
+      <mxGeometry height="420" width="860" x="670" y="970" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_VentaPOS" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;" value="&lt;b&gt;VentaPOS&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="240" x="690" y="1062" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_DetalleVenta" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;" value="&lt;b&gt;DetalleVenta&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="230" x="970" y="1028" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_CambioPrenda" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fed7aa;strokeColor=#ea580c;strokeWidth=1.5;" value="&lt;b&gt;CambioPrenda (CU19)&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="240" x="690" y="1258" as="geometry" />
+    </mxCell>
+    <mxCell id="ent_DevolucionPrenda" parent="1" style="verticalAlign=middle;align=center;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=13;fontStyle=1;rounded=1;shadow=1;fillColor=#fed7aa;strokeColor=#ea580c;strokeWidth=1.5;" value="&lt;b&gt;DevolucionPrenda (CU20)&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="280" x="970" y="1248" as="geometry" />
+    </mxCell>
+    <mxCell id="rel_vta_det" edge="1" parent="1" source="ent_VentaPOS" target="ent_DetalleVenta" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_vta_det" connectable="0" parent="rel_vta_det" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="desglosa &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_det_var" edge="1" parent="1" source="ent_DetalleVenta" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0;exitY=0;entryX=1;entryY=1;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_det_var" connectable="0" parent="rel_det_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="vende prenda &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_vta_camb" edge="1" parent="1" source="ent_VentaPOS" target="ent_CambioPrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_vta_camb" connectable="0" parent="rel_vta_camb" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="origina cambio &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_vta_dev" edge="1" parent="1" source="ent_VentaPOS" target="ent_DevolucionPrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_vta_dev" connectable="0" parent="rel_vta_dev" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="origina devolucion &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_camb_var" edge="1" parent="1" source="ent_CambioPrenda" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0;exitY=0;entryX=1;entryY=0.8;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_camb_var" connectable="0" parent="rel_camb_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="entrega nueva talla &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_dev_var" edge="1" parent="1" source="ent_DevolucionPrenda" target="ent_VariantePrenda" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0;exitY=0;entryX=0.9;entryY=0.9;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_dev_var" connectable="0" parent="rel_dev_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="reincorpora prenda &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="rel_suc_vta" edge="1" parent="1" source="ent_Sucursal" target="ent_VentaPOS" style="endArrow=none;html=1;rounded=0;strokeColor=#333333;strokeWidth=1.2;exitX=0.2;exitY=1;entryX=0.5;entryY=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="lbl_suc_vta" connectable="0" parent="rel_suc_vta" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="se factura en &gt;" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_emp_usr" connectable="0" parent="rel_emp_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_emp_usr" connectable="0" parent="rel_emp_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_suc_usr" connectable="0" parent="rel_suc_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_suc_usr" connectable="0" parent="rel_suc_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_usr_prov" connectable="0" parent="rel_usr_prov" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_usr_prov" connectable="0" parent="rel_usr_prov" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_prn_cat" connectable="0" parent="rel_prn_cat" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_prn_cat" connectable="0" parent="rel_prn_cat" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_prn_col" connectable="0" parent="rel_prn_col" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_prn_col" connectable="0" parent="rel_prn_col" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_var_tal" connectable="0" parent="rel_var_tal" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_var_tal" connectable="0" parent="rel_var_tal" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_var_col" connectable="0" parent="rel_var_col" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_var_col" connectable="0" parent="rel_var_col" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_suc_inv" connectable="0" parent="rel_suc_inv" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_suc_inv" connectable="0" parent="rel_suc_inv" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_var_inv" connectable="0" parent="rel_var_inv" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_var_inv" connectable="0" parent="rel_var_inv" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_inv_mov" connectable="0" parent="rel_inv_mov" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_inv_mov" connectable="0" parent="rel_inv_mov" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_suc_trasp_orig" connectable="0" parent="rel_suc_trasp_orig" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_suc_trasp_orig" connectable="0" parent="rel_suc_trasp_orig" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_trasp_item" connectable="0" parent="rel_trasp_item" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_trasp_item" connectable="0" parent="rel_trasp_item" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_item_var" connectable="0" parent="rel_item_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_item_var" connectable="0" parent="rel_item_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_suc_off" connectable="0" parent="rel_suc_off" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_suc_off" connectable="0" parent="rel_suc_off" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_car_item" connectable="0" parent="rel_car_item" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_car_item" connectable="0" parent="rel_car_item" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_item_var_car" connectable="0" parent="rel_item_var_car" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_item_var_car" connectable="0" parent="rel_item_var_car" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_res_suc" connectable="0" parent="rel_res_suc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_res_suc" connectable="0" parent="rel_res_suc" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_ped_var" connectable="0" parent="rel_ped_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_ped_var" connectable="0" parent="rel_ped_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_vta_det" connectable="0" parent="rel_vta_det" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_vta_det" connectable="0" parent="rel_vta_det" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_det_var" connectable="0" parent="rel_det_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_det_var" connectable="0" parent="rel_det_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_vta_camb" connectable="0" parent="rel_vta_camb" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_vta_camb" connectable="0" parent="rel_vta_camb" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_vta_dev" connectable="0" parent="rel_vta_dev" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_vta_dev" connectable="0" parent="rel_vta_dev" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_camb_var" connectable="0" parent="rel_camb_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_camb_var" connectable="0" parent="rel_camb_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_dev_var" connectable="0" parent="rel_dev_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_dev_var" connectable="0" parent="rel_dev_var" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c1_suc_vta" connectable="0" parent="rel_suc_vta" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="c2_suc_vta" connectable="0" parent="rel_suc_vta" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontStyle=1;" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-5" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

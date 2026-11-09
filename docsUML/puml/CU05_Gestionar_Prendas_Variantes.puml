@@ -1,0 +1,63 @@
+@startuml CU05_Gestionar_Prendas_Variantes
+title Diagrama de Comunicación / Robustez ICONIX - CU05: Gestionar Prendas y Variantes de Precio por Talla
+
+top to bottom direction
+skinparam actorStyle hollow
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #005522
+skinparam ArrowFontColor #000000
+skinparam ArrowFontSize 10
+
+actor ":AdministradorTenant" as Act
+
+package "Frontend (Angular PWA)" {
+  boundary ":AdminCatalogPageComponent" as Page
+  boundary ":CatalogApiService" as Api
+}
+
+package "Backend (FastAPI)" {
+  control ":CatalogRoutes" as Routes
+  control ":CatalogService" as Svc
+  
+  entity ":Product" as EntProd
+  entity ":ProductVariant" as EntVar
+  entity ":Category" as EntCat
+  entity ":Size" as EntSize
+}
+
+' -------------------------------------------------------------
+' ENLACES Y MENSAJES DE COMUNICACIÓN
+' -------------------------------------------------------------
+
+' 1. Actor <--> Frontend Page
+Act --> Page : 1: loadData()\n2: onSubmit()\n3: onSubmit() [SKU duplicado]\n4: onSubmit() [Descuento inválido]
+
+' 2. Frontend Boundaries
+Page --> Api : 1.1: listProducts()\n2.1: createProduct()\n3.1: createProduct()\n4.1: createProduct()
+Api --> Page : 1.5: setProducts()\n2.8: response() [HTTP 201 Created]
+Page --> Act : 3.5: showErrorToast()\n4.3: showErrorToast()
+
+' 3. Frontend <--> Backend Routes
+Api --> Routes : 1.2: list_products_route()\n2.2: create_product_route()\n3.2: create_product_route()\n4.2: create_product_route()
+
+Routes --> Api : 3.4: raise_http_exception() [400 SKU Duplicado]\n4.2: raise_http_exception() [400 Descuento Excedido]
+
+' 4. Backend Routes <--> Domain Service
+Routes --> Svc : 1.3: query()\n2.3: create_product()
+
+' 5. SELF-LOOP 1 (Validaciones de negocio en CatalogService)
+Svc --> Svc : 2.4: validate_variant_payload() [Valida SKU y talla/color únicos]\n2.5: validate_discount() [Valida descuento <= precio]\n3.3: validate_variant_payload() [FAIL: SKU colisiona]\n4.1: validate_discount() [FAIL: Descuento > precio]
+
+' 6. Queries y Persistencia en Entidades
+Routes --> EntCat : 1.4: query()
+Routes --> EntSize : 1.5: query()
+
+Svc --> EntProd : 1.4: query()\n2.6: create() [Inserta prenda matriz con tenant_id]
+Svc --> EntVar : 2.7: create() [Inserta variantes con precio diferenciado por talla]
+
+' 7. SELF-LOOP 2 (Refresco reactivo en Page)
+Page --> Page : 2.9: loadData()
+
+@enduml

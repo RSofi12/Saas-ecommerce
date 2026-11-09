@@ -1,0 +1,63 @@
+@startuml CU04_Gestionar_Sucursales_Limites
+title Diagrama de Comunicación / Robustez ICONIX - CU04: Gestionar Sucursales y Límites de Plan
+
+top to bottom direction
+skinparam actorStyle hollow
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #16a34a
+skinparam ArrowFontColor #16a34a
+skinparam ArrowFontSize 10
+
+actor ":AdministradorTenant" as Act
+
+package "Frontend (Angular PWA)" {
+  boundary ":AdminBranchPageComponent" as Page
+  boundary ":AdminBranchService" as Srv
+}
+
+package "Backend (FastAPI)" {
+  control ":BranchRoutes" as Routes
+  control ":BranchService" as BService
+  
+  entity ":Branch" as EntBranch
+  entity ":Subscription" as EntSub
+  entity ":Plan" as EntPlan
+}
+
+' -------------------------------------------------------------
+' ENLACES Y MENSAJES DE COMUNICACIÓN
+' -------------------------------------------------------------
+
+' 1. Actor <--> Frontend Page
+Act --> Page : 1: loadData()\n2: openModal()\n2.1: submit() [Crear sucursal]\n3: submit() [Cuota llena]\n4: toggleActive() [Activar/Desactivar]
+
+' 2. Frontend Boundaries
+Page --> Srv : 1.1: getBranchQuota()\n1.2: listBranches()\n2.2: createBranch()\n3.1: createBranch()\n4.1: updateBranchActive()
+
+Srv --> Page : 1.11: setBranches() [Actualiza tabla reactiva]\n4.4: notifyStatusUpdated()
+Page --> Act : 3.5: showErrorToast() [Límite de cuota alcanzado]
+
+' 3. Frontend <--> Backend Routes
+Srv --> Routes : 1.3: get_branch_quota_route()\n1.8: list_branches_route()\n2.3: create_branch_route()\n3.2: create_branch_route()\n4.2: update_branch()
+
+Routes --> Srv : 2.7: response() [HTTP 201 Created]\n3.4: raise_http_exception() [HTTP 400 Cuota Excedida]
+
+' 4. Backend Routes <--> Domain Service
+Routes --> BService : 1.4: get_branch_quota()\n1.9: get_branches()\n2.4: create_branch()
+
+' 5. SELF-LOOP 1 (Validación de cuota en BranchService)
+BService --> BService : 2.5: validate_branch_quota() [OK: sucursales < max_branches]\n3.3: validate_branch_quota() [FAIL: sucursales >= max_branches]
+
+' 6. Queries y Persistencia en Entidades
+BService --> EntSub : 1.5: query() [Suscripción activa]
+BService --> EntPlan : 1.6: query() [Límite max_branches]
+BService --> EntBranch : 1.7: query() [Conteo actual]\n1.10: query() [Listado]\n2.6: create() [Inserta sucursal]
+
+Routes --> EntBranch : 4.3: update() [Cambia is_active]
+
+' 7. SELF-LOOP 2 (Recarga reactiva en Page)
+Page --> Page : 2.8: loadData() [Refresca listado]
+
+@enduml

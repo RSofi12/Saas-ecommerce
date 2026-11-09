@@ -1,0 +1,124 @@
+@startuml CU24_secuencia_segmentacion_kmeans
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 4
+
+' Paleta visual Enterprise Architect (Celeste claro / Cian suave)
+skinparam participant {
+    BackgroundColor #D8EFF8
+    BorderColor #2D6898
+    FontColor #000000
+    FontStyle bold
+}
+skinparam actor {
+    BackgroundColor #FFE5CC
+    BorderColor #994C00
+    FontColor #000000
+}
+skinparam sequence {
+    LifeLineBorderColor #2D6898
+    LifeLineBackgroundColor #EBF5FB
+    ArrowColor #222222
+    ArrowFontColor #000000
+    ArrowFontSize 11
+    GroupBorderColor #4682B4
+    GroupBackgroundColor #F0F8FF
+    GroupHeaderFontColor #1B4F72
+    GroupHeaderFontSize 11
+}
+
+autonumber
+
+actor "AdministradorTenant" as Admin
+participant "«Interface»\n:AdminMlSegmentationPageComponent" as UIClusterPage
+participant "«Interface»\n:CustomerSegmentationApiService" as UIClusterApi
+participant "«Controller»\n:CustomerSegmentationRoutes" as CtrlRoutes
+participant "«Controller»\n:CustomerSegmentationService" as CtrlService
+participant "«Entity»\n:Plan" as EntPlan
+participant "«Entity»\n:User" as EntUser
+participant "«Entity»\n:Sale" as EntSale
+participant "«Entity»\n:GarmentReturn" as EntReturn
+participant "«Entity»\n:SyntheticDataset" as EntDataset
+participant "«Entity»\n:CustomerSegment" as EntSegment
+participant "«Entity»\n:MLModel" as EntMlModel
+
+' Fase 1: Solicitud de Segmentación
+Admin -> UIClusterPage: accederModuloSegmentacion()
+activate UIClusterPage
+Admin -> UIClusterPage: solicitarSegmentacionClientes()
+UIClusterPage -> UIClusterApi: trainCustomerClusters()
+activate UIClusterApi
+UIClusterApi -> CtrlRoutes: POST_train_clusters()
+activate CtrlRoutes
+
+' Fase 2: Validación de Permisos y Acceso a IA
+CtrlRoutes -> CtrlRoutes: validarPermisosAdministrador()
+CtrlRoutes -> CtrlService: train_and_segment_customers()
+activate CtrlService
+
+alt Plan Pro/Enterprise (IA Activa)
+    CtrlService -> CtrlService: validate_ai_access()
+    CtrlService -> EntPlan: checkSubscriptionTier()
+    activate EntPlan
+    EntPlan --> CtrlService: returnSubscriptionDetails()
+    deactivate EntPlan
+else Plan Básico (HTTP 403 Forbidden)
+    CtrlService --> CtrlRoutes: raiseForbiddenException()
+end
+
+' Fase 3: Extracción RFM+D o Fallback Cold Start
+alt Clientes Reales >= 10
+    CtrlService -> EntUser: getTenantCustomers()
+    activate EntUser
+    EntUser --> CtrlService: returnCustomerList()
+    deactivate EntUser
+    CtrlService -> EntSale: getCustomerSalesHistory()
+    activate EntSale
+    EntSale --> CtrlService: returnSalesList()
+    deactivate EntSale
+    CtrlService -> EntReturn: getCustomerReturnsHistory()
+    activate EntReturn
+    EntReturn --> CtrlService: returnReturnsList()
+    deactivate EntReturn
+    CtrlService -> CtrlService: construirMatrizRfmD()
+    CtrlService -> CtrlService: verificarVolumenClientesMinimo()
+else Cold Start Fallback (Dataset Sintético CU22)
+    CtrlService -> EntDataset: cargarDatasetSinteticoFallback()
+    activate EntDataset
+    EntDataset --> CtrlService: returnSyntheticFeatures()
+    deactivate EntDataset
+end
+
+' Fase 4: Escalado y Algoritmo K-Means
+CtrlService -> CtrlService: escalarMatrizCaracteristicas()
+CtrlService -> CtrlService: entrenarKMeansClustering()
+CtrlService -> CtrlService: calcularIndiceSiluetaEInercia()
+
+loop Por cada Cluster 0..3: VIP, Temporada, Ofertas, Riesgo
+    CtrlService -> CtrlService: interpretarPerfilesCentroides()
+    CtrlService -> CtrlService: proyectarCoordenadas2DScatter()
+end
+
+' Fase 5: Persistencia de Modelo y Segmentos
+CtrlService -> EntMlModel: persistirModeloCentroides()
+activate EntMlModel
+EntMlModel --> CtrlService: returnModelSaved()
+deactivate EntMlModel
+
+CtrlService -> EntSegment: persistirSegmentosClientes()
+activate EntSegment
+EntSegment --> CtrlService: returnSegmentsSaved()
+deactivate EntSegment
+
+' Fase 6: Retorno de Resultados y Visualización
+CtrlService --> CtrlRoutes: returnClusterResults()
+deactivate CtrlService
+CtrlRoutes --> UIClusterApi: returnJsonSuccess()
+deactivate CtrlRoutes
+UIClusterApi --> UIClusterPage: returnObservableResult()
+deactivate UIClusterApi
+UIClusterPage --> Admin: renderizarGraficoScatterYPerfiles()
+deactivate UIClusterPage
+@enduml

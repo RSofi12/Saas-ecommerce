@@ -1,0 +1,335 @@
+<mxGraphModel dx="1628" dy="898" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="850" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO DEL DIAGRAMA -->
+    <mxCell id="CU09-COMM-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:6pt;&quot;&gt;&lt;span style=&quot;font-size:13pt;font-family:Arial,sans-serif;color:#000000;font-weight:700;&quot;&gt;CU09 – Comprar Prendas con Stripe y Despacho Condicionado&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:9.5pt;color:#555555;margin:0;&quot;&gt;Diagrama de Robustez / Comunicación ICONIX (UML 2.5+) • Flujo Actor - Boundary - Controller - Entities&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="55" width="550" x="40" y="30" as="geometry" />
+    </mxCell>
+
+    <!-- ACTORES -->
+    <mxCell id="CU09-COMM-ACT-CLI" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Cliente" vertex="1">
+      <mxGeometry height="70" width="40" x="50" y="280" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-ACT-STRIPE" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":PasarelaStripe" vertex="1">
+      <mxGeometry height="70" width="40" x="430" y="80" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARIES (FRONTERAS) -->
+    <mxCell id="CU09-COMM-BND-CHK" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":CheckoutView" vertex="1">
+      <mxGeometry height="65" width="75" x="200" y="280" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-BND-ELEM" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":StripeElementsCard" vertex="1">
+      <mxGeometry height="60" width="70" x="200" y="140" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-BND-CONF" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":OrderConfirmationModal" vertex="1">
+      <mxGeometry height="60" width="70" x="200" y="440" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLERS (CONTROL) -->
+    <mxCell id="CU09-COMM-CTRL-ROUTES" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":PaymentRoutes" vertex="1">
+      <mxGeometry height="70" width="65" x="420" y="280" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-CTRL-SERV" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":OrderService" vertex="1">
+      <mxGeometry height="70" width="65" x="650" y="280" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITIES (ENTIDADES) -->
+    <mxCell id="CU09-COMM-ENT-CART" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Cart" vertex="1">
+      <mxGeometry height="44" width="44" x="920" y="140" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-ENT-ORDER" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Order" vertex="1">
+      <mxGeometry height="44" width="44" x="920" y="230" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-ENT-ATTEMPT" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":PaymentAttempt" vertex="1">
+      <mxGeometry height="44" width="44" x="920" y="320" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-ENT-EVENT" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":StripeEvent" vertex="1">
+      <mxGeometry height="44" width="44" x="920" y="410" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-COMM-ENT-INV" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Inventory" vertex="1">
+      <mxGeometry height="44" width="44" x="920" y="500" as="geometry" />
+    </mxCell>
+
+    <!-- ENLACES DE COMUNICACIÓN (LÍNEAS SÓLIDAS) -->
+    <mxCell id="CU09-LNK-CLI-CHK" edge="1" parent="1" source="CU09-COMM-ACT-CLI" target="CU09-COMM-BND-CHK" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-CHK-ROUTES" edge="1" parent="1" source="CU09-COMM-BND-CHK" target="CU09-COMM-CTRL-ROUTES" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-ROUTES-SERV" edge="1" parent="1" source="CU09-COMM-CTRL-ROUTES" target="CU09-COMM-CTRL-SERV" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-CHK-ELEM" edge="1" parent="1" source="CU09-COMM-BND-CHK" target="CU09-COMM-BND-ELEM" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-ELEM-STRIPE" edge="1" parent="1" source="CU09-COMM-BND-ELEM" target="CU09-COMM-ACT-STRIPE" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-STRIPE-ROUTES" edge="1" parent="1" source="CU09-COMM-ACT-STRIPE" target="CU09-COMM-CTRL-ROUTES" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-SERV-STRIPE" edge="1" parent="1" source="CU09-COMM-CTRL-SERV" target="CU09-COMM-ACT-STRIPE" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="666" y="115" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-LNK-CHK-CONF" edge="1" parent="1" source="CU09-COMM-BND-CHK" target="CU09-COMM-BND-CONF" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="CU09-LNK-CONF-CLI" edge="1" parent="1" source="CU09-COMM-BND-CONF" target="CU09-COMM-ACT-CLI" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="70" y="470" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-LNK-SERV-CART" edge="1" parent="1" source="CU09-COMM-CTRL-SERV" target="CU09-COMM-ENT-CART" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="780" y="162" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-LNK-SERV-ORDER" edge="1" parent="1" source="CU09-COMM-CTRL-SERV" target="CU09-COMM-ENT-ORDER" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="780" y="252" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-LNK-SERV-ATTEMPT" edge="1" parent="1" source="CU09-COMM-CTRL-SERV" target="CU09-COMM-ENT-ATTEMPT" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=1;exitY=0.6;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="780" y="342" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-LNK-SERV-EVENT" edge="1" parent="1" source="CU09-COMM-CTRL-SERV" target="CU09-COMM-ENT-EVENT" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="780" y="432" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-LNK-SERV-INV" edge="1" parent="1" source="CU09-COMM-CTRL-SERV" target="CU09-COMM-ENT-INV" style="rounded=1;html=1;endArrow=none;endFill=0;fontSize=10;exitX=1;exitY=0.9;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="780" y="522" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES FLUJO 1: Checkout y Creación de PaymentIntent (Azul Marino Oscuro #003366) -->
+    <mxCell id="CU09-M1" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1: iniciarCheckout()" vertex="1">
+      <mxGeometry height="20" width="130" x="75" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="272" as="sourcePoint" />
+        <mxPoint x="180" y="272" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-1" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.1: stripe_checkout_route()" vertex="1">
+      <mxGeometry height="20" width="150" x="260" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="285" y="272" as="sourcePoint" />
+        <mxPoint x="385" y="272" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-2" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.2: create_stripe_payment()" vertex="1">
+      <mxGeometry height="20" width="160" x="480" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-2" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="505" y="272" as="sourcePoint" />
+        <mxPoint x="615" y="272" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-3" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.3: validarStockDisponible()" vertex="1">
+      <mxGeometry height="20" width="160" x="600" y="360" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-3" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;curved=1;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="670" y="350" as="sourcePoint" />
+        <mxPoint x="690" y="350" as="targetPoint" />
+        <Array as="points"><mxPoint x="680" y="380" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-4" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.4: obtenerCarrito()" vertex="1">
+      <mxGeometry height="20" width="130" x="780" y="140" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-4" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="137" as="sourcePoint" />
+        <mxPoint x="890" y="137" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-5" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.5: crearOrden()" vertex="1">
+      <mxGeometry height="20" width="120" x="780" y="230" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-5" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="227" as="sourcePoint" />
+        <mxPoint x="890" y="227" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-6" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.6: crearIntentoPago()" vertex="1">
+      <mxGeometry height="20" width="130" x="780" y="320" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-6" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="317" as="sourcePoint" />
+        <mxPoint x="890" y="317" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M1-7" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="1.7: crearPaymentIntent()" vertex="1">
+      <mxGeometry height="20" width="150" x="500" y="95" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A1-7" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="640" y="92" as="sourcePoint" />
+        <mxPoint x="500" y="92" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES FLUJO 2: Confirmación en Stripe Elements (Verde Bosque #005522) -->
+    <mxCell id="CU09-M2" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="2: confirmarPagoStripe()" vertex="1">
+      <mxGeometry height="20" width="150" x="70" y="190" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A2" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#005522;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="90" y="240" as="sourcePoint" />
+        <mxPoint x="190" y="180" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M2-1" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="2.1: confirmCardPayment()" vertex="1">
+      <mxGeometry height="20" width="150" x="280" y="110" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A2-1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#005522;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="290" y="130" as="sourcePoint" />
+        <mxPoint x="400" y="100" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES FLUJO 3: Webhook Asíncrono de Stripe y Despacho (Púrpura Oscuro #4B0082) -->
+    <mxCell id="CU09-M3" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3: stripe_webhook_route()" vertex="1">
+      <mxGeometry height="20" width="150" x="460" y="190" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="450" y="160" as="sourcePoint" />
+        <mxPoint x="450" y="260" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M3-1" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3.1: verificarFirmaWebhook()" vertex="1">
+      <mxGeometry height="20" width="160" x="330" y="360" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3-1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;curved=1;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="430" y="350" as="sourcePoint" />
+        <mxPoint x="450" y="350" as="targetPoint" />
+        <Array as="points"><mxPoint x="440" y="380" /></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M3-2" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3.2: process_stripe_event()" vertex="1">
+      <mxGeometry height="20" width="160" x="480" y="300" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3-2" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="505" y="297" as="sourcePoint" />
+        <mxPoint x="615" y="297" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M3-3" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3.3: registrarEventoStripe()" vertex="1">
+      <mxGeometry height="20" width="140" x="780" y="410" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3-3" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="407" as="sourcePoint" />
+        <mxPoint x="890" y="407" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M3-4" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3.4: actualizarEstadoPagado()" vertex="1">
+      <mxGeometry height="20" width="160" x="780" y="255" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3-4" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="252" as="sourcePoint" />
+        <mxPoint x="890" y="252" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M3-5" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3.5: generarTrackingDespacho()" vertex="1">
+      <mxGeometry height="20" width="170" x="780" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3-5" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="272" as="sourcePoint" />
+        <mxPoint x="890" y="272" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M3-6" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="3.6: decrementarInventario()" vertex="1">
+      <mxGeometry height="20" width="160" x="780" y="500" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A3-6" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4B0082;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="497" as="sourcePoint" />
+        <mxPoint x="890" y="497" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES FLUJO 4: Despacho y Comprobante (Azul Marino Oscuro #003366) -->
+    <mxCell id="CU09-M4" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="4: renderizarComprobanteDespacho()" vertex="1">
+      <mxGeometry height="20" width="190" x="200" y="380" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A4" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="240" y="350" as="sourcePoint" />
+        <mxPoint x="240" y="430" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="CU09-M4-1" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=9.5;fontColor=#000000;fontStyle=1;align=center;" value="4.1: mostrarStepperDespacho()" vertex="1">
+      <mxGeometry height="20" width="170" x="60" y="440" as="geometry" />
+    </mxCell>
+    <mxCell id="CU09-A4-1" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#003366;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="180" y="470" as="sourcePoint" />
+        <mxPoint x="100" y="470" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

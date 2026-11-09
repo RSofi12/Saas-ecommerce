@@ -1,0 +1,690 @@
+<mxfile host="Electron" modified="2026-10-25T10:00:00.000Z" agent="Antigravity Senior Architect" version="21.0.0" type="device">
+  <diagram id="CU01-COMM" name="1. Diagrama de Comunicación UML">
+    <mxGraphModel dx="1628" dy="898" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1550" pageHeight="950" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO DEL DIAGRAMA -->
+    <mxCell id="CU01-COMM-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:4pt;&quot;&gt;&lt;span style=&quot;font-size:13pt;font-family:Arial,sans-serif;color:#0f172a;font-weight:700;&quot;&gt;CU01 – Registrar y Gestionar Empresas Tenants (RF-01, RF-02)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:9pt;color:#64748b;margin:0;&quot;&gt;Diagrama de Comunicación UML 2.5 • ICONIX Process (Actor • Boundary • Controller • Entity)&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="50" width="600" x="40" y="25" as="geometry" />
+    </mxCell>
+
+    <!-- CUADRO DE LEYENDA / RESUMEN DE SECUENCIAS -->
+    <mxCell id="CU01-COMM-LEGEND" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;fontSize=9;fontColor=#334155;shadow=0;" value="&lt;b style=&quot;color:#0f172a;font-size:10pt;&quot;&gt;Flujos del Caso de Uso (ICONIX):&lt;/b&gt;&lt;br&gt;&lt;b style=&quot;color:#0284c7;&quot;&gt;Secuencia 1:&lt;/b&gt; Flujo Normal — Aprovisionar Nueva Empresa Tenant, Plan Inicial y Administrador&lt;br&gt;&lt;b style=&quot;color:#dc2626;&quot;&gt;Secuencia 2:&lt;/b&gt; Flujo Alternativo A1 — Error 400 por Slug o NIT/RUT ya Registrado (Controlador aborta)&lt;br&gt;&lt;b style=&quot;color:#16a34a;&quot;&gt;Secuencia 3:&lt;/b&gt; Flujo Normal — Consultar, Listar y Filtrar Tenants Reactivamente (KPIs)&lt;br&gt;&lt;b style=&quot;color:#7c3aed;&quot;&gt;Secuencia 4:&lt;/b&gt; Flujo Normal — Conmutar Estado Operativo de Empresa (ACTIVO &amp;harr; SUSPENDIDO)" vertex="1">
+      <mxGeometry height="75" width="560" x="800" y="15" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== OBJETOS DEL MODELADO ICONIX ==================== -->
+
+    <!-- ACTOR: :Superadmin -->
+    <mxCell id="CU01-COMM-ACT" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=11;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#fee2e2;strokeColor=#ef4444;" value=":Superadmin" vertex="1">
+      <mxGeometry height="70" width="40" x="50" y="380" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY 1: :TenantFormModalComponent -->
+    <mxCell id="CU01-COMM-BND-MODAL" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#e0f2fe;strokeColor=#0284c7;" value=":TenantFormModalComponent" vertex="1">
+      <mxGeometry height="70" width="80" x="250" y="210" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY 2: :TenantsPageComponent -->
+    <mxCell id="CU01-COMM-BND-PAGE" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#e0f2fe;strokeColor=#0284c7;" value=":TenantsPageComponent" vertex="1">
+      <mxGeometry height="70" width="80" x="250" y="520" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY 3: :CompanyService -->
+    <mxCell id="CU01-COMM-BND-SRV" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#e0f2fe;strokeColor=#0284c7;" value=":CompanyService" vertex="1">
+      <mxGeometry height="70" width="80" x="480" y="380" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER 1: :CompanyRoutes (FastAPI Router) -->
+    <mxCell id="CU01-COMM-CTRL-ROUTES" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#dcfce7;strokeColor=#22c55e;" value=":CompanyRoutes" vertex="1">
+      <mxGeometry height="80" width="70" x="720" y="375" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER 2: :TenantService (Domain Service) -->
+    <mxCell id="CU01-COMM-CTRL-SVC" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#dcfce7;strokeColor=#22c55e;" value=":TenantService" vertex="1">
+      <mxGeometry height="80" width="70" x="960" y="375" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 1: :Company (companies) -->
+    <mxCell id="CU01-COMM-ENT-COMP" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#fef08a;strokeColor=#ca8a04;" value=":Company" vertex="1">
+      <mxGeometry height="46" width="46" x="1260" y="150" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 2: :Plan (plans) -->
+    <mxCell id="CU01-COMM-ENT-PLAN" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#fef08a;strokeColor=#ca8a04;" value=":Plan" vertex="1">
+      <mxGeometry height="46" width="46" x="1260" y="290" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 3: :Subscription (subscriptions) -->
+    <mxCell id="CU01-COMM-ENT-SUB" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#fef08a;strokeColor=#ca8a04;" value=":Subscription" vertex="1">
+      <mxGeometry height="46" width="46" x="1260" y="430" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 4: :User (users) -->
+    <mxCell id="CU01-COMM-ENT-USR" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;fillColor=#fef08a;strokeColor=#ca8a04;" value=":User" vertex="1">
+      <mxGeometry height="46" width="46" x="1260" y="570" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== ENLACES DE COMUNICACIÓN (LÍNEAS SÓLIDAS) ==================== -->
+
+    <!-- Enlace Actor - Modal Component -->
+    <mxCell id="CU01-COMM-LNK-ACT-MODAL" edge="1" parent="1" source="CU01-COMM-ACT" target="CU01-COMM-BND-MODAL" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Actor - Page Component -->
+    <mxCell id="CU01-COMM-LNK-ACT-PAGE" edge="1" parent="1" source="CU01-COMM-ACT" target="CU01-COMM-BND-PAGE" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Modal Component - Page Component (Event binding) -->
+    <mxCell id="CU01-COMM-LNK-MODAL-PAGE" edge="1" parent="1" source="CU01-COMM-BND-MODAL" target="CU01-COMM-BND-PAGE" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;dashed=1;strokeColor=#94a3b8;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Modal Component - CompanyService -->
+    <mxCell id="CU01-COMM-LNK-MODAL-SRV" edge="1" parent="1" source="CU01-COMM-BND-MODAL" target="CU01-COMM-BND-SRV" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Page Component - CompanyService -->
+    <mxCell id="CU01-COMM-LNK-PAGE-SRV" edge="1" parent="1" source="CU01-COMM-BND-PAGE" target="CU01-COMM-BND-SRV" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace CompanyService - CompanyRoutes (HTTP Rest API) -->
+    <mxCell id="CU01-COMM-LNK-SRV-ROUTES" edge="1" parent="1" source="CU01-COMM-BND-SRV" target="CU01-COMM-CTRL-ROUTES" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace CompanyRoutes - TenantService (Inyección FastAPI) -->
+    <mxCell id="CU01-COMM-LNK-ROUTES-SVC" edge="1" parent="1" source="CU01-COMM-CTRL-ROUTES" target="CU01-COMM-CTRL-SVC" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace TenantService - Company -->
+    <mxCell id="CU01-COMM-LNK-SVC-COMP" edge="1" parent="1" source="CU01-COMM-CTRL-SVC" target="CU01-COMM-ENT-COMP" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.9;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1070" y="173" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Enlace TenantService - Plan -->
+    <mxCell id="CU01-COMM-LNK-SVC-PLAN" edge="1" parent="1" source="CU01-COMM-CTRL-SVC" target="CU01-COMM-ENT-PLAN" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1090" y="313" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Enlace TenantService - Subscription -->
+    <mxCell id="CU01-COMM-LNK-SVC-SUB" edge="1" parent="1" source="CU01-COMM-CTRL-SVC" target="CU01-COMM-ENT-SUB" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=1;exitY=0.65;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1090" y="453" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Enlace TenantService - User -->
+    <mxCell id="CU01-COMM-LNK-SVC-USR" edge="1" parent="1" source="CU01-COMM-CTRL-SVC" target="CU01-COMM-ENT-USR" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.9;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1070" y="593" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ==================== MENSAJES: SECUENCIA 1 (ALTA DE EMPRESA TENANT) ==================== -->
+    
+    <!-- 1: openModal() -->
+    <mxCell id="CU01-COMM-M1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;fontStyle=1;" value="1: openModal()" vertex="1">
+      <mxGeometry height="22" width="120" x="80" y="450" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A1" edge="1" parent="1" source="CU01-COMM-M1" target="CU01-COMM-M1" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="475" as="sourcePoint" />
+        <mxPoint x="150" y="475" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.1: syncSubdomain() -->
+    <mxCell id="CU01-COMM-M11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.1: syncSubdomain()" vertex="1">
+      <mxGeometry height="22" width="130" x="80" y="250" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A11" edge="1" parent="1" source="CU01-COMM-M11" target="CU01-COMM-M11" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="245" as="sourcePoint" />
+        <mxPoint x="150" y="245" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.2: submit() -->
+    <mxCell id="CU01-COMM-M12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;fontStyle=1;" value="1.2: submit()" vertex="1">
+      <mxGeometry height="22" width="100" x="100" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A12" edge="1" parent="1" source="CU01-COMM-M12" target="CU01-COMM-M12" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="115" y="270" as="sourcePoint" />
+        <mxPoint x="155" y="270" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.3: createCompany() -->
+    <mxCell id="CU01-COMM-M13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.3: createCompany()" vertex="1">
+      <mxGeometry height="22" width="130" x="330" y="250" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A13" edge="1" parent="1" source="CU01-COMM-M13" target="CU01-COMM-M13" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="355" y="245" as="sourcePoint" />
+        <mxPoint x="405" y="245" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.4: register_company() -->
+    <mxCell id="CU01-COMM-M14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.4: register_company()" vertex="1">
+      <mxGeometry height="22" width="140" x="560" y="340" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A14" edge="1" parent="1" source="CU01-COMM-M14" target="CU01-COMM-M14" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="585" y="335" as="sourcePoint" />
+        <mxPoint x="635" y="335" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.5: create_tenant() -->
+    <mxCell id="CU01-COMM-M15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.5: create_tenant()" vertex="1">
+      <mxGeometry height="22" width="130" x="800" y="340" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A15" edge="1" parent="1" source="CU01-COMM-M15" target="CU01-COMM-M15" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="825" y="335" as="sourcePoint" />
+        <mxPoint x="875" y="335" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.6: query() (validar unicidad slug y nit) -->
+    <mxCell id="CU01-COMM-M16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.6: query()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="145" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A16" edge="1" parent="1" source="CU01-COMM-M16" target="CU01-COMM-M16" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="140" as="sourcePoint" />
+        <mxPoint x="1140" y="140" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.7: get_default_or_by_code_plan() -->
+    <mxCell id="CU01-COMM-M17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.7: get_default_or_by_code_plan()" vertex="1">
+      <mxGeometry height="22" width="180" x="1050" y="285" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A17" edge="1" parent="1" source="CU01-COMM-M17" target="CU01-COMM-M17" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1090" y="280" as="sourcePoint" />
+        <mxPoint x="1140" y="280" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.8: create() (Company) -->
+    <mxCell id="CU01-COMM-M18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.8: create()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="170" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A18" edge="1" parent="1" source="CU01-COMM-M18" target="CU01-COMM-M18" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="165" as="sourcePoint" />
+        <mxPoint x="1140" y="165" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.9: create() (Subscription) -->
+    <mxCell id="CU01-COMM-M19" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.9: create()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="425" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A19" edge="1" parent="1" source="CU01-COMM-M19" target="CU01-COMM-M19" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="420" as="sourcePoint" />
+        <mxPoint x="1140" y="420" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.10: create() (User) -->
+    <mxCell id="CU01-COMM-M110" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;" value="1.10: create()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="565" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A110" edge="1" parent="1" source="CU01-COMM-M110" target="CU01-COMM-M110" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="560" as="sourcePoint" />
+        <mxPoint x="1140" y="560" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.11: response() (Retorno HTTP 201) -->
+    <mxCell id="CU01-COMM-M111" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;fontStyle=0;" value="1.11: response()" vertex="1">
+      <mxGeometry height="20" width="110" x="575" y="420" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A111" edge="1" parent="1" source="CU01-COMM-M111" target="CU01-COMM-M111" style="endArrow=classic;html=1;rounded=1;strokeWidth=1;strokeColor=#0284c7;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="640" y="445" as="sourcePoint" />
+        <mxPoint x="590" y="445" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.12: onCompanyCreated() (Notificación reactiva de Modal a Page) -->
+    <mxCell id="CU01-COMM-M112" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#0369a1;fontStyle=0;" value="1.12: onCompanyCreated()" vertex="1">
+      <mxGeometry height="22" width="145" x="215" y="375" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A112" edge="1" parent="1" source="CU01-COMM-M112" target="CU01-COMM-M112" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#0284c7;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="287" y="398" as="sourcePoint" />
+        <mxPoint x="287" y="435" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+
+    <!-- ==================== MENSAJES: SECUENCIA 2 (FLUJO ALTERNATIVO A1 - DUPLICIDAD) ==================== -->
+
+    <!-- 2: submit() -->
+    <mxCell id="CU01-COMM-M2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;fontStyle=1;" value="2: submit()" vertex="1">
+      <mxGeometry height="22" width="90" x="105" y="300" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A2" edge="1" parent="1" source="CU01-COMM-M2" target="CU01-COMM-M2" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#dc2626;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="295" as="sourcePoint" />
+        <mxPoint x="160" y="295" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.1: createCompany() -->
+    <mxCell id="CU01-COMM-M21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;" value="2.1: createCompany()" vertex="1">
+      <mxGeometry height="22" width="130" x="330" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A21" edge="1" parent="1" source="CU01-COMM-M21" target="CU01-COMM-M21" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#dc2626;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="355" y="270" as="sourcePoint" />
+        <mxPoint x="405" y="270" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.2: register_company() -->
+    <mxCell id="CU01-COMM-M22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;" value="2.2: register_company()" vertex="1">
+      <mxGeometry height="22" width="140" x="560" y="365" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A22" edge="1" parent="1" source="CU01-COMM-M22" target="CU01-COMM-M22" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#dc2626;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="585" y="360" as="sourcePoint" />
+        <mxPoint x="635" y="360" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.3: create_tenant() -->
+    <mxCell id="CU01-COMM-M23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;" value="2.3: create_tenant()" vertex="1">
+      <mxGeometry height="22" width="130" x="800" y="365" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A23" edge="1" parent="1" source="CU01-COMM-M23" target="CU01-COMM-M23" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#dc2626;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="825" y="360" as="sourcePoint" />
+        <mxPoint x="875" y="360" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.4: query() (detección duplicidad slug o nit) -->
+    <mxCell id="CU01-COMM-M24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;" value="2.4: query()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="195" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A24" edge="1" parent="1" source="CU01-COMM-M24" target="CU01-COMM-M24" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#dc2626;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="190" as="sourcePoint" />
+        <mxPoint x="1140" y="190" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.5: raise_http_exception() (Error 400 Bad Request) -->
+    <mxCell id="CU01-COMM-M25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;fontStyle=0;" value="2.5: raise_http_exception()" vertex="1">
+      <mxGeometry height="20" width="150" x="790" y="420" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A25" edge="1" parent="1" source="CU01-COMM-M25" target="CU01-COMM-M25" style="endArrow=classic;html=1;rounded=1;strokeWidth=1;strokeColor=#dc2626;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="875" y="445" as="sourcePoint" />
+        <mxPoint x="825" y="445" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.6: showErrorToast() (Notificación de error en modal) -->
+    <mxCell id="CU01-COMM-M26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#dc2626;fontStyle=0;" value="2.6: showErrorToast()" vertex="1">
+      <mxGeometry height="20" width="130" x="330" y="300" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A26" edge="1" parent="1" source="CU01-COMM-M26" target="CU01-COMM-M26" style="endArrow=classic;html=1;rounded=1;strokeWidth=1;strokeColor=#dc2626;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="405" y="325" as="sourcePoint" />
+        <mxPoint x="355" y="325" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+
+    <!-- ==================== MENSAJES: SECUENCIA 3 (CONSULTAR Y LISTAR TENANTS) ==================== -->
+
+    <!-- 3: loadCompanies() -->
+    <mxCell id="CU01-COMM-M3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#16a34a;fontStyle=1;" value="3: loadCompanies()" vertex="1">
+      <mxGeometry height="22" width="130" x="80" y="480" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A3" edge="1" parent="1" source="CU01-COMM-M3" target="CU01-COMM-M3" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#16a34a;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="505" as="sourcePoint" />
+        <mxPoint x="150" y="505" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.1: getCompanies() -->
+    <mxCell id="CU01-COMM-M31" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#16a34a;" value="3.1: getCompanies()" vertex="1">
+      <mxGeometry height="22" width="130" x="330" y="445" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A31" edge="1" parent="1" source="CU01-COMM-M31" target="CU01-COMM-M31" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#16a34a;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="355" y="440" as="sourcePoint" />
+        <mxPoint x="405" y="440" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.2: get_all_companies() -->
+    <mxCell id="CU01-COMM-M32" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#16a34a;" value="3.2: get_all_companies()" vertex="1">
+      <mxGeometry height="22" width="140" x="560" y="315" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A32" edge="1" parent="1" source="CU01-COMM-M32" target="CU01-COMM-M32" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#16a34a;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="585" y="310" as="sourcePoint" />
+        <mxPoint x="635" y="310" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.3: list_companies() -->
+    <mxCell id="CU01-COMM-M33" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#16a34a;" value="3.3: list_companies()" vertex="1">
+      <mxGeometry height="22" width="130" x="800" y="315" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A33" edge="1" parent="1" source="CU01-COMM-M33" target="CU01-COMM-M33" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#16a34a;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="825" y="310" as="sourcePoint" />
+        <mxPoint x="875" y="310" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.4: query() (recuperar lista con filtro y orden) -->
+    <mxCell id="CU01-COMM-M34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#16a34a;" value="3.4: query()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="220" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A34" edge="1" parent="1" source="CU01-COMM-M34" target="CU01-COMM-M34" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#16a34a;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="215" as="sourcePoint" />
+        <mxPoint x="1140" y="215" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.5: setCompanies() (retorno y cálculo de métricas) -->
+    <mxCell id="CU01-COMM-M35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#16a34a;fontStyle=0;" value="3.5: setCompanies()" vertex="1">
+      <mxGeometry height="20" width="130" x="330" y="475" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A35" edge="1" parent="1" source="CU01-COMM-M35" target="CU01-COMM-M35" style="endArrow=classic;html=1;rounded=1;strokeWidth=1;strokeColor=#16a34a;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="405" y="500" as="sourcePoint" />
+        <mxPoint x="355" y="500" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+
+    <!-- ==================== MENSAJES: SECUENCIA 4 (CONMUTAR ESTADO DE EMPRESA) ==================== -->
+
+    <!-- 4: toggleStatus() -->
+    <mxCell id="CU01-COMM-M4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#7c3aed;fontStyle=1;" value="4: toggleStatus()" vertex="1">
+      <mxGeometry height="22" width="120" x="80" y="510" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A4" edge="1" parent="1" source="CU01-COMM-M4" target="CU01-COMM-M4" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#7c3aed;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="535" as="sourcePoint" />
+        <mxPoint x="150" y="535" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4.1: updateCompanyStatus() -->
+    <mxCell id="CU01-COMM-M41" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#7c3aed;" value="4.1: updateCompanyStatus()" vertex="1">
+      <mxGeometry height="22" width="160" x="330" y="510" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A41" edge="1" parent="1" source="CU01-COMM-M41" target="CU01-COMM-M41" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#7c3aed;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="360" y="505" as="sourcePoint" />
+        <mxPoint x="410" y="505" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4.2: update_status() -->
+    <mxCell id="CU01-COMM-M42" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#7c3aed;" value="4.2: update_status()" vertex="1">
+      <mxGeometry height="22" width="130" x="565" y="390" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A42" edge="1" parent="1" source="CU01-COMM-M42" target="CU01-COMM-M42" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#7c3aed;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="585" y="385" as="sourcePoint" />
+        <mxPoint x="635" y="385" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4.3: set_company_status() -->
+    <mxCell id="CU01-COMM-M43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#7c3aed;" value="4.3: set_company_status()" vertex="1">
+      <mxGeometry height="22" width="150" x="790" y="390" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A43" edge="1" parent="1" source="CU01-COMM-M43" target="CU01-COMM-M43" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#7c3aed;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="825" y="385" as="sourcePoint" />
+        <mxPoint x="875" y="385" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4.4: update() (actualizar estado en Company) -->
+    <mxCell id="CU01-COMM-M44" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#7c3aed;" value="4.4: update()" vertex="1">
+      <mxGeometry height="22" width="90" x="1080" y="245" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A44" edge="1" parent="1" source="CU01-COMM-M44" target="CU01-COMM-M44" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;strokeColor=#7c3aed;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1100" y="240" as="sourcePoint" />
+        <mxPoint x="1140" y="240" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4.5: notifyStatusUpdated() (retorno reactivo y toast) -->
+    <mxCell id="CU01-COMM-M45" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontColor=#7c3aed;fontStyle=0;" value="4.5: notifyStatusUpdated()" vertex="1">
+      <mxGeometry height="20" width="160" x="330" y="540" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-COMM-A45" edge="1" parent="1" source="CU01-COMM-M45" target="CU01-COMM-M45" style="endArrow=classic;html=1;rounded=1;strokeWidth=1;strokeColor=#7c3aed;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="420" y="565" as="sourcePoint" />
+        <mxPoint x="360" y="565" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
+  </diagram>
+  <diagram id="CU01-CLASS" name="2. Clases de Análisis (ICONIX)">
+    <mxGraphModel dx="2742" dy="1318" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO DEL DIAGRAMA -->
+    <mxCell id="CU01-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:6pt;&quot;&gt;&lt;span style=&quot;font-size:14pt;font-family:Arial,sans-serif;color:#0f172a;font-weight:700;&quot;&gt;CU01 – Registrar y Gestionar Empresas Tenants (RF-01, RF-02)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:10pt;color:#64748b;margin:0;&quot;&gt;Diagrama de Clases de Análisis • ICONIX Robustness Analysis (Boundary - Controller - Entity)&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="50" width="650" x="50" y="25" as="geometry" />
+    </mxCell>
+
+    <!-- ACTOR: Superadministrador -->
+    <mxCell id="CU01-A" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontStyle=0;fontSize=12;labelBackgroundColor=none;fillColor=#fee2e2;strokeColor=#ef4444;" value="Superadministrador" vertex="1">
+      <mxGeometry height="60" width="40" x="50" y="320" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Actor - Interface -->
+    <mxCell id="CU01-e0" edge="1" parent="1" source="CU01-A" target="CU01-I1" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-e0-act" connectable="0" parent="CU01-e0" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="gestiona empresas y suscripciones" vertex="1">
+      <mxGeometry relative="1" x="-0.15" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e0-c1" connectable="0" parent="CU01-e0" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e0-c2" connectable="0" parent="CU01-e0" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- INTERFACE / BOUNDARY 1: TenantsPageComponent -->
+    <mxCell id="CU01-I1" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;TenantsPageComponent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ companies: Signal&amp;lt;Company[]&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ loading: Signal&amp;lt;Boolean&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ searchQuery: Signal&amp;lt;String&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ statusFilter: Signal&amp;lt;String&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ isModalOpen: Signal&amp;lt;Boolean&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ totalTenants: Signal&amp;lt;Int&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ activeTenants: Signal&amp;lt;Int&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ suspendedTenants: Signal&amp;lt;Int&amp;gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ ngOnInit(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ loadCompanies(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ toggleStatus(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ openSubscriptionModal(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ onSubscriptionUpdated(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ onCompanyCreated(): void&lt;/p&gt;" vertex="1">
+      <mxGeometry height="290" width="230" x="180" y="200" as="geometry" />
+    </mxCell>
+
+    <!-- INTERFACE / BOUNDARY 2: TenantFormModalComponent -->
+    <mxCell id="CU01-I2" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;TenantFormModalComponent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ isOpen: Boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ submitting: Signal&amp;lt;Boolean&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ form: FormGroup&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ close: EventEmitter&amp;lt;void&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ created: EventEmitter&amp;lt;Company&amp;gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ syncSubdomain(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ handleBackdropClick(): void&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ submit(): void&lt;/p&gt;" vertex="1">
+      <mxGeometry height="240" width="230" x="180" y="540" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Interface 1 - Interface 2 -->
+    <mxCell id="CU01-e_i1_i2" edge="1" parent="1" source="CU01-I1" target="CU01-I2" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;endArrow=open;endFill=0;fontSize=10;labelBackgroundColor=none;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-e_i1_i2_lbl" connectable="0" parent="CU01-e_i1_i2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="incrusta y escucha eventos" vertex="1">
+      <mxGeometry relative="1" x="0.1" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- BOUNDARY 3: CompanyService -->
+    <mxCell id="CU01-I3" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Boundary / Service&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;CompanyService&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- api: ApiService&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getCompanies(): Observable&amp;lt;Company[]&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getCompanyById(): Observable&amp;lt;Company&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ getPlans(): Observable&amp;lt;Plan[]&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ createCompany(): Observable&amp;lt;CompanyOut&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ updateCompanyStatus(): Observable&amp;lt;Company&amp;gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ assignSubscription(): Observable&amp;lt;Subscription&amp;gt;&lt;/p&gt;" vertex="1">
+      <mxGeometry height="220" width="250" x="460" y="360" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Interface 1 - CompanyService -->
+    <mxCell id="CU01-e_i1_srv" edge="1" parent="1" source="CU01-I1" target="CU01-I3" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=12;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Relación Interface 2 - CompanyService -->
+    <mxCell id="CU01-e_i2_srv" edge="1" parent="1" source="CU01-I2" target="CU01-I3" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=12;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER: TenantController (CompanyRoutes + TenantService) -->
+    <mxCell id="CU01-C" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Controller&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;TenantController&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ register_company(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_all_companies(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_company_by_id(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_by_subdomain(): Response&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ update_status(): Response&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ create_tenant(): tuple[Company, User]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ list_companies(): list[Company]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_company(): Company&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ set_company_status(): Company&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_default_or_by_code_plan(): Plan&lt;/p&gt;" vertex="1">
+      <mxGeometry height="260" width="250" x="760" y="340" as="geometry" />
+    </mxCell>
+
+    <!-- Relación CompanyService - TenantController -->
+    <mxCell id="CU01-e_srv_c" edge="1" parent="1" source="CU01-I3" target="CU01-C" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-e_srv_c_c1" connectable="0" parent="CU01-e_srv_c" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.8" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e_srv_c_c2" connectable="0" parent="CU01-e_srv_c" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.8" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ENTITY 1: Company (companies) -->
+    <mxCell id="CU01-E_COMP" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Company&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String(150)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ business_name: String(200)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ nit_rut: String(50) [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ subdomain: String(63) [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ status: String(20)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ email: String(120)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ phone: String(30)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ created_at: DateTime&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ create(): Company&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ update(): Company&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="260" width="240" x="1080" y="70" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 2: Plan (plans) -->
+    <mxCell id="CU01-E_PLAN" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Plan&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String(50) [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ code: String(30) [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ description: Text&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ max_branches: Int [2, 10]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ has_ai_access: Boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ price_monthly: Numeric(10,2)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ is_active: Boolean&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_default_or_by_code_plan(): Plan&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="250" width="240" x="1390" y="270" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 3: Subscription (subscriptions) -->
+    <mxCell id="CU01-E_SUB" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;Subscription&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ company_id: UUID [FK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ plan_id: UUID [FK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ start_date: DateTime&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ end_date: DateTime [null]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ status: String(20)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ created_at: DateTime&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ create(): Subscription&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="220" width="240" x="1080" y="380" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 4: User (users) -->
+    <mxCell id="CU01-E_USR" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;labelBackgroundColor=none;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Entity&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;User (Admin Inicial)&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ id: UUID [PK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ email: String [unique]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ hashed_password: String&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ rol: RolEnum [administrador]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ tenant_id: UUID [FK]&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ is_active: Boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ created_at: DateTime&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ create(): User&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ query(): Query&lt;/p&gt;" vertex="1">
+      <mxGeometry height="240" width="240" x="1080" y="650" as="geometry" />
+    </mxCell>
+
+    <!-- RELACIONES CONTROLLER A ENTIDADES -->
+    <!-- Controller - Company -->
+    <mxCell id="CU01-ce_comp" edge="1" parent="1" source="CU01-C" target="CU01-E_COMP" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;fontSize=12;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Controller - Subscription -->
+    <mxCell id="CU01-ce_sub" edge="1" parent="1" source="CU01-C" target="CU01-E_SUB" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.55;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Controller - User -->
+    <mxCell id="CU01-ce_usr" edge="1" parent="1" source="CU01-C" target="CU01-E_USR" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;fontSize=12;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- RELACIONES Y CARDINALIDADES ENTRE ENTIDADES -->
+    <!-- Company - Subscription -->
+    <mxCell id="CU01-e_comp_sub" edge="1" parent="1" source="CU01-E_COMP" target="CU01-E_SUB" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-e_comp_sub_c1" connectable="0" parent="CU01-e_comp_sub" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.65" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e_comp_sub_c2" connectable="0" parent="CU01-e_comp_sub" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.65" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Subscription - Plan -->
+    <mxCell id="CU01-e_sub_plan" edge="1" parent="1" source="CU01-E_SUB" target="CU01-E_PLAN" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="CU01-e_sub_plan_c1" connectable="0" parent="CU01-e_sub_plan" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+0..*" vertex="1">
+      <mxGeometry relative="1" x="-0.7" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e_sub_plan_c2" connectable="0" parent="CU01-e_sub_plan" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="0.7" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Company - User -->
+    <mxCell id="CU01-e_comp_usr" edge="1" parent="1" source="CU01-E_COMP" target="CU01-E_USR" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.65;entryDx=0;entryDy=0;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1050" y="291" />
+          <mxPoint x="1050" y="806" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e_comp_usr_c1" connectable="0" parent="CU01-e_comp_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1" vertex="1">
+      <mxGeometry relative="1" x="-0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU01-e_comp_usr_c2" connectable="0" parent="CU01-e_comp_usr" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="+1..*" vertex="1">
+      <mxGeometry relative="1" x="0.85" y="-2" as="geometry">
+        <mxPoint as="offset" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
+  </diagram>
+</mxfile>
