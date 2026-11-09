@@ -108,7 +108,7 @@ export class LandingPageComponent {
   ];
 
   readonly images = {
-    logoIcon: '/assets/logo-fashionstore.png',
+    logoIcon: '/assets/logo_fashionstore.svg',
     logoName: '/assets/logo-name.png',
     heroStore: '/assets/clothes-perch-cream.jpg',
     tryOnStore: '/assets/women-store.jpg',
