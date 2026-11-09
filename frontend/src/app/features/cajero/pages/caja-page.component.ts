@@ -339,6 +339,7 @@ export class CajaPageComponent {
   protected readonly submittingExchange = signal(false);
   protected readonly lastProcessedExchange = signal<GarmentExchange | null>(null);
   protected readonly showExchangeReceiptModal = signal(false);
+  protected readonly lastExchangeQuote = signal<ExchangeQuoteResponse | null>(null);
 
   constructor() {
     void this.searchProducts();
@@ -788,6 +789,7 @@ export class CajaPageComponent {
         )
       );
 
+      this.lastExchangeQuote.set(quote);
       this.lastProcessedExchange.set(resp.data ?? null);
       this.showExchangeModal.set(false);
       this.showExchangeReceiptModal.set(true);
@@ -800,7 +802,13 @@ export class CajaPageComponent {
     }
   }
 
+  protected printExchangeReceipt(): void {
+    window.print();
+  }
+
   protected closeExchangeReceiptModal(): void {
     this.showExchangeReceiptModal.set(false);
+    this.lastProcessedExchange.set(null);
+    this.lastExchangeQuote.set(null);
   }
 }
