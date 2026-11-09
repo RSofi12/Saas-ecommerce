@@ -15,6 +15,7 @@ import '../features/profile/profile_page.dart';
 import '../features/reservations/reservation_create_page.dart';
 import '../features/reservations/reservation_models.dart';
 import '../features/reservations/reservations_page.dart';
+import '../features/branches_map/branches_map_page.dart';
 import '../shared/widgets/app_scaffold.dart';
 
 abstract final class AppRoutes {
@@ -29,6 +30,7 @@ abstract final class AppRoutes {
   static const productDetail = '/product';
   static const login = '/login';
   static const notifications = '/notifications';
+  static const branchesMap = '/branches-map';
 }
 
 abstract final class AppRouter {
@@ -125,6 +127,12 @@ abstract final class AppRouter {
       AppRoutes.login => _page(
         settings,
         _LoginRoutePage(authController: authController),
+      ),
+      AppRoutes.branchesMap => _page(
+        settings,
+        BranchesMapPage(
+          initialBranchId: settings.arguments is String ? settings.arguments as String : null,
+        ),
       ),
       _ => _page(
         settings,

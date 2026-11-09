@@ -1,0 +1,443 @@
+<section class="space-y-6">
+  <!-- Encabezado Principal y Acciones de Exportación -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Reportes Empresariales</h1>
+        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">CU21</span>
+      </div>
+      <p class="text-sm text-slate-500 mt-1">
+        Consolidado analítico de ventas, stock y movimientos con filtros dinámicos y descarga formal.
+      </p>
+    </div>
+
+    <!-- Botones de Acción y Exportación Directa -->
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Botón CU20: Asistente por Voz y Lenguaje Natural con Gemini RAG -->
+      <button
+        hlmBtn
+        size="sm"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-sm transition flex items-center gap-1.5 border border-indigo-700"
+        (click)="openVoiceAssistant()">
+        <span class="text-sm">🎙️</span>
+        <span>Asistente por Voz (IA)</span>
+      </button>
+
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium shadow-sm transition"
+        [disabled]="loading() || exporting()"
+        (click)="exportReport('csv')">
+        <span class="font-mono text-xs mr-1 text-slate-400">.csv</span>
+        {{ exportingFormat() === 'csv' ? 'Generando...' : 'CSV' }}
+      </button>
+
+      <button
+        hlmBtn
+        size="sm"
+        class="bg-emerald-700 text-white hover:bg-emerald-800 font-medium shadow-sm transition flex items-center gap-1.5"
+        [disabled]="loading() || exporting()"
+        (click)="exportReport('excel')">
+        <span class="font-mono text-xs opacity-75 mr-0.5">📊</span>
+        {{ exportingFormat() === 'excel' ? 'Generando...' : 'Excel (.xlsx)' }}
+      </button>
+
+      <button
+        hlmBtn
+        size="sm"
+        class="bg-rose-700 text-white hover:bg-rose-800 font-medium shadow-sm transition flex items-center gap-1.5"
+        [disabled]="loading() || exporting()"
+        (click)="exportReport('pdf')">
+        <span class="font-mono text-xs opacity-75 mr-0.5">📄</span>
+        {{ exportingFormat() === 'pdf' ? 'Generando...' : 'PDF Oficial' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Pestañas de Dominio (Ventas, Inventario, Movimientos) -->
+  <nav class="flex items-center space-x-2 border-b border-slate-200">
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition"
+      [ngClass]="activeTab() === 'sales' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'"
+      (click)="setTab('sales')">
+      <span>Ventas y Facturación</span>
+      @if (salesRows().length > 0) {
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium">{{ salesRows().length }}</span>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition"
+      [ngClass]="activeTab() === 'inventory' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'"
+      (click)="setTab('inventory')">
+      <span>Stock e Inventario</span>
+      @if (inventoryRows().length > 0) {
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium">{{ inventoryRows().length }}</span>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition"
+      [ngClass]="activeTab() === 'movements' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'"
+      (click)="setTab('movements')">
+      <span>Trazabilidad de Movimientos</span>
+      @if (movementsRows().length > 0) {
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium">{{ movementsRows().length }}</span>
+      }
+    </button>
+  </nav>
+
+  <!-- Barra de Filtros y Configuración Dinámica de Columnas -->
+  <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-4">
+    <!-- Fila Superior: Presets de Fecha y Búsqueda -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <!-- Accesos Rápidos de Rango de Fecha -->
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <span class="text-slate-500 font-medium mr-1">Periodo:</span>
+        <button
+          type="button"
+          class="rounded-md px-2.5 py-1 font-medium transition"
+          [ngClass]="datePreset() === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+          (click)="setQuickDate('all')">
+          Histórico
+        </button>
+        <button
+          type="button"
+          class="rounded-md px-2.5 py-1 font-medium transition"
+          [ngClass]="datePreset() === 'today' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+          (click)="setQuickDate('today')">
+          Hoy
+        </button>
+        <button
+          type="button"
+          class="rounded-md px-2.5 py-1 font-medium transition"
+          [ngClass]="datePreset() === 'last7days' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+          (click)="setQuickDate('last7days')">
+          Últimos 7 días
+        </button>
+        <button
+          type="button"
+          class="rounded-md px-2.5 py-1 font-medium transition"
+          [ngClass]="datePreset() === 'thisMonth' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+          (click)="setQuickDate('thisMonth')">
+          Este Mes
+        </button>
+      </div>
+
+      <!-- Botón para alternar el Selector de Columnas Visibles -->
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+        (click)="showColumnSelector.set(!showColumnSelector())">
+        <span>{{ showColumnSelector() ? '▲ Ocultar columnas' : '▼ Columnas visibles' }}</span>
+        <span class="rounded-full bg-slate-200 px-1.5 py-0.2 text-[10px] text-slate-800 font-bold">
+          {{ currentSelectedColumns().length }}/{{ currentColumnsDef().length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Fila Inferior de Filtros Específicos -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-slate-100">
+      <!-- Sucursal -->
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Sucursal</label>
+        @if (isAdmin()) {
+          <select
+            class="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400"
+            [ngModel]="branchId()"
+            (ngModelChange)="branchId.set($event); onFilterChange()">
+            <option value="">Todas las sucursales</option>
+            @for (branch of branches(); track branch.id) {
+              <option [value]="branch.id">{{ branch.name }}</option>
+            }
+          </select>
+        } @else {
+          <div class="h-9 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700">
+            Sucursal asignada
+          </div>
+        }
+      </div>
+
+      <!-- Fecha Desde -->
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Desde</label>
+        <input
+          type="date"
+          class="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400"
+          [ngModel]="fromDate()"
+          (ngModelChange)="fromDate.set($event); onFilterChange()" />
+      </div>
+
+      <!-- Fecha Hasta -->
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Hasta</label>
+        <input
+          type="date"
+          class="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400"
+          [ngModel]="toDate()"
+          (ngModelChange)="toDate.set($event); onFilterChange()" />
+      </div>
+
+      <!-- Búsqueda en Vivo -->
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Buscar producto o SKU</label>
+        <input
+          type="text"
+          placeholder="Filtrar tabla..."
+          class="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)" />
+      </div>
+    </div>
+
+    <!-- Panel Colapsable de Selección Interactiva de Columnas -->
+    @if (showColumnSelector()) {
+      <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 animate-in fade-in duration-150">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+          <div class="text-xs font-semibold text-slate-700">
+            Selecciona las columnas a incluir en la tabla y exportaciones:
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <button
+              type="button"
+              class="text-primary hover:underline font-medium"
+              (click)="selectAllColumns()">
+              Marcar todas
+            </button>
+            <span class="text-slate-300">|</span>
+            <button
+              type="button"
+              class="text-slate-500 hover:underline"
+              (click)="resetDefaultColumns()">
+              Predeterminadas
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          @for (col of currentColumnsDef(); track col.key) {
+            <label
+              class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs cursor-pointer select-none transition"
+              [ngClass]="isColumnVisible(col.key) ? 'border-primary/40 bg-white text-slate-900 font-medium shadow-xs' : 'border-slate-200 bg-slate-100 text-slate-400 line-through'">
+              <input
+                type="checkbox"
+                class="rounded border-slate-300 text-primary focus:ring-0 size-3.5"
+                [checked]="isColumnVisible(col.key)"
+                (change)="toggleColumn(col.key)" />
+              <span>{{ col.label }}</span>
+            </label>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- Tarjetas KPI de Resumen -->
+  @if (summary(); as s) {
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      @if (activeTab() === 'sales') {
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Ventas Totales</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">Bs. {{ s.total_sales || '0.00' }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Ingresos brutos acumulados</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Unidades Vendidas</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">{{ s.total_units || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Prendas despachadas</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Transacciones / Pedidos</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">{{ s.total_orders || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Ventas presenciales y online</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Ticket Promedio</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">Bs. {{ s.average_ticket || '0.00' }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Por transacción realizada</p>
+        </div>
+      } @else if (activeTab() === 'inventory') {
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Stock Físico Total</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">{{ s.total_stock || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">En depósitos y vitrinas</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Stock Reservado</p>
+          <p class="text-xl font-bold text-amber-700 mt-1">{{ s.total_reserved || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Comprometido en probador/pedidos</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Stock Disponible</p>
+          <p class="text-xl font-bold text-emerald-700 mt-1">{{ s.total_available || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Listo para la venta</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Líneas de Producto</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">{{ s.total_lines || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Variantes registradas</p>
+        </div>
+      } @else {
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Total Unidades Movidas</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">{{ s.total_units_moved || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Ingresos, salidas y traslados</p>
+        </div>
+        <div hlmCard class="bg-white p-4 shadow-sm border border-slate-200 rounded-xl">
+          <p class="text-xs font-medium text-slate-500">Líneas Trazadas</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">{{ s.total_lines || 0 }}</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Registros auditados</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Tabla de Datos con Columnas Dinámicas -->
+  <section class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+        <div class="size-8 animate-spin rounded-full border-2 border-slate-300 border-t-primary mb-3"></div>
+        <p class="text-sm font-medium">Cargando datos del reporte...</p>
+      </div>
+    } @else {
+      <!-- Vista Ventas -->
+      @if (activeTab() === 'sales') {
+        @if (filteredSalesRows().length === 0) {
+          <div class="text-center py-16 px-4">
+            <p class="text-slate-400 text-sm">No se encontraron ventas con los filtros aplicados.</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-600 font-semibold uppercase text-[11px] border-b border-slate-200">
+                <tr>
+                  @if (isColumnVisible('branch_name')) { <th class="px-4 py-3">Sucursal</th> }
+                  @if (isColumnVisible('product_name')) { <th class="px-4 py-3">Producto</th> }
+                  @if (isColumnVisible('variant_sku')) { <th class="px-4 py-3">SKU / Talla</th> }
+                  @if (isColumnVisible('type')) { <th class="px-4 py-3">Canal</th> }
+                  @if (isColumnVisible('quantity_sold')) { <th class="px-4 py-3 text-right">Cantidad</th> }
+                  @if (isColumnVisible('gross_sales')) { <th class="px-4 py-3 text-right">Total (Bs.)</th> }
+                  @if (isColumnVisible('payment_method')) { <th class="px-4 py-3">Método Pago</th> }
+                  @if (isColumnVisible('payment_status')) { <th class="px-4 py-3">Estado Pago</th> }
+                  @if (isColumnVisible('sale_status')) { <th class="px-4 py-3">Estado Venta</th> }
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (row of filteredSalesRows(); track $index) {
+                  <tr class="hover:bg-slate-50/80 transition">
+                    @if (isColumnVisible('branch_name')) { <td class="px-4 py-2.5 font-medium">{{ row.branch_name }}</td> }
+                    @if (isColumnVisible('product_name')) { <td class="px-4 py-2.5 font-semibold text-slate-900">{{ row.product_name }}</td> }
+                    @if (isColumnVisible('variant_sku')) { <td class="px-4 py-2.5 font-mono text-slate-600">{{ row.variant_sku }}</td> }
+                    @if (isColumnVisible('type')) {
+                      <td class="px-4 py-2.5">
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          [ngClass]="row.type === 'venta presencial' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'">
+                          {{ row.type }}
+                        </span>
+                      </td>
+                    }
+                    @if (isColumnVisible('quantity_sold')) { <td class="px-4 py-2.5 text-right font-medium">{{ row.quantity_sold }}</td> }
+                    @if (isColumnVisible('gross_sales')) { <td class="px-4 py-2.5 text-right font-bold text-slate-900">Bs. {{ row.gross_sales }}</td> }
+                    @if (isColumnVisible('payment_method')) { <td class="px-4 py-2.5 text-slate-600">{{ row.payment_method || 'N/A' }}</td> }
+                    @if (isColumnVisible('payment_status')) { <td class="px-4 py-2.5 text-slate-600">{{ row.payment_status || 'N/A' }}</td> }
+                    @if (isColumnVisible('sale_status')) { <td class="px-4 py-2.5 text-slate-600">{{ row.sale_status || 'N/A' }}</td> }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+
+      <!-- Vista Inventario -->
+      @if (activeTab() === 'inventory') {
+        @if (filteredInventoryRows().length === 0) {
+          <div class="text-center py-16 px-4">
+            <p class="text-slate-400 text-sm">No se encontraron productos en stock con los filtros aplicados.</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-600 font-semibold uppercase text-[11px] border-b border-slate-200">
+                <tr>
+                  @if (isColumnVisible('branch_name')) { <th class="px-4 py-3">Sucursal</th> }
+                  @if (isColumnVisible('product_name')) { <th class="px-4 py-3">Producto</th> }
+                  @if (isColumnVisible('variant_sku')) { <th class="px-4 py-3">SKU / Talla</th> }
+                  @if (isColumnVisible('quantity')) { <th class="px-4 py-3 text-right">Stock Físico</th> }
+                  @if (isColumnVisible('reserved_quantity')) { <th class="px-4 py-3 text-right">Reservado</th> }
+                  @if (isColumnVisible('available_quantity')) { <th class="px-4 py-3 text-right">Disponible</th> }
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (row of filteredInventoryRows(); track $index) {
+                  <tr class="hover:bg-slate-50/80 transition">
+                    @if (isColumnVisible('branch_name')) { <td class="px-4 py-2.5 font-medium">{{ row.branch_name }}</td> }
+                    @if (isColumnVisible('product_name')) { <td class="px-4 py-2.5 font-semibold text-slate-900">{{ row.product_name }}</td> }
+                    @if (isColumnVisible('variant_sku')) { <td class="px-4 py-2.5 font-mono text-slate-600">{{ row.variant_sku }}</td> }
+                    @if (isColumnVisible('quantity')) { <td class="px-4 py-2.5 text-right font-medium">{{ row.quantity }}</td> }
+                    @if (isColumnVisible('reserved_quantity')) { <td class="px-4 py-2.5 text-right text-amber-700 font-medium">{{ row.reserved_quantity }}</td> }
+                    @if (isColumnVisible('available_quantity')) { <td class="px-4 py-2.5 text-right text-emerald-700 font-bold">{{ row.available_quantity }}</td> }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+
+      <!-- Vista Movimientos -->
+      @if (activeTab() === 'movements') {
+        @if (filteredMovementsRows().length === 0) {
+          <div class="text-center py-16 px-4">
+            <p class="text-slate-400 text-sm">No se encontraron movimientos de stock en el periodo consultado.</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-600 font-semibold uppercase text-[11px] border-b border-slate-200">
+                <tr>
+                  @if (isColumnVisible('branch_name')) { <th class="px-4 py-3">Sucursal</th> }
+                  @if (isColumnVisible('product_name')) { <th class="px-4 py-3">Producto</th> }
+                  @if (isColumnVisible('variant_sku')) { <th class="px-4 py-3">SKU / Talla</th> }
+                  @if (isColumnVisible('movement_type')) { <th class="px-4 py-3">Tipo Movimiento</th> }
+                  @if (isColumnVisible('quantity')) { <th class="px-4 py-3 text-right">Unidades</th> }
+                  @if (isColumnVisible('movements_count')) { <th class="px-4 py-3 text-right">Transacciones</th> }
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (row of filteredMovementsRows(); track $index) {
+                  <tr class="hover:bg-slate-50/80 transition">
+                    @if (isColumnVisible('branch_name')) { <td class="px-4 py-2.5 font-medium">{{ row.branch_name }}</td> }
+                    @if (isColumnVisible('product_name')) { <td class="px-4 py-2.5 font-semibold text-slate-900">{{ row.product_name }}</td> }
+                    @if (isColumnVisible('variant_sku')) { <td class="px-4 py-2.5 font-mono text-slate-600">{{ row.variant_sku }}</td> }
+                    @if (isColumnVisible('movement_type')) {
+                      <td class="px-4 py-2.5">
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          [ngClass]="row.movement_type === 'income' || row.movement_type === 'transfer_in' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
+                          {{ formatMovementType(row.movement_type) }}
+                        </span>
+                      </td>
+                    }
+                    @if (isColumnVisible('quantity')) { <td class="px-4 py-2.5 text-right font-bold text-slate-900">{{ row.quantity }}</td> }
+                    @if (isColumnVisible('movements_count')) { <td class="px-4 py-2.5 text-right text-slate-600 font-medium">{{ row.movements_count }}</td> }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </section>
+
+  <!-- CU20: Modal de Asistente de Voz y Reportes Ejecutivos por Lenguaje Natural (Gemini RAG) -->
+  <app-voice-assistant-modal
+    [isOpen]="showVoiceAssistant()"
+    [branchId]="branchId() || null"
+    (close)="closeVoiceAssistant()" />
+</section>

@@ -20,6 +20,8 @@ import {
   UpdateNameItemRequest,
   UpdateProductRequest,
   Point,
+  BranchStockItem,
+  VariantMultiBranchAvailability,
 } from '../models/catalog.model';
 
 @Injectable({ providedIn: 'root' })
@@ -209,6 +211,12 @@ export class CatalogApiService {
     );
   }
 
+  getVariantMultiBranchAvailability(variantId: string) {
+    return this.api.get<ApiResponse<VariantMultiBranchAvailability>>(
+      `/catalog/availability?variant_id=${variantId}`,
+    );
+  }
+
   updateVariantStatus(variantId: string, status: ProductStatus) {
     return this.api.patch<ApiResponse<CatalogProduct>>(`/catalog/variants/${variantId}/status`, {
       status,
@@ -232,5 +240,20 @@ export class CatalogApiService {
 
   deleteVariantImage(variantId: string) {
     return this.api.delete<ApiResponse<CatalogProduct>>(`/catalog/variants/${variantId}/image`);
+  }
+
+  getOfflineCatalogPack(branchId?: string, tenantId?: string) {
+    const params = new URLSearchParams();
+    if (branchId) params.append('branch_id', branchId);
+    if (tenantId) params.append('tenant_id', tenantId);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return this.api.get<ApiResponse<{
+      version: number;
+      tenant_id: string | null;
+      branch_id: string | null;
+      total_products: number;
+      products: CatalogProduct[];
+      synced_at: string;
+    }>>(`/catalog/offline-pack${queryString}`);
   }
 }

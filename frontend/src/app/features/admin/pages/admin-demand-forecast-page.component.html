@@ -1,0 +1,546 @@
+<div class="space-y-6">
+  <!-- ENCABEZADO PRINCIPAL DE LA PANTALLA -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-5">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+          <ng-icon name="lucideSparkles" class="w-3.5 h-3.5"></ng-icon>
+          Machine Learning Supervisado (CU23)
+        </span>
+        @if (activeModel()) {
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+            R² {{ (activeModel()!.metrics.r2 * 100).toFixed(1) }}%
+          </span>
+        }
+      </div>
+      <h1 class="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">
+        Predicción de Demanda por Talla
+      </h1>
+      <p class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+        Estimación cuantitativa de ventas a 4 semanas con ensamble RandomForestRegressor y alertas tempranas de stock.
+      </p>
+    </div>
+
+    <!-- Pestañas de Navegación Segmentada -->
+    <nav class="inline-flex p-1 bg-stone-100 dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-800 self-start sm:self-auto">
+      <button
+        type="button"
+        (click)="setTab('forecast')"
+        [class]="activeTab() === 'forecast' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'"
+        class="px-3.5 py-1.5 text-xs rounded-md transition-all flex items-center gap-2"
+      >
+        <ng-icon name="lucideTrendingUp" class="w-3.5 h-3.5"></ng-icon>
+        <span>Proyección por Prenda</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="setTab('alerts')"
+        [class]="activeTab() === 'alerts' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'"
+        class="px-3.5 py-1.5 text-xs rounded-md transition-all flex items-center gap-2 relative"
+      >
+        <ng-icon name="lucideAlertTriangle" class="w-3.5 h-3.5"></ng-icon>
+        <span>Alertas de Stock</span>
+        @if (highUrgencyCount() > 0) {
+          <span class="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-rose-500 text-white rounded-full">
+            {{ highUrgencyCount() }}
+          </span>
+        }
+      </button>
+
+      <button
+        type="button"
+        (click)="setTab('training')"
+        [class]="activeTab() === 'training' ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'"
+        class="px-3.5 py-1.5 text-xs rounded-md transition-all flex items-center gap-2"
+      >
+        <ng-icon name="lucideSlidersHorizontal" class="w-3.5 h-3.5"></ng-icon>
+        <span>Calibración ML</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- MENSAJES DE ESTADO / ALERTA -->
+  @if (errorMessage()) {
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 flex items-start gap-3 transition-all animate-fadeIn">
+      <ng-icon name="lucideAlertTriangle" class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5"></ng-icon>
+      <div class="flex-1">
+        <p class="font-medium">Atención en el cálculo predictivo</p>
+        <p class="mt-0.5 text-xs opacity-90">{{ errorMessage() }}</p>
+      </div>
+      <button (click)="errorMessage.set(null)" class="text-red-500 hover:text-red-700 text-xs font-semibold">✕</button>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300 flex items-start gap-3 transition-all animate-fadeIn">
+      <ng-icon name="lucideCheckCircle2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></ng-icon>
+      <div class="flex-1">
+        <p class="font-medium">Operación Exitosa</p>
+        <p class="mt-0.5 text-xs opacity-90">{{ successMessage() }}</p>
+      </div>
+      <button (click)="successMessage.set(null)" class="text-emerald-500 hover:text-emerald-700 text-xs font-semibold">✕</button>
+    </div>
+  }
+
+  <!-- ============================================================== -->
+  <!-- TAB 1: PROYECCIÓN CUANTITATIVA POR PRENDA (VISTA PRINCIPAL) -->
+  <!-- ============================================================== -->
+  @if (activeTab() === 'forecast') {
+    <div class="space-y-6 animate-fadeIn">
+      <!-- Barra de Filtros y Configuración Rápida -->
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-4 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          <!-- Selector de Prenda -->
+          <div class="md:col-span-5 space-y-1.5">
+            <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">
+              Seleccionar Prenda Textil
+            </label>
+            <div class="relative">
+              <select
+                [ngModel]="selectedProductId()"
+                (ngModelChange)="onProductSelect($event)"
+                class="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-9 font-medium"
+              >
+                @for (prod of products(); track prod.id) {
+                  <option [value]="prod.id">{{ prod.name }}</option>
+                }
+              </select>
+              <ng-icon name="lucideChevronDown" class="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none"></ng-icon>
+            </div>
+          </div>
+
+          <!-- Selector de Sucursal -->
+          <div class="md:col-span-3 space-y-1.5">
+            <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">
+              Sucursal / Sede
+            </label>
+            <select
+              [ngModel]="selectedBranchId()"
+              (ngModelChange)="selectedBranchId.set($event); executeForecast()"
+              class="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option [ngValue]="null">Todas las Sucursales (Consolidado)</option>
+              @for (b of branches(); track b.id) {
+                <option [value]="b.id">{{ b.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Selector de Horizonte Temporal (Semanas) -->
+          <div class="md:col-span-4 space-y-1.5">
+            <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">
+              Horizonte de Proyección
+            </label>
+            <div class="flex items-center gap-1.5 bg-stone-100 dark:bg-stone-800/80 p-1 rounded-lg border border-stone-200 dark:border-stone-700">
+              @for (w of [1, 2, 4, 8]; track w) {
+                <button
+                  type="button"
+                  (click)="setWeeksAhead(w)"
+                  [class]="weeksAhead() === w ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm font-semibold' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'"
+                  class="flex-1 py-1 text-xs rounded transition-all text-center"
+                >
+                  {{ w }} sem
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métricas Resumen (KPI Strip) -->
+      @if (forecastResult(); as fc) {
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+            <p class="text-xs font-medium text-stone-500 dark:text-stone-400">Demanda Total Estimada</p>
+            <p class="text-2xl font-bold text-stone-900 dark:text-stone-100 mt-1 font-mono">
+              {{ fc.total_projected_demand }} <span class="text-xs font-normal text-stone-500">unidades</span>
+            </p>
+            <p class="text-[11px] text-stone-400 mt-1">Próximas {{ fc.weeks_ahead }} semanas</p>
+          </div>
+
+          <div class="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+            <p class="text-xs font-medium text-stone-500 dark:text-stone-400">Variantes en Riesgo</p>
+            <p class="text-2xl font-bold mt-1 font-mono" [class]="fc.critical_variants_count > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'">
+              {{ fc.critical_variants_count }}
+            </p>
+            <p class="text-[11px] text-stone-400 mt-1">Requieren reposición inmediata</p>
+          </div>
+
+          <div class="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+            <p class="text-xs font-medium text-stone-500 dark:text-stone-400">Ajuste del Modelo (R²)</p>
+            <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1 font-mono">
+              {{ (fc.model_r2 * 100).toFixed(1) }}%
+            </p>
+            <p class="text-[11px] text-stone-400 mt-1">Confianza estadística 95%</p>
+          </div>
+
+          <div class="bg-white dark:bg-stone-900 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+            <p class="text-xs font-medium text-stone-500 dark:text-stone-400">Categoría Evaluada</p>
+            <p class="text-base font-semibold text-stone-800 dark:text-stone-200 mt-1 truncate">
+              {{ fc.category_name }}
+            </p>
+            <p class="text-[11px] text-stone-400 mt-1">Estacionalidad textil boliviana</p>
+          </div>
+        </div>
+
+        <!-- GRÁFICO COMPARATIVO: STOCK ACTUAL VS DEMANDA PROYECTADA POR TALLA -->
+        <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-5 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-100 dark:border-stone-800 pb-3 mb-4">
+            <div>
+              <h2 class="text-base font-semibold text-stone-900 dark:text-stone-100">
+                Balance de Stock vs Demanda Estimada por Talla
+              </h2>
+              <p class="text-xs text-stone-500 dark:text-stone-400">
+                Comparativa de existencias físicas en percha frente a la inferencia del ensamble RandomForest.
+              </p>
+            </div>
+            <!-- Leyenda -->
+            <div class="flex items-center gap-4 text-xs">
+              <span class="inline-flex items-center gap-1.5 text-stone-600 dark:text-stone-400">
+                <span class="w-3 h-3 rounded bg-stone-300 dark:bg-stone-700 inline-block"></span>
+                Stock Actual
+              </span>
+              <span class="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-medium">
+                <span class="w-3 h-3 rounded bg-indigo-600 inline-block"></span>
+                Demanda Proyectada
+              </span>
+            </div>
+          </div>
+
+          <!-- Barras Comparativas Proporcionales -->
+          <div class="space-y-4 pt-2">
+            @for (f of fc.forecast_by_size; track f.size) {
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-md font-bold text-xs bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 border border-stone-200 dark:border-stone-700">
+                      {{ f.size }}
+                    </span>
+                    <span class="font-mono text-stone-500 text-[11px]">{{ f.sku || 'SKU Genérico' }}</span>
+                    <span [class]="getStockBadgeClass(f.stock_status)" class="px-2 py-0.5 rounded text-[10px] font-semibold">
+                      {{ f.stock_status }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-4 font-mono text-xs">
+                    <span class="text-stone-500">Stock: <strong class="text-stone-800 dark:text-stone-200">{{ f.current_stock }}</strong></span>
+                    <span class="text-indigo-600 dark:text-indigo-400">Demanda: <strong>{{ f.total_predicted_units }}</strong></span>
+                    @if (f.recommended_reorder > 0) {
+                      <span class="text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900">
+                        +{{ f.recommended_reorder }} reabastecer
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Barra doble -->
+                <div class="h-3.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden flex relative">
+                  <!-- Barra Stock Actual -->
+                  <div
+                    class="h-full bg-stone-400 dark:bg-stone-600 transition-all duration-500"
+                    [style.width.%]="(f.current_stock / getMaxDemandValue(fc.forecast_by_size)) * 100"
+                  ></div>
+                  <!-- Barra Demanda Estimada -->
+                  <div
+                    class="h-full bg-indigo-600 transition-all duration-500 opacity-80"
+                    [style.width.%]="(f.total_predicted_units / getMaxDemandValue(fc.forecast_by_size)) * 100"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- TABLA DETALLADA DE PROYECCIÓN SEMANAL -->
+        <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
+          <div class="px-5 py-3.5 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50">
+            <h3 class="text-sm font-semibold text-stone-900 dark:text-stone-100">
+              Desglose Semanal e Intervalos de Confianza Estadística
+            </h3>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-100/70 dark:bg-stone-800/70 text-stone-600 dark:text-stone-400 border-b border-stone-200 dark:border-stone-800">
+                <tr>
+                  <th class="py-3 px-4 font-semibold">Talla</th>
+                  <th class="py-3 px-3 font-semibold text-right">Stock Actual</th>
+                  @for (w of [1, 2, 3, 4].slice(0, fc.weeks_ahead); track w) {
+                    <th class="py-3 px-3 font-semibold text-right">Semana {{ w }}</th>
+                  }
+                  <th class="py-3 px-3 font-semibold text-right">Total Est.</th>
+                  <th class="py-3 px-3 font-semibold text-right">Rango (95%)</th>
+                  <th class="py-3 px-3 font-semibold text-center">Estado</th>
+                  <th class="py-3 px-4 font-semibold text-right">Pedido Sugerido</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100 dark:divide-stone-800 text-stone-800 dark:text-stone-200 font-mono">
+                @for (item of fc.forecast_by_size; track item.size) {
+                  <tr class="hover:bg-stone-50 dark:hover:bg-stone-850/50 transition-colors">
+                    <td class="py-3 px-4 font-sans font-bold text-stone-900 dark:text-stone-100">
+                      {{ item.size }}
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                      {{ item.current_stock }}
+                    </td>
+                    @for (wVal of item.predicted_weekly_demand; track $index) {
+                      <td class="py-3 px-3 text-right text-stone-600 dark:text-stone-300">
+                        {{ wVal.toFixed(1) }}
+                      </td>
+                    }
+                    <td class="py-3 px-3 text-right font-bold text-indigo-600 dark:text-indigo-400">
+                      {{ item.total_predicted_units }}
+                    </td>
+                    <td class="py-3 px-3 text-right text-stone-500 text-[11px]">
+                      [{{ item.confidence_lower }} - {{ item.confidence_upper }}]
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                      <span [class]="getStockBadgeClass(item.stock_status)" class="px-2 py-0.5 rounded text-[10px] font-sans font-semibold">
+                        {{ item.stock_status }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      @if (item.recommended_reorder > 0) {
+                        <span class="text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded">
+                          {{ item.recommended_reorder }} unid.
+                        </span>
+                      } @else {
+                        <span class="text-stone-400 font-sans text-xs">—</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      } @else if (isForecasting()) {
+        <div class="py-16 text-center space-y-3 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
+          <ng-icon name="lucideRefreshCw" class="w-8 h-8 text-indigo-600 animate-spin mx-auto"></ng-icon>
+          <p class="text-sm font-medium text-stone-700 dark:text-stone-300">
+            Procesando inferencia con ensamble RandomForest...
+          </p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ============================================================== -->
+  <!-- TAB 2: BANDEJA DE ALERTAS DE REABASTECIMIENTO TEMPRANO -->
+  <!-- ============================================================== -->
+  @if (activeTab() === 'alerts') {
+    <div class="space-y-4 animate-fadeIn">
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div>
+          <h2 class="text-base font-semibold text-stone-900 dark:text-stone-100">
+            Bandeja de Alertas Tempranas de Reposición
+          </h2>
+          <p class="text-xs text-stone-500 dark:text-stone-400">
+            Prendas y variantes textiles cuyo stock en percha es inferior a la demanda estimada del próximo periodo.
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="loadStockAlerts()"
+          [disabled]="isLoadingAlerts()"
+          class="px-3 py-1.5 text-xs font-medium bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-lg transition-colors flex items-center gap-1.5 self-start sm:self-auto"
+        >
+          <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoadingAlerts()" class="w-3.5 h-3.5"></ng-icon>
+          Actualizar Alertas
+        </button>
+      </div>
+
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
+        @if (isLoadingAlerts()) {
+          <div class="py-12 text-center space-y-2">
+            <ng-icon name="lucideRefreshCw" class="w-6 h-6 text-indigo-600 animate-spin mx-auto"></ng-icon>
+            <p class="text-xs text-stone-500">Calculando déficit de inventario en percha...</p>
+          </div>
+        } @else if (stockAlerts().length === 0) {
+          <div class="py-12 text-center space-y-2 text-stone-500">
+            <ng-icon name="lucideCheckCircle2" class="w-8 h-8 text-emerald-500 mx-auto"></ng-icon>
+            <p class="text-sm font-medium text-stone-700 dark:text-stone-300">Inventario en balance óptimo</p>
+            <p class="text-xs">No se detectaron variantes textiles en riesgo de desabastecimiento inminente.</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-100/70 dark:bg-stone-800/70 text-stone-600 dark:text-stone-400 border-b border-stone-200 dark:border-stone-800 font-semibold">
+                <tr>
+                  <th class="py-3 px-4">Prenda Textil</th>
+                  <th class="py-3 px-3">SKU</th>
+                  <th class="py-3 px-3 text-center">Talla</th>
+                  <th class="py-3 px-3 text-right">Stock Actual</th>
+                  <th class="py-3 px-3 text-right">Demanda Mes</th>
+                  <th class="py-3 px-4 text-right">Déficit / Pedido Sugerido</th>
+                  <th class="py-3 px-4 text-center">Nivel Urgencia</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100 dark:divide-stone-800 font-mono text-stone-800 dark:text-stone-200">
+                @for (a of stockAlerts(); track a.variant_id) {
+                  <tr class="hover:bg-stone-50 dark:hover:bg-stone-850/50 transition-colors">
+                    <td class="py-3 px-4 font-sans font-medium text-stone-900 dark:text-stone-100">
+                      {{ a.product_name }}
+                    </td>
+                    <td class="py-3 px-3 text-stone-500 text-[11px]">
+                      {{ a.sku }}
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                      <span class="inline-block px-2 py-0.5 bg-stone-100 dark:bg-stone-800 rounded font-bold font-sans">
+                        {{ a.size }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                      {{ a.current_stock }}
+                    </td>
+                    <td class="py-3 px-3 text-right text-indigo-600 dark:text-indigo-400 font-bold">
+                      {{ a.projected_demand_next_month }}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      <span class="text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-950/40 px-2.5 py-0.5 rounded border border-rose-200 dark:border-rose-900">
+                        +{{ a.recommended_reorder_units }} unid.
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <span [class]="getUrgencyBadgeClass(a.urgency)" class="px-2.5 py-0.5 rounded text-[10px] font-sans">
+                        {{ a.urgency }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================== -->
+  <!-- TAB 3: CALIBRACIÓN Y AUDITORÍA DEL MODELO PREDICTIVO -->
+  <!-- ============================================================== -->
+  @if (activeTab() === 'training') {
+    <div class="space-y-6 animate-fadeIn">
+      <!-- Tarjeta del Modelo Activo -->
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-5 shadow-sm">
+        <h2 class="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">
+          Modelo de Machine Learning Vigente
+        </h2>
+        <p class="text-xs text-stone-500 dark:text-stone-400 mb-4">
+          Auditoría técnica del algoritmo activo en la base de datos central (`ml_models`).
+        </p>
+
+        @if (activeModel(); as m) {
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-lg bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-700">
+            <div>
+              <p class="text-[11px] font-medium text-stone-500">Algoritmo</p>
+              <p class="text-sm font-bold text-stone-800 dark:text-stone-200 mt-0.5 font-sans">{{ m.name }}</p>
+              <p class="text-[10px] text-stone-400 font-mono mt-0.5">{{ m.version }}</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium text-stone-500">Bondad de Ajuste R²</p>
+              <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 font-mono">
+                {{ (m.metrics.r2 * 100).toFixed(1) }}%
+              </p>
+              <p class="text-[10px] text-stone-400">Coeficiente determinación</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium text-stone-500">Error Medio Absoluto (MAE)</p>
+              <p class="text-xl font-bold text-stone-800 dark:text-stone-200 mt-0.5 font-mono">
+                {{ m.metrics.mae.toFixed(2) }}
+              </p>
+              <p class="text-[10px] text-stone-400">Desviación en unidades</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium text-stone-500">Última Calibración</p>
+              <p class="text-xs font-mono text-stone-700 dark:text-stone-300 mt-1">
+                {{ m.trained_at | date: 'dd/MM/yyyy HH:mm' }}
+              </p>
+              <span class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
+              </span>
+            </div>
+          </div>
+        } @else {
+          <div class="py-6 text-center text-xs text-stone-500">
+            No se ha calibrado ningún modelo para esta empresa aún.
+          </div>
+        }
+      </div>
+
+      <!-- Panel de Reentrenamiento y Calibración -->
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-5 shadow-sm">
+        <h3 class="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">
+          Recalibrar Ensamble RandomForest
+        </h3>
+        <p class="text-xs text-stone-500 dark:text-stone-400 mb-5">
+          Ajusta los hiperparámetros y reentrena el modelo utilizando los datos de ventas reales o sintéticos (CU22) del tenant.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="space-y-2">
+            <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">
+              Número de Árboles (n_estimators): <strong class="text-indigo-600">{{ nEstimators() }}</strong>
+            </label>
+            <input
+              type="range"
+              min="20"
+              max="200"
+              step="10"
+              [ngModel]="nEstimators()"
+              (ngModelChange)="nEstimators.set($event)"
+              class="w-full accent-indigo-600 cursor-pointer"
+            />
+            <p class="text-[11px] text-stone-400">Mayor cantidad mejora estabilidad pero incrementa tiempo de inferencia.</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">
+              Profundidad Máxima (max_depth): <strong class="text-indigo-600">{{ maxDepth() }}</strong>
+            </label>
+            <input
+              type="range"
+              min="4"
+              max="20"
+              step="1"
+              [ngModel]="maxDepth()"
+              (ngModelChange)="maxDepth.set($event)"
+              class="w-full accent-indigo-600 cursor-pointer"
+            />
+            <p class="text-[11px] text-stone-400">Previene overfitting en datos estacionales de moda textil.</p>
+          </div>
+
+          <div class="space-y-2 flex flex-col justify-center">
+            <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-stone-700 dark:text-stone-300">
+              <input
+                type="checkbox"
+                [ngModel]="useSynthetic()"
+                (ngModelChange)="useSynthetic.set($event)"
+                class="rounded border-stone-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span>Integrar Dataset Sintético CU22 si ventas reales < 100</span>
+            </label>
+            <p class="text-[11px] text-stone-400">Permite arranque en frío y cobertura de temporadas completas.</p>
+          </div>
+        </div>
+
+        <div class="pt-5 border-t border-stone-100 dark:border-stone-800 mt-5 flex justify-end">
+          <button
+            type="button"
+            (click)="trainModel()"
+            [disabled]="isTraining()"
+            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-2"
+          >
+            @if (isTraining()) {
+              <ng-icon name="lucideRefreshCw" class="w-4 h-4 animate-spin"></ng-icon>
+              <span>Ajustando Bosque Aleatorio...</span>
+            } @else {
+              <ng-icon name="lucideSlidersHorizontal" class="w-4 h-4"></ng-icon>
+              <span>Reentrenar y Calibrar Modelo</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

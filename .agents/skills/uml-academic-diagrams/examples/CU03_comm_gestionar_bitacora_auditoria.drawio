@@ -1,0 +1,235 @@
+﻿<mxGraphModel dx="1628" dy="898" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO DEL DIAGRAMA -->
+    <mxCell id="CU03-COMM-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:6pt;&quot;&gt;&lt;span style=&quot;font-size:12pt;font-family:Arial,sans-serif;color:#000000;font-weight:700;&quot;&gt;CU03 – Gestionar bitácora de auditoría&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:9pt;color:#666666;margin:0;&quot;&gt;Diagrama de Comunicación UML • Flujo Actor - Boundary - Controller - Entities&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="50" width="450" x="40" y="30" as="geometry" />
+    </mxCell>
+
+    <!-- ACTOR: :Administrador -->
+    <mxCell id="CU03-COMM-ACT" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Administrador" vertex="1">
+      <mxGeometry height="70" width="40" x="70" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY / INTERFACE: :AuditLogViewer -->
+    <mxCell id="CU03-COMM-BND" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":AuditLogViewer" vertex="1">
+      <mxGeometry height="70" width="80" x="310" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER: :AuditController -->
+    <mxCell id="CU03-COMM-CTRL" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":AuditController" vertex="1">
+      <mxGeometry height="80" width="70" x="550" y="255" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 1: :Bitacora -->
+    <mxCell id="CU03-COMM-ENT-BI" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Bitacora" vertex="1">
+      <mxGeometry height="42" width="42" x="850" y="170" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY 2: :User -->
+    <mxCell id="CU03-COMM-ENT-US" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":User" vertex="1">
+      <mxGeometry height="42" width="42" x="850" y="340" as="geometry" />
+    </mxCell>
+
+    <!-- ENLACES DE COMUNICACIÓN (LÍNEAS SÓLIDAS) -->
+    <!-- Enlace Actor - Boundary -->
+    <mxCell id="CU03-COMM-LNK-ACT-BND" edge="1" parent="1" source="CU03-COMM-ACT" target="CU03-COMM-BND" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Boundary - Controller -->
+    <mxCell id="CU03-COMM-LNK-BND-CTRL" edge="1" parent="1" source="CU03-COMM-BND" target="CU03-COMM-CTRL" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Controller - Bitacora -->
+    <mxCell id="CU03-COMM-LNK-CTRL-BI" edge="1" parent="1" source="CU03-COMM-CTRL" target="CU03-COMM-ENT-BI" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.9;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="640" y="191" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Enlace Controller - User -->
+    <mxCell id="CU03-COMM-LNK-CTRL-US" edge="1" parent="1" source="CU03-COMM-CTRL" target="CU03-COMM-ENT-US" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.9;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="640" y="361" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES Y FLECHAS DE DIRECCIÓN: SECUENCIA 1 (CONSULTA Y FILTROS) -->
+    <!-- 1: solicitarConsultaBitacora() -->
+    <mxCell id="CU03-COMM-M1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1: solicitarConsultaBitacora()" vertex="1">
+      <mxGeometry height="26" width="160" x="130" y="200" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A1" edge="1" parent="1" source="CU03-COMM-M1" target="CU03-COMM-M1" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="195" as="sourcePoint" />
+        <mxPoint x="215" y="195" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.1: index() -->
+    <mxCell id="CU03-COMM-M11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.1: index()" vertex="1">
+      <mxGeometry height="24" width="100" x="410" y="200" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A11" edge="1" parent="1" source="CU03-COMM-M11" target="CU03-COMM-M11" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="445" y="195" as="sourcePoint" />
+        <mxPoint x="475" y="195" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.2: with() -->
+    <mxCell id="CU03-COMM-M12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.2: with()" vertex="1">
+      <mxGeometry height="24" width="90" x="680" y="115" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A12" edge="1" parent="1" source="CU03-COMM-M12" target="CU03-COMM-M12" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="710" y="110" as="sourcePoint" />
+        <mxPoint x="740" y="110" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.3: paginate() (Fiel a Bitacora::with()->paginate() en AuditController.php) -->
+    <mxCell id="CU03-COMM-M13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.3: paginate()" vertex="1">
+      <mxGeometry height="24" width="90" x="680" y="140" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A13" edge="1" parent="1" source="CU03-COMM-M13" target="CU03-COMM-M13" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="710" y="135" as="sourcePoint" />
+        <mxPoint x="740" y="135" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.4: mostrarEventosPaginados() (retorno) -->
+    <mxCell id="CU03-COMM-M14" parent="1" style="text;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.4: mostrarEventosPaginados()" vertex="1">
+      <mxGeometry height="20" width="160" x="385" y="335" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A14" edge="1" parent="1" source="CU03-COMM-M14" target="CU03-COMM-M14" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="475" y="330" as="sourcePoint" />
+        <mxPoint x="435" y="330" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.5: renderizarTablaAuditoria() (retorno) -->
+    <mxCell id="CU03-COMM-M15" parent="1" style="text;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.5: renderizarTablaAuditoria()" vertex="1">
+      <mxGeometry height="20" width="160" x="130" y="335" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A15" edge="1" parent="1" source="CU03-COMM-M15" target="CU03-COMM-M15" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="220" y="330" as="sourcePoint" />
+        <mxPoint x="180" y="330" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES Y FLECHAS DE DIRECCIÓN: SECUENCIA 2 (METADATOS DE FILTRO) -->
+    <!-- 2: inicializarFiltros() -->
+    <mxCell id="CU03-COMM-M2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#005522;fontStyle=1;labelBackgroundColor=none;" value="2: inicializarFiltros()" vertex="1">
+      <mxGeometry height="24" width="130" x="145" y="165" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A2" edge="1" parent="1" source="CU03-COMM-M2" target="CU03-COMM-M2" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#005522;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="160" as="sourcePoint" />
+        <mxPoint x="215" y="160" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.1: filtersData() -->
+    <mxCell id="CU03-COMM-M21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#005522;fontStyle=1;labelBackgroundColor=none;" value="2.1: filtersData()" vertex="1">
+      <mxGeometry height="24" width="105" x="407.5" y="165" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A21" edge="1" parent="1" source="CU03-COMM-M21" target="CU03-COMM-M21" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#005522;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="445" y="160" as="sourcePoint" />
+        <mxPoint x="475" y="160" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.2: distinct() -->
+    <mxCell id="CU03-COMM-M22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#005522;fontStyle=1;labelBackgroundColor=none;" value="2.2: distinct()" vertex="1">
+      <mxGeometry height="24" width="90" x="680" y="165" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A22" edge="1" parent="1" source="CU03-COMM-M22" target="CU03-COMM-M22" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#005522;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="710" y="160" as="sourcePoint" />
+        <mxPoint x="740" y="160" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.3: get() -->
+    <mxCell id="CU03-COMM-M23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#005522;fontStyle=1;labelBackgroundColor=none;" value="2.3: get()" vertex="1">
+      <mxGeometry height="24" width="80" x="680" y="340" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A23" edge="1" parent="1" source="CU03-COMM-M23" target="CU03-COMM-M23" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#005522;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="710" y="335" as="sourcePoint" />
+        <mxPoint x="740" y="335" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES Y FLECHAS DE DIRECCIÓN: SECUENCIA 3 (MÉTRICAS / STATS DIARIOS) -->
+    <!-- 3: solicitarMetricasDiarias() -->
+    <mxCell id="CU03-COMM-M3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="3: solicitarMetricasDiarias()" vertex="1">
+      <mxGeometry height="24" width="150" x="135" y="235" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A3" edge="1" parent="1" source="CU03-COMM-M3" target="CU03-COMM-M3" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="230" as="sourcePoint" />
+        <mxPoint x="215" y="230" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.1: stats() -->
+    <mxCell id="CU03-COMM-M31" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="3.1: stats()" vertex="1">
+      <mxGeometry height="24" width="90" x="415" y="235" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A31" edge="1" parent="1" source="CU03-COMM-M31" target="CU03-COMM-M31" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="445" y="230" as="sourcePoint" />
+        <mxPoint x="475" y="230" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3.2: count() -->
+    <mxCell id="CU03-COMM-M32" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="3.2: count()" vertex="1">
+      <mxGeometry height="24" width="90" x="680" y="190" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A32" edge="1" parent="1" source="CU03-COMM-M32" target="CU03-COMM-M32" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="710" y="185" as="sourcePoint" />
+        <mxPoint x="740" y="185" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES Y FLECHAS DE DIRECCIÓN: SECUENCIA 4 (INSPECCIÓN FORENSE) -->
+    <!-- 4: seleccionarEvento() -->
+    <mxCell id="CU03-COMM-M4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#800000;fontStyle=1;labelBackgroundColor=none;" value="4: seleccionarEvento()" vertex="1">
+      <mxGeometry height="24" width="135" x="142.5" y="270" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A4" edge="1" parent="1" source="CU03-COMM-M4" target="CU03-COMM-M4" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#800000;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="265" as="sourcePoint" />
+        <mxPoint x="215" y="265" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4.1: renderizarModalDetalle() (retorno) -->
+    <mxCell id="CU03-COMM-M41" parent="1" style="text;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#800000;fontStyle=1;labelBackgroundColor=none;" value="4.1: renderizarModalDetalle()" vertex="1">
+      <mxGeometry height="20" width="160" x="130" y="300" as="geometry" />
+    </mxCell>
+    <mxCell id="CU03-COMM-A41" edge="1" parent="1" source="CU03-COMM-M41" target="CU03-COMM-M41" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#800000;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="220" y="295" as="sourcePoint" />
+        <mxPoint x="180" y="295" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

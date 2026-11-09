@@ -1,0 +1,386 @@
+<mxGraphModel dx="1628" dy="898" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TITULO -->
+    <mxCell id="CU16-COMM-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:6pt;&quot;&gt;&lt;span style=&quot;font-size:13pt;font-family:Arial,sans-serif;color:#000000;font-weight:700;&quot;&gt;CU16 – Registrar Consulta Médica y Triaje Clínico&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:9pt;color:#666666;margin:0;&quot;&gt;Diagrama de Comunicación UML • Arquitectura BCE Canónica: 1 Boundary y 1 Controller&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="50" width="550" x="40" y="30" as="geometry" />
+    </mxCell>
+
+    <!-- ACTOR: :Médico -->
+    <mxCell id="CU16-COMM-ACT" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Médico" vertex="1">
+      <mxGeometry height="70" width="40" x="70" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY: :ConsultaRegistroModal -->
+    <mxCell id="CU16-COMM-BND" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":ConsultaRegistroModal" vertex="1">
+      <mxGeometry height="70" width="80" x="310" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER: :ConsultasController -->
+    <mxCell id="CU16-COMM-CTRL" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":ConsultasController" vertex="1">
+      <mxGeometry height="80" width="70" x="570" y="255" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITIES (DISTRIBUIDAS VERTICALMENTE A LA DERECHA) -->
+    <!-- :Cita -->
+    <mxCell id="CU16-COMM-ENT-CIT" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Cita" vertex="1">
+      <mxGeometry height="42" width="42" x="910" y="100" as="geometry" />
+    </mxCell>
+
+    <!-- :HistoriaClinica -->
+    <mxCell id="CU16-COMM-ENT-HIS" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":HistoriaClinica" vertex="1">
+      <mxGeometry height="42" width="42" x="910" y="190" as="geometry" />
+    </mxCell>
+
+    <!-- :ConsultaMedica -->
+    <mxCell id="CU16-COMM-ENT-CON" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":ConsultaMedica" vertex="1">
+      <mxGeometry height="42" width="42" x="910" y="280" as="geometry" />
+    </mxCell>
+
+    <!-- :Diagnostico -->
+    <mxCell id="CU16-COMM-ENT-DIA" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Diagnostico" vertex="1">
+      <mxGeometry height="42" width="42" x="910" y="370" as="geometry" />
+    </mxCell>
+
+    <!-- :CitaEstadoHistorial -->
+    <mxCell id="CU16-COMM-ENT-EST" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":CitaEstadoHistorial" vertex="1">
+      <mxGeometry height="42" width="42" x="910" y="460" as="geometry" />
+    </mxCell>
+
+    <!-- :Bitacora -->
+    <mxCell id="CU16-COMM-ENT-BIT" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Bitacora" vertex="1">
+      <mxGeometry height="42" width="42" x="910" y="550" as="geometry" />
+    </mxCell>
+
+    <!-- ========================================================================= -->
+    <!-- LINEAS DE RELACION (CONECTORES BASE CONTINUOS SIN FLECHA) -->
+    <!-- ========================================================================= -->
+
+    <!-- Actor <-> Boundary -->
+    <mxCell id="CU16-LNK-ACT-BND" edge="1" parent="1" source="CU16-COMM-ACT" target="CU16-COMM-BND" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Boundary <-> Controller -->
+    <mxCell id="CU16-LNK-BND-CTRL" edge="1" parent="1" source="CU16-COMM-BND" target="CU16-COMM-CTRL" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Controller -> Cita -->
+    <mxCell id="CU16-LNK-CTRL-CIT" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-ENT-CIT" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0.9;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="670" y="121" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> HistoriaClinica -->
+    <mxCell id="CU16-LNK-CTRL-HIS" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-ENT-HIS" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0.9;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="670" y="211" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> ConsultaMedica -->
+    <mxCell id="CU16-LNK-CTRL-CON" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-ENT-CON" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Controller -> Diagnostico -->
+    <mxCell id="CU16-LNK-CTRL-DIA" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-ENT-DIA" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0.9;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="670" y="391" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> CitaEstadoHistorial -->
+    <mxCell id="CU16-LNK-CTRL-EST" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-ENT-EST" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0.9;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="670" y="481" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> Bitacora -->
+    <mxCell id="CU16-LNK-CTRL-BIT" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-ENT-BIT" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="670" y="571" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ========================================================================= -->
+    <!-- MENSAJES Y FLECHAS INDEPENDIENTES ARRIBA DE CADA MENSAJE (CANONICO DRAWIO) -->
+    <!-- ========================================================================= -->
+
+    <!-- SECCION ACTOR -> BOUNDARY (LLAMADAS ARRIBA, RETORNOS ABAJO) -->
+
+    <!-- 1: abrirConsulta(cita) -->
+    <mxCell id="CU16-M1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1: abrirConsulta(cita)" vertex="1">
+      <mxGeometry height="24" width="140" x="140" y="165" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A1" edge="1" parent="1" source="CU16-M1" target="CU16-M1" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="160" as="sourcePoint" />
+        <mxPoint x="215" y="160" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2: ingresarSignosVitales() -->
+    <mxCell id="CU16-M2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#005522;fontStyle=1;labelBackgroundColor=none;" value="2: ingresarSignosVitales()" vertex="1">
+      <mxGeometry height="24" width="150" x="135" y="195" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A2" edge="1" parent="1" source="CU16-M2" target="CU16-M2" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#005522;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="190" as="sourcePoint" />
+        <mxPoint x="215" y="190" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 3: ingresarDiagnosticosYPlan() -->
+    <mxCell id="CU16-M3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="3: ingresarDiagnosticosYPlan()" vertex="1">
+      <mxGeometry height="24" width="170" x="125" y="225" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A3" edge="1" parent="1" source="CU16-M3" target="CU16-M3" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="220" as="sourcePoint" />
+        <mxPoint x="215" y="220" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 4: clickGuardarConsulta() -->
+    <mxCell id="CU16-M4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="4: clickGuardarConsulta()" vertex="1">
+      <mxGeometry height="24" width="150" x="135" y="255" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A4" edge="1" parent="1" source="CU16-M4" target="CU16-M4" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="180" y="250" as="sourcePoint" />
+        <mxPoint x="215" y="250" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- RETORNOS ACTOR <- BOUNDARY (ABAJO CON FLECHA DISCONTINUA) -->
+
+    <!-- 1.5: mostrarFormulario() -->
+    <mxCell id="CU16-M15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.5: mostrarFormulario()" vertex="1">
+      <mxGeometry height="20" width="150" x="135" y="335" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A15" edge="1" parent="1" source="CU16-M15" target="CU16-M15" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="220" y="330" as="sourcePoint" />
+        <mxPoint x="180" y="330" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 5.12: notificarExito() -->
+    <mxCell id="CU16-M512" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.12: notificarExito()" vertex="1">
+      <mxGeometry height="20" width="150" x="135" y="365" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A512" edge="1" parent="1" source="CU16-M512" target="CU16-M512" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="220" y="360" as="sourcePoint" />
+        <mxPoint x="180" y="360" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 6.1: mostrarAlertaError() -->
+    <mxCell id="CU16-M61" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#800000;fontStyle=1;labelBackgroundColor=none;" value="6.1: mostrarAlertaError()" vertex="1">
+      <mxGeometry height="20" width="150" x="135" y="395" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A61" edge="1" parent="1" source="CU16-M61" target="CU16-M61" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#800000;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="220" y="390" as="sourcePoint" />
+        <mxPoint x="180" y="390" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- AUTO-LLAMADA BOUNDARY: 2.1: calcularIMC() -->
+    <mxCell id="CU16-SELF-BND" edge="1" parent="1" source="CU16-COMM-BND" target="CU16-COMM-BND" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="350" y="215" />
+          <mxPoint x="400" y="215" />
+          <mxPoint x="400" y="295" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU16-MBND-SELF" parent="1" style="text;html=1;fontSize=10;fontColor=#005522;align=center;fontStyle=1;" value="2.1: calcularIMC() ⟲" vertex="1">
+      <mxGeometry x="320" y="195" width="115" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- SECCION BOUNDARY -> CONTROLLER (LLAMADAS ARRIBA, RETORNOS ABAJO) -->
+
+    <!-- 1.1: index() / preparar() -->
+    <mxCell id="CU16-M11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.1: GET /citas/{id}/preparar" vertex="1">
+      <mxGeometry height="24" width="160" x="400" y="215" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A11" edge="1" parent="1" source="CU16-M11" target="CU16-M11" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="450" y="210" as="sourcePoint" />
+        <mxPoint x="485" y="210" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 5: store() -->
+    <mxCell id="CU16-M5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5: POST /consultas" vertex="1">
+      <mxGeometry height="24" width="140" x="410" y="255" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A5" edge="1" parent="1" source="CU16-M5" target="CU16-M5" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="450" y="250" as="sourcePoint" />
+        <mxPoint x="485" y="250" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- RETORNOS CONTROLLER -> BOUNDARY (ABAJO CON FLECHA DISCONTINUA) -->
+
+    <!-- 1.4: 200 OK (datosFicha) -->
+    <mxCell id="CU16-M14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.4: 200 OK (datosFicha)" vertex="1">
+      <mxGeometry height="20" width="160" x="400" y="335" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A14" edge="1" parent="1" source="CU16-M14" target="CU16-M14" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="490" y="330" as="sourcePoint" />
+        <mxPoint x="450" y="330" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 5.11: 201 Created (consulta) -->
+    <mxCell id="CU16-M511" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.11: 201 Created" vertex="1">
+      <mxGeometry height="20" width="140" x="410" y="365" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A511" edge="1" parent="1" source="CU16-M511" target="CU16-M511" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="490" y="360" as="sourcePoint" />
+        <mxPoint x="450" y="360" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 6: 422 Unprocessable / 403 Forbidden -->
+    <mxCell id="CU16-M6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#800000;fontStyle=1;labelBackgroundColor=none;" value="6: 422 Unprocessable" vertex="1">
+      <mxGeometry height="20" width="150" x="405" y="395" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-A6" edge="1" parent="1" source="CU16-M6" target="CU16-M6" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#800000;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="490" y="390" as="sourcePoint" />
+        <mxPoint x="450" y="390" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- AUTO-LLAMADAS CONTROLLER -->
+    <mxCell id="CU16-SELF-CTRL" edge="1" parent="1" source="CU16-COMM-CTRL" target="CU16-COMM-CTRL" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="605" y="195" />
+          <mxPoint x="660" y="195" />
+          <mxPoint x="660" y="295" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="CU16-MCTRL-SELF" parent="1" style="text;html=1;fontSize=9;fontColor=#4B0082;align=center;fontStyle=1;" value="5.1: validate() ⟲&#xa;5.2: DB::transaction() ⟲&#xa;5.4: validarAccesoMedico() ⟲" vertex="1">
+      <mxGeometry x="580" y="160" width="155" height="35" as="geometry" />
+    </mxCell>
+
+    <!-- ========================================================================= -->
+    <!-- SECCION CONTROLLER -> ENTITIES (LLAMADAS ARRIBA DE CADA CONECTOR) -->
+    <!-- ========================================================================= -->
+
+    <!-- Controller -> Cita: 1.2: with() -->
+    <mxCell id="CU16-MCIT1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#003366;fontStyle=1;labelBackgroundColor=none;" value="1.2: with()" vertex="1">
+      <mxGeometry height="24" width="80" x="720" y="65" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-ACIT1" edge="1" parent="1" source="CU16-MCIT1" target="CU16-MCIT1" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#003366;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="60" as="sourcePoint" />
+        <mxPoint x="780" y="60" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> Cita: 5.3: lockForUpdate() -->
+    <mxCell id="CU16-MCIT2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.3: lockForUpdate()" vertex="1">
+      <mxGeometry height="24" width="120" x="700" y="90" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-ACIT2" edge="1" parent="1" source="CU16-MCIT2" target="CU16-MCIT2" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="85" as="sourcePoint" />
+        <mxPoint x="780" y="85" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> Cita: 5.8: update() -->
+    <mxCell id="CU16-MCIT3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.8: update()" vertex="1">
+      <mxGeometry height="24" width="90" x="715" y="115" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-ACIT3" edge="1" parent="1" source="CU16-MCIT3" target="CU16-MCIT3" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="110" as="sourcePoint" />
+        <mxPoint x="780" y="110" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> HistoriaClinica: 5.5: firstOrCreate() -->
+    <mxCell id="CU16-MHIS" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.5: firstOrCreate()" vertex="1">
+      <mxGeometry height="24" width="115" x="705" y="180" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-AHIS" edge="1" parent="1" source="CU16-MHIS" target="CU16-MHIS" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="175" as="sourcePoint" />
+        <mxPoint x="780" y="175" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> ConsultaMedica: 5.6: create() -->
+    <mxCell id="CU16-MCON" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.6: create()" vertex="1">
+      <mxGeometry height="24" width="90" x="715" y="270" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-ACON" edge="1" parent="1" source="CU16-MCON" target="CU16-MCON" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="265" as="sourcePoint" />
+        <mxPoint x="780" y="265" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> Diagnostico: 5.7: create() -->
+    <mxCell id="CU16-MDIA" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.7: create()" vertex="1">
+      <mxGeometry height="24" width="90" x="715" y="360" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-ADIA" edge="1" parent="1" source="CU16-MDIA" target="CU16-MDIA" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="355" as="sourcePoint" />
+        <mxPoint x="780" y="355" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> CitaEstadoHistorial: 5.9: create() -->
+    <mxCell id="CU16-MEST" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.9: create()" vertex="1">
+      <mxGeometry height="24" width="90" x="715" y="450" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-AEST" edge="1" parent="1" source="CU16-MEST" target="CU16-MEST" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="445" as="sourcePoint" />
+        <mxPoint x="780" y="445" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Controller -> Bitacora: 5.10: registrar() -->
+    <mxCell id="CU16-MBIT" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;fontColor=#4B0082;fontStyle=1;labelBackgroundColor=none;" value="5.10: registrar()" vertex="1">
+      <mxGeometry height="24" width="100" x="710" y="540" as="geometry" />
+    </mxCell>
+    <mxCell id="CU16-ABIT" edge="1" parent="1" source="CU16-MBIT" target="CU16-MBIT" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;strokeColor=#4B0082;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="750" y="535" as="sourcePoint" />
+        <mxPoint x="780" y="535" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

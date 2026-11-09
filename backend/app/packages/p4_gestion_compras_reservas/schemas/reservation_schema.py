@@ -1,9 +1,9 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ReservationStatusEnum(str, Enum):
@@ -19,13 +19,24 @@ class ReservationStatusEnum(str, Enum):
 
 class ReservationItemCreate(BaseModel):
     variant_id: UUID
-    quantity: int = Field(gt=0)
+    quantity: int = Field(gt=0, description="Cantidad a apartar (debe ser mayor a 0)")
 
 
 class ReservationCreate(BaseModel):
     branch_id: UUID
     visit_date: date
     items: list[ReservationItemCreate] = Field(min_length=1)
+    client_reservation_id: UUID | None = Field(default=None, description="UUIDv4 generado en cliente para contingencia offline e idempotencia")
+
+    @field_validator("visit_date")
+    @classmethod
+    def validate_visit_date(cls, v: date) -> date:
+        today = date.today()
+        if v < today:
+            raise ValueError("La fecha de visita no puede ser anterior a la fecha actual.")
+        if v > today + timedelta(days=7):
+            raise ValueError("La fecha de reserva no puede exceder los 7 días de anticipación.")
+        return v
 
 
 class ReservationDecisionRequest(BaseModel):
@@ -34,6 +45,7 @@ class ReservationDecisionRequest(BaseModel):
 
 class ReservationItemRead(BaseModel):
     id: UUID
+    tenant_id: UUID | None = None
     reservation_id: UUID
     variant_id: UUID
     quantity: int
@@ -54,6 +66,7 @@ class ReservationItemRead(BaseModel):
 
 class ReservationRead(BaseModel):
     id: UUID
+    tenant_id: UUID | None = None
     branch_id: UUID
     branch_name: str
     user_id: UUID
@@ -64,8 +77,58 @@ class ReservationRead(BaseModel):
     status: ReservationStatusEnum
     total_amount: Decimal
     item_count: int
+    reservation_code: str = Field(default="", description="Código alfanumérico amigable de reserva, ej: RES-A1B2C3D4")
+    qr_payload: str = Field(default="", description="Payload para escaneo o renderizado de código QR")
+    resolved_at: datetime | None = None
+    resolved_by: UUID | None = None
+    resolution_note: str | None = None
     created_at: datetime
     updated_at: datetime | None = None
     items: list[ReservationItemRead] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
+
+
+class ConflictResolutionType(str, Enum):
+    reactivate = "reactivate"
+    substitute = "substitute"
+    close = "close"
+
+
+class ReservationConflictResolveRequest(BaseModel):
+    resolution_type: ConflictResolutionType
+    extended_days: int = Field(default=1, ge=1, le=7, description="Días adicionales para reactivar")
+    substitute_variant_id: UUID | None = Field(default=None, description="Nueva variante si se acuerda sustitución de prenda")
+    notes: str = Field(min_length=3, max_length=500, description="Justificación o acuerdo con el cliente en mostrador")
+
+
+class ItemStockAvailability(BaseModel):
+    variant_id: UUID
+    product_name: str
+    variant_sku: str
+    requested_quantity: int
+    available_quantity: int
+    has_sufficient_stock: bool
+
+
+class ReservationConflictItemRead(BaseModel):
+    id: UUID
+    reservation_code: str
+    user_id: UUID
+    user_name: str
+    branch_id: UUID
+    branch_name: str
+    visit_date: date
+    expires_at: date
+    status: ReservationStatusEnum
+    total_amount: Decimal
+    item_count: int
+    resolved_at: datetime | None = None
+    resolved_by: UUID | None = None
+    resolution_note: str | None = None
+    can_reactivate: bool
+    items_stock: list[ItemStockAvailability] = Field(default_factory=list)
+    items: list[ReservationItemRead] = Field(default_factory=list)
+
+    model_config = {"from_attributes": True}
+

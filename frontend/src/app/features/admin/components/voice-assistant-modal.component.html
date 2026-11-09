@@ -1,0 +1,315 @@
+<!-- Modal Backdrop con Desenfoque y Transición Suave -->
+@if (isOpen) {
+  <div
+    class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm transition-opacity duration-300"
+    (click)="handleBackdropClick($event)">
+    
+    <!-- Contenedor Principal del Modal -->
+    <div
+      class="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 text-slate-100 shadow-2xl transition-all duration-300 transform scale-100"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title">
+
+      <!-- Header del Asistente -->
+      <header class="flex items-center justify-between border-b border-slate-800 px-6 py-4 bg-slate-900/90">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-400">
+            <span class="text-xl">🎙️</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="modal-title" class="text-base font-semibold tracking-tight text-white">
+                Asistente Ejecutivo Gemini
+              </h2>
+              <span class="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-300 border border-indigo-500/20">
+                <span class="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                RAG Multitenant
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Consultas en lenguaje natural con Gemini 2.5 Flash y locución auditiva
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          (click)="onClose()"
+          aria-label="Cerrar modal">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <!-- Cuerpo del Modal (Scrollable) -->
+      <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+        <!-- ALERTA SI PLAN BÁSICO TIENE ACCESO BLOQUEADO (HTTP 403) -->
+        @if (planBlockedError()) {
+          <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 text-amber-200">
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">🔒</span>
+              <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-amber-100">Acceso Restringido por Política de Planes (CU02/CU04)</h3>
+                <p class="text-xs text-amber-200/90 leading-relaxed">
+                  {{ planBlockedError() }}
+                </p>
+                <div class="pt-2">
+                  <span class="inline-flex items-center text-xs font-medium text-amber-300 underline underline-offset-4">
+                    Comunícate con el administrador para actualizar al Plan Profesional o Empresarial.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ZONA DE CAPTURA DE VOZ / MICRÓFONO -->
+        <div class="flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60 p-6 text-center">
+          
+          <!-- Botón de Micrófono con Animación de Ondas -->
+          <div class="relative mb-4 flex items-center justify-center">
+            @if (isListening()) {
+              <div class="absolute -inset-4 rounded-full bg-rose-500/20 animate-ping"></div>
+              <div class="absolute -inset-2 rounded-full bg-rose-500/30"></div>
+            }
+
+            <button
+              type="button"
+              class="relative flex h-20 w-20 items-center justify-center rounded-full transition duration-300 shadow-lg focus:outline-none focus:ring-4"
+              [ngClass]="isListening() ? 'bg-rose-600 text-white shadow-rose-900/50 focus:ring-rose-500/40 animate-pulse' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/40 focus:ring-indigo-500/30'"
+              [disabled]="isProcessing()"
+              (click)="toggleListening()"
+              aria-label="Activar o desactivar micrófono">
+              
+              @if (isListening()) {
+                <!-- Icono de Detener Micrófono -->
+                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+              } @else {
+                <!-- Icono de Micrófono Inactivo -->
+                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              }
+            </button>
+          </div>
+
+          <!-- Indicador de Estado del Micrófono -->
+          @if (isListening()) {
+            <div class="space-y-1">
+              <div class="flex items-center justify-center gap-1.5 py-1">
+                <span class="h-3 w-1 rounded-full bg-rose-400 animate-waveform-1"></span>
+                <span class="h-6 w-1 rounded-full bg-rose-400 animate-waveform-2"></span>
+                <span class="h-4 w-1 rounded-full bg-rose-400 animate-waveform-3"></span>
+                <span class="h-7 w-1 rounded-full bg-rose-400 animate-waveform-1"></span>
+                <span class="h-5 w-1 rounded-full bg-rose-400 animate-waveform-2"></span>
+                <span class="h-3 w-1 rounded-full bg-rose-400 animate-waveform-3"></span>
+              </div>
+              <p class="text-sm font-medium text-rose-300">Escuchando tu consulta... (pausa para procesar)</p>
+            </div>
+          } @else if (isProcessing()) {
+            <div class="flex items-center gap-2 text-indigo-400">
+              <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              <span class="text-sm font-medium text-slate-300">Analizando contexto multitenant con Gemini 2.5 Flash...</span>
+            </div>
+          } @else {
+            <p class="text-sm font-medium text-slate-300">
+              Presiona para hablar o escribe tu consulta en el campo inferior
+            </p>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Optimizado para consultas de ventas, prendas estrella, stock crítico y devoluciones
+            </p>
+          }
+
+          <!-- Entrada de Texto Alternativa / Editable -->
+          <div class="mt-4 flex w-full max-w-xl items-center gap-2">
+            <div class="relative flex-1">
+              <input
+                #queryInput
+                type="text"
+                class="w-full rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-sm text-white placeholder-slate-500 shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
+                placeholder="Ej: ¿Cuáles son las prendas más vendidas y cuánto facturamos?"
+                [ngModel]="queryText()"
+                (ngModelChange)="queryText.set($event)"
+                (keydown.enter)="submitQuery()"
+                [disabled]="isProcessing() || isListening()" />
+              @if (queryText()) {
+                <button
+                  type="button"
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  (click)="queryText.set('')">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              }
+            </div>
+
+            <button
+              hlmBtn
+              size="sm"
+              class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl font-medium shadow-md transition disabled:opacity-50"
+              [disabled]="isProcessing() || !queryText().trim() || isListening()"
+              (click)="submitQuery()">
+              Consultar
+            </button>
+          </div>
+        </div>
+
+        <!-- PREGUNTAS SUGERIDAS (CHIPS) -->
+        @if (capabilities()?.suggested_queries && !reportResult()) {
+          <div class="space-y-2.5">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Consultas sugeridas para tu boutique:
+            </p>
+            <div class="flex flex-wrap gap-2">
+              @for (query of capabilities()!.suggested_queries; track query) {
+                <button
+                  type="button"
+                  class="rounded-lg border border-slate-800 bg-slate-800/60 px-3 py-1.5 text-xs text-slate-300 hover:border-indigo-500/50 hover:bg-slate-800 hover:text-white transition text-left"
+                  [disabled]="isProcessing()"
+                  (click)="applySuggestion(query)">
+                  💬 {{ query }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- RESULTADOS DEL REPORTE EJECUTIVO GENERADO -->
+        @if (reportResult(); as report) {
+          <div class="space-y-5 rounded-2xl border border-slate-800 bg-slate-950/40 p-5 transition-all duration-300">
+            
+            <!-- Encabezado de la Respuesta -->
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-3">
+              <div>
+                <span class="text-xs font-medium text-slate-400">Consulta analizada:</span>
+                <p class="text-sm font-semibold text-white mt-0.5">“{{ report.query }}”</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <!-- Badge de Fallback o Gemini -->
+                @if (report.is_fallback) {
+                  <span class="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-300 border border-amber-500/20">
+                    ⚠️ Motor Heurístico Local
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/20">
+                    ✨ {{ report.model_used }}
+                  </span>
+                }
+
+                <!-- Botón de Control de Locución Auditiva -->
+                @if (speechSynthesisSupported() && report.speech_text) {
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition"
+                    [ngClass]="isSpeaking() ? 'bg-rose-500/10 border-rose-500/30 text-rose-300 animate-pulse' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'"
+                    (click)="toggleSpeech()"
+                    [title]="isSpeaking() ? 'Pausar locución' : 'Escuchar respuesta por voz'">
+                    <span>{{ isSpeaking() ? '⏸️ Detener Voz' : '🔊 Escuchar Resumen' }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Resumen Ejecutivo (Narrativa Directa) -->
+            <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+              <div class="flex items-center gap-2 mb-2 text-indigo-300 font-medium text-xs uppercase tracking-wider">
+                <span>📋 Resumen Ejecutivo</span>
+              </div>
+              <p class="text-sm text-slate-200 leading-relaxed font-sans">
+                {{ report.executive_summary }}
+              </p>
+            </div>
+
+            <!-- Grid de Tarjetas KPI -->
+            @if (report.kpis && report.kpis.length > 0) {
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+                  Indicadores Clave del Negocio:
+                </p>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  @for (kpi of report.kpis; track kpi.title) {
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-1">
+                      <p class="text-xs font-medium text-slate-400 truncate">{{ kpi.title }}</p>
+                      <p class="text-lg font-bold tracking-tight text-white">{{ kpi.value }}</p>
+                      @if (kpi.subtext) {
+                        <p class="text-xs text-slate-500">{{ kpi.subtext }}</p>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Tabla de Previsualización de Datos Detallados -->
+            @if (report.data_preview && report.data_preview.length > 0) {
+              <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Detalle de Artículos / Contexto Relevante:
+                </p>
+                <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50">
+                  <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="border-b border-slate-800 bg-slate-800/50 text-slate-400 font-medium">
+                      <tr>
+                        @for (col of getObjectKeys(report.data_preview[0]); track col) {
+                          <th class="px-3.5 py-2.5 uppercase tracking-wider">{{ col }}</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/50">
+                      @for (row of report.data_preview; track $index) {
+                        <tr class="hover:bg-slate-800/30 transition">
+                          @for (col of getObjectKeys(report.data_preview[0]); track col) {
+                            <td class="px-3.5 py-2 font-mono text-slate-200">{{ row[col] }}</td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+
+            <!-- Botón de Nueva Consulta -->
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+              <span class="text-xs text-slate-500">
+                Generado: {{ report.generated_at | date:'short' }}
+              </span>
+
+              <button
+                type="button"
+                class="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1"
+                (click)="resetConversation()">
+                <span>🔄 Nueva Consulta</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Footer del Modal -->
+      <footer class="flex items-center justify-between border-t border-slate-800 px-6 py-3.5 bg-slate-900/90 text-xs text-slate-500">
+        <span>FashionStore Multitenant • Sistemas 2</span>
+        <button
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+          (click)="onClose()">
+          Cerrar
+        </button>
+      </footer>
+    </div>
+  </div>
+}

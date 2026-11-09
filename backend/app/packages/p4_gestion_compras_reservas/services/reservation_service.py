@@ -1,10 +1,11 @@
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 import logging
 from uuid import UUID
+import uuid
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.packages.p1_gestion_usuarios_acceso.models.branch import Branch
 from app.packages.p1_gestion_usuarios_acceso.models.user import User
@@ -21,6 +22,10 @@ from app.packages.p2_gestion_productos_catalogo.models.size import Size
 from app.packages.p2_gestion_productos_catalogo.models.color import Color
 from app.packages.p2_gestion_productos_catalogo.schemas.catalog_enums import ProductStatusEnum
 from app.packages.p4_gestion_compras_reservas.schemas.reservation_schema import (
+    ConflictResolutionType,
+    ItemStockAvailability,
+    ReservationConflictItemRead,
+    ReservationConflictResolveRequest,
     ReservationCreate,
     ReservationItemRead,
     ReservationRead,
@@ -78,6 +83,7 @@ def _reservation_items_query(db: Session, reservation_id: UUID):
     return (
         db.query(
             ReservationItem.id.label("id"),
+            ReservationItem.tenant_id.label("tenant_id"),
             ReservationItem.reservation_id.label("reservation_id"),
             ReservationItem.variant_id.label("variant_id"),
             ReservationItem.quantity.label("quantity"),
@@ -117,6 +123,7 @@ def _serialize_reservation(db: Session, reservation: Reservation) -> Reservation
             ReservationItemRead.model_validate(
                 {
                     **data,
+                    "tenant_id": data.get("tenant_id") or reservation.tenant_id,
                     "line_total": line_total,
                 }
             ).model_dump()
@@ -128,6 +135,7 @@ def _serialize_reservation(db: Session, reservation: Reservation) -> Reservation
     return ReservationRead.model_validate(
         {
             "id": reservation.id,
+            "tenant_id": reservation.tenant_id,
             "branch_id": reservation.branch_id,
             "branch_name": branch_name,
             "user_id": reservation.user_id,
@@ -138,6 +146,11 @@ def _serialize_reservation(db: Session, reservation: Reservation) -> Reservation
             "status": reservation.status,
             "total_amount": total_amount,
             "item_count": item_count,
+            "reservation_code": f"RES-{str(reservation.id)[:8].upper()}",
+            "qr_payload": f"FS-RES:{reservation.id}",
+            "resolved_at": reservation.resolved_at,
+            "resolved_by": reservation.resolved_by,
+            "resolution_note": reservation.resolution_note,
             "created_at": reservation.created_at,
             "updated_at": reservation.updated_at,
             "items": items,
@@ -192,7 +205,7 @@ def expire_due_reservations(db: Session):
 def expire_transferred_reservations(db: Session):
     reservations = (
         db.query(Reservation)
-        .options(joinedload(Reservation.items))
+        .options(selectinload(Reservation.items))
         .filter(Reservation.status == ReservationStatusEnum.purchase_pending, Reservation.cart_id.isnot(None))
         .with_for_update(skip_locked=True)
         .all()
@@ -226,51 +239,85 @@ def expire_transferred_reservations(db: Session):
     return expired
 
 
-def list_reservations(db: Session, user_id: UUID):
+def list_reservations(db: Session, user_id: UUID, tenant_id: UUID | None = None):
     expire_due_reservations(db)
-    reservations = (
-        db.query(Reservation)
-        .filter(Reservation.user_id == user_id)
-        .order_by(Reservation.created_at.desc())
-        .all()
-    )
+    query = db.query(Reservation).filter(Reservation.user_id == user_id)
+    if tenant_id:
+        query = query.filter(Reservation.tenant_id == tenant_id)
+    reservations = query.order_by(Reservation.created_at.desc()).all()
     return [_serialize_reservation(db, reservation).model_dump() for reservation in reservations]
 
 
-def list_reservations_by_branch(db: Session, branch_id: UUID):
+def list_reservations_by_branch(db: Session, branch_id: UUID, tenant_id: UUID | None = None):
     expire_due_reservations(db)
-    reservations = (
-        db.query(Reservation)
-        .filter(Reservation.branch_id == branch_id)
-        .order_by(Reservation.created_at.desc())
-        .all()
-    )
+    query = db.query(Reservation).filter(Reservation.branch_id == branch_id)
+    if tenant_id:
+        query = query.filter(Reservation.tenant_id == tenant_id)
+    reservations = query.order_by(Reservation.created_at.desc()).all()
     return [_serialize_reservation(db, reservation).model_dump() for reservation in reservations]
 
 
-def get_reservation(db: Session, user_id: UUID, reservation_id: UUID):
+def get_reservation(db: Session, user_id: UUID, reservation_id: UUID, tenant_id: UUID | None = None):
     expire_due_reservations(db)
     reservation = _get_reservation_for_user(db, reservation_id, user_id)
     if not reservation:
         return None
+    if tenant_id and reservation.tenant_id and reservation.tenant_id != tenant_id:
+        return None
     return _serialize_reservation(db, reservation).model_dump()
 
 
-def create_reservation(db: Session, user_id: UUID, payload: ReservationCreate):
+def create_reservation(db: Session, user_id: UUID, payload: ReservationCreate, tenant_id: UUID | None = None):
     expire_due_reservations(db)
 
+    # 1. Validar fechas de visita (rango de hoy hasta 7 días posteriores)
+    today = date.today()
+    if payload.visit_date < today:
+        raise ValueError("La fecha de visita no puede ser anterior a la fecha actual.")
+    if payload.visit_date > today + timedelta(days=7):
+        raise ValueError("La fecha de reserva no puede exceder los 7 días de anticipación.")
+
+    # 2. Validar cantidades de ítems
     normalized_items: dict[UUID, int] = defaultdict(int)
     for item in payload.items:
+        if item.quantity <= 0:
+            raise ValueError("La cantidad a reservar debe ser mayor a cero.")
         normalized_items[item.variant_id] += item.quantity
 
+    # 3. Validar sucursal existente y activa
     branch = db.query(Branch).filter(Branch.id == payload.branch_id).first()
     if not branch:
         raise ValueError("Sucursal no encontrada")
     if hasattr(branch, "is_active") and not branch.is_active:
         raise ValueError("Sucursal inactiva")
 
+    # 4. Resolver y validar aislamiento multitenant
+    branch_tenant_id = getattr(branch, "tenant_id", None)
+    resolved_tenant_id = tenant_id or branch_tenant_id
+
+    if tenant_id and branch_tenant_id and branch_tenant_id != tenant_id:
+        raise ValueError("La sucursal seleccionada no pertenece a la empresa actual.")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise ValueError("Usuario cliente no encontrado")
+    if tenant_id and getattr(user, "tenant_id", None) and user.tenant_id != tenant_id:
+        raise ValueError("El usuario no pertenece a la empresa actual.")
+    if not resolved_tenant_id and getattr(user, "tenant_id", None):
+        resolved_tenant_id = user.tenant_id
+
+    # 5. Idempotencia y contingencia offline
+    client_res_id = getattr(payload, "client_reservation_id", None)
+    if client_res_id:
+        existing = db.query(Reservation).filter(Reservation.id == client_res_id).first()
+        if existing:
+            return _serialize_reservation(db, existing).model_dump()
+
+    reservation_id = client_res_id or uuid.uuid4()
     with db.begin_nested():
         reservation = Reservation(
+            id=reservation_id,
+            tenant_id=resolved_tenant_id,
             branch_id=payload.branch_id,
             user_id=user_id,
             visit_date=payload.visit_date,
@@ -302,6 +349,7 @@ def create_reservation(db: Session, user_id: UUID, payload: ReservationCreate):
             inventory.reserved_quantity = (inventory.reserved_quantity or 0) + quantity
             db.add(
                 ReservationItem(
+                    tenant_id=resolved_tenant_id,
                     reservation_id=reservation.id,
                     variant_id=variant_id,
                     quantity=quantity,
@@ -319,11 +367,15 @@ def create_reservation(db: Session, user_id: UUID, payload: ReservationCreate):
     return _serialize_reservation(db, reservation).model_dump()
 
 
-def cancel_reservation(db: Session, user_id: UUID, reservation_id: UUID):
+def cancel_reservation(db: Session, user_id: UUID, reservation_id: UUID, tenant_id: UUID | None = None):
     expire_due_reservations(db)
     reservation = _get_reservation_for_user(db, reservation_id, user_id)
     if not reservation:
         return None
+    if tenant_id and reservation.tenant_id and reservation.tenant_id != tenant_id:
+        raise ValueError("No tienes permisos para cancelar reservas de otra empresa.")
+    if reservation.status not in {ReservationStatusEnum.pending, ReservationStatusEnum.confirmed}:
+        raise ValueError(f"No se puede cancelar una reserva en estado '{reservation.status.value}'.")
     with db.begin_nested():
         for item in reservation.items:
             inventory = _get_inventory_for_update(db, item.variant_id, reservation.branch_id)
@@ -407,7 +459,7 @@ def transfer_reservation_to_cart(db: Session, user_id: UUID, reservation_id: UUI
     expire_due_reservations(db)
     reservation = (
         db.query(Reservation)
-        .options(joinedload(Reservation.items))
+        .options(selectinload(Reservation.items))
         .filter(Reservation.id == reservation_id, Reservation.user_id == user_id)
         .with_for_update()
         .first()
@@ -475,3 +527,190 @@ def cancel_branch_reservation(db: Session, reservation_id: UUID, branch_id: UUID
 
 def list_reservation_statuses():
     return [status.value for status in ReservationStatusEnum]
+
+
+def list_branch_conflicts(db: Session, branch_id: UUID, tenant_id: UUID | None = None):
+    # Asegura que cualquier reserva que haya cumplido su vencimiento libere existencias
+    expire_due_reservations(db)
+
+    query = (
+        db.query(Reservation)
+        .options(selectinload(Reservation.items))
+        .filter(
+            Reservation.branch_id == branch_id,
+            (
+                Reservation.status.in_([
+                    ReservationStatusEnum.expired,
+                    ReservationStatusEnum.not_sold,
+                    ReservationStatusEnum.cancelled,
+                ])
+                | (Reservation.resolved_at.isnot(None))
+            ),
+        )
+    )
+    if tenant_id:
+        query = query.filter(Reservation.tenant_id == tenant_id)
+
+    reservations = query.order_by(Reservation.created_at.desc()).all()
+    results = []
+    for res in reservations:
+        items_stock = []
+        can_reactivate = True if res.items else False
+        for item in res.items:
+            inv = db.query(Inventory).filter(
+                Inventory.variant_id == item.variant_id,
+                Inventory.branch_id == res.branch_id,
+            ).first()
+            available = _available_quantity(inv)
+            has_stock = available >= item.quantity
+            if not has_stock:
+                can_reactivate = False
+
+            variant = (
+                db.query(ProductVariant)
+                .options(joinedload(ProductVariant.product))
+                .filter(ProductVariant.id == item.variant_id)
+                .first()
+            )
+            prod_name = variant.product.name if variant and variant.product else "Prenda"
+            sku = variant.sku if variant else str(item.variant_id)
+
+            items_stock.append(ItemStockAvailability(
+                variant_id=item.variant_id,
+                product_name=prod_name,
+                variant_sku=sku,
+                requested_quantity=item.quantity,
+                available_quantity=available,
+                has_sufficient_stock=has_stock,
+            ))
+
+        serialized = _serialize_reservation(db, res)
+        results.append(ReservationConflictItemRead(
+            id=res.id,
+            reservation_code=serialized.reservation_code,
+            user_id=res.user_id,
+            user_name=serialized.user_name,
+            branch_id=res.branch_id,
+            branch_name=serialized.branch_name,
+            visit_date=res.visit_date,
+            expires_at=res.expires_at,
+            status=res.status,
+            total_amount=res.total_amount,
+            item_count=serialized.item_count,
+            resolved_at=res.resolved_at,
+            resolved_by=res.resolved_by,
+            resolution_note=res.resolution_note,
+            can_reactivate=can_reactivate,
+            items_stock=items_stock,
+            items=serialized.items,
+        ).model_dump())
+
+    return results
+
+
+def resolve_reservation_conflict(
+    db: Session,
+    reservation_id: UUID,
+    payload: ReservationConflictResolveRequest,
+    user_id: UUID,
+    tenant_id: UUID | None = None,
+    branch_id: UUID | None = None,
+):
+    query = (
+        db.query(Reservation)
+        .options(selectinload(Reservation.items))
+        .filter(Reservation.id == reservation_id)
+        .with_for_update()
+    )
+    if tenant_id:
+        query = query.filter(Reservation.tenant_id == tenant_id)
+    if branch_id:
+        query = query.filter(Reservation.branch_id == branch_id)
+
+    reservation = query.first()
+    if not reservation:
+        return None
+
+    try:
+        now_utc = datetime.now(timezone.utc)
+        if payload.resolution_type == ConflictResolutionType.reactivate:
+            # Validar que todos los items de la reserva cuenten con stock disponible en la sucursal
+            for item in reservation.items:
+                inv = _get_inventory_for_update(db, item.variant_id, reservation.branch_id)
+                available = _available_quantity(inv)
+                if available < item.quantity:
+                    raise ValueError(
+                        f"No es posible reactivar la reserva: la prenda seleccionada no cuenta con stock disponible suficiente ({available} disp. vs {item.quantity} req.)."
+                    )
+
+            # Re-bloquear inventario
+            for item in reservation.items:
+                inv = _get_inventory_for_update(db, item.variant_id, reservation.branch_id)
+                if inv:
+                    inv.reserved_quantity = (inv.reserved_quantity or 0) + item.quantity
+
+            reservation.status = ReservationStatusEnum.confirmed
+            reservation.expires_at = date.today() + timedelta(days=payload.extended_days)
+            reservation.resolved_at = now_utc
+            reservation.resolved_by = user_id
+            reservation.resolution_note = f"[REACTIVACIÓN +{payload.extended_days}d]: {payload.notes}"
+
+        elif payload.resolution_type == ConflictResolutionType.substitute:
+            if not payload.substitute_variant_id:
+                raise ValueError("Debe indicar la variante sustituta para reasignar la reserva.")
+
+            sub_variant = db.query(ProductVariant).filter(
+                ProductVariant.id == payload.substitute_variant_id
+            ).first()
+            if not sub_variant:
+                raise ValueError("La variante sustituta indicada no existe.")
+
+            sub_inv = _get_inventory_for_update(db, payload.substitute_variant_id, reservation.branch_id)
+            available = _available_quantity(sub_inv)
+            if available < 1:
+                raise ValueError("La prenda sustituta seleccionada no tiene stock disponible en esta sucursal.")
+
+            # Si la reserva tenía inventario reservado previo, liberarlo
+            if reservation.status in ACTIVE_RESERVATION_STATUSES:
+                for item in reservation.items:
+                    old_inv = _get_inventory_for_update(db, item.variant_id, reservation.branch_id)
+                    if old_inv:
+                        old_inv.reserved_quantity = max((old_inv.reserved_quantity or 0) - item.quantity, 0)
+
+            # Reasignar el primer item a la variante sustituta
+            if reservation.items:
+                target_item = reservation.items[0]
+                target_item.variant_id = sub_variant.id
+                target_item.unit_price = Decimal(str(sub_variant.price or 0.0))
+                target_item.tenant_id = reservation.tenant_id
+
+            # Bloquear la nueva variante en inventario
+            sub_inv.reserved_quantity = (sub_inv.reserved_quantity or 0) + (reservation.items[0].quantity if reservation.items else 1)
+
+            reservation.status = ReservationStatusEnum.confirmed
+            reservation.expires_at = date.today() + timedelta(days=payload.extended_days)
+            reservation.resolved_at = now_utc
+            reservation.resolved_by = user_id
+            reservation.resolution_note = f"[SUSTITUCIÓN VAR {sub_variant.sku}]: {payload.notes}"
+
+        elif payload.resolution_type == ConflictResolutionType.close:
+            # Liberar cualquier residuo de stock reservado si aún estuviese activo
+            if reservation.status in ACTIVE_RESERVATION_STATUSES:
+                for item in reservation.items:
+                    inv = _get_inventory_for_update(db, item.variant_id, reservation.branch_id)
+                    if inv:
+                        inv.reserved_quantity = max((inv.reserved_quantity or 0) - item.quantity, 0)
+
+            reservation.status = ReservationStatusEnum.cancelled
+            reservation.resolved_at = now_utc
+            reservation.resolved_by = user_id
+            reservation.resolution_note = f"[CIERRE DEFINITIVO]: {payload.notes}"
+
+        db.commit()
+        db.refresh(reservation)
+        notify_reservation_event(db, reservation.id, reservation.user_id, reservation.status.value)
+        return _serialize_reservation(db, reservation).model_dump()
+    except Exception:
+        db.rollback()
+        raise
+

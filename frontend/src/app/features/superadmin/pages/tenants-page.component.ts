@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { CompanyService } from '../../../core/services/company.service';
@@ -11,12 +12,13 @@ import { SubscriptionModalComponent } from '../components/subscription-modal.com
 @Component({
   selector: 'app-tenants-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, TenantFormModalComponent, SubscriptionModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, TenantFormModalComponent, SubscriptionModalComponent],
   template: `
     <div class="space-y-8 p-6 lg:p-10 max-w-7xl mx-auto">
       
       <!-- HEADER CON RESUMEN EJECUTIVO -->
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Portal Master SaaS • CU01 & CU02
@@ -40,6 +42,23 @@ import { SubscriptionModalComponent } from '../components/subscription-modal.com
           <span>Registrar Empresa</span>
         </button>
       </div>
+
+      <!-- NAVEGACIÓN SUPERIOR ENTRE MÓDULOS DEL MASTER SAAS -->
+      <div class="flex items-center gap-2 border-b border-slate-200 text-sm font-medium">
+        <a
+          routerLink="/app/superadmin/tenants"
+          class="pb-3 px-1 border-b-2 border-slate-900 text-slate-900 font-semibold"
+        >
+          Empresas Contratantes
+        </a>
+        <a
+          routerLink="/app/superadmin/plans"
+          class="pb-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
+        >
+          Planes & Cuotas SaaS
+        </a>
+      </div>
+    </div>
 
       <!-- TARJETAS DE MÉTRICAS (KPIs) -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

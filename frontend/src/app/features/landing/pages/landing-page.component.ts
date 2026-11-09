@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 interface FaqItem {
@@ -12,6 +12,19 @@ interface StepItem {
   number: string;
   title: string;
   description: string;
+}
+
+interface PlanItem {
+  name: string;
+  badge: string;
+  price: string;
+  period: string;
+  highlightText: string;
+  description: string;
+  features: string[];
+  isPopular?: boolean;
+  ctaText: string;
+  ctaLink: string;
 }
 
 interface FeatureItem {
@@ -29,13 +42,121 @@ interface FeatureItem {
   styleUrl: './landing-page.component.css',
 })
 export class LandingPageComponent {
-  // Configuración de imágenes del sitio (aquí puedes cambiar las fotos fácilmente)
+  // Configuración de imágenes del sitio
+  // Planes de suscripción SaaS oficiales
+  readonly plans: PlanItem[] = [
+    {
+      name: 'Plan Básico',
+      badge: 'Boutique Inicial',
+      price: '',
+      period: 'USD/mes',
+      highlightText: 'Primer mes GRATIS (Prueba de 30 días)',
+      description: 'Ideal para boutiques independientes y tiendas que inician su digitalización.',
+      features: [
+        'Hasta 2 sucursales activas',
+        'Productos y variantes ilimitadas (talles y colores)',
+        'Punto de Venta POS de mostrador (con modo offline)',
+        'Catálogo digital interactivo y reservas',
+        'Gestión de clientes y tallas habituales',
+        'Control de stock, turnos y arqueos de caja',
+        'Reportes esenciales de rotación y ventas',
+      ],
+      isPopular: false,
+      ctaText: 'Comenzar prueba gratis',
+      ctaLink: '/auth/register',
+    },
+    {
+      name: 'Plan Profesional',
+      badge: '★ Más Elegido',
+      price: '',
+      period: 'USD/mes',
+      highlightText: 'Incluye Módulo IA Generativa',
+      description: 'Para marcas y cadenas de moda en expansión que buscan maximizar ventas.',
+      features: [
+        'Hasta 10 sucursales y depósitos',
+        'Todo lo incluido en el Plan Básico',
+        'Probador Virtual con Inteligencia Artificial (IA)',
+        'Recomendaciones colaborativas personalizadas',
+        'Gestión de despachos con Stripe y pasarelas',
+        'Políticas avanzadas de cambios y devoluciones',
+        'Métricas predictivas de rentabilidad y demanda',
+      ],
+      isPopular: true,
+      ctaText: 'Iniciar con Pro',
+      ctaLink: '/auth/register',
+    },
+    {
+      name: 'Plan Empresarial',
+      badge: 'Multitienda & Franquicia',
+      price: '',
+      period: 'USD/mes',
+      highlightText: 'Soporte y SLA Prioritario 24/7',
+      description: 'Solución corporativa para grandes retailers textiles y franquicias.',
+      features: [
+        'Hasta 25 sucursales centralizadas',
+        'Acceso completo a todos los modelos de IA',
+        'Sincronización multi-sucursal en tiempo real',
+        'Asistente de reposición inteligente entre locales',
+        'API dedicada para integraciones contables/ERP',
+        'Copias de respaldo continuas y auditoría SaaS',
+        'Onboarding personalizado y soporte VIP',
+      ],
+      isPopular: false,
+      ctaText: 'Contactar a Ventas',
+      ctaLink: '/auth/register',
+    },
+  ];
+
   readonly images = {
     logoIcon: '/assets/logo-fashionstore.png',
     logoName: '/assets/logo-name.png',
     heroStore: '/assets/clothes-perch-cream.jpg',
     tryOnStore: '/assets/women-store.jpg',
   };
+
+  // Estado de desplazamiento para fluidez de la navbar y botón flotante
+  readonly isScrolled = signal(false);
+
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    if (typeof window !== 'undefined') {
+      this.isScrolled.set(window.scrollY > 30);
+    }
+  }
+
+  // Desplazamiento suave y preciso hacia cualquier sección
+  scrollToSection(event: Event, sectionId: string): void {
+    event.preventDefault();
+    if (typeof document === 'undefined') return;
+
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navOffset = 85;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - navOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+
+      // Actualiza la URL de forma limpia
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+  }
+
+  // Desplazamiento fluido al inicio (Top)
+  scrollToTop(event?: Event): void {
+    if (event) event.preventDefault();
+    if (typeof window === 'undefined') return;
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+
+    window.history.pushState(null, '', '/');
+  }
 
   // FAQ reactivo con estado abierto/cerrado
   readonly faqs = signal<FaqItem[]>([

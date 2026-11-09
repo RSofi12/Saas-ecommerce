@@ -56,6 +56,20 @@ async def get_branch_quota_route(
     )
 
 
+@router.get("/public", summary="Listar sucursales públicas activas para clientes y mapa (CU19)")
+async def list_public_branches_route(
+    db: Session = Depends(get_db),
+    tenant_id: UUID | None = None,
+):
+    branches = [b for b in get_branches(db, tenant_id=tenant_id) if b.is_active]
+    branches_data = [BranchRead.model_validate(b).model_dump() for b in branches]
+    return response(
+        status_code=status.HTTP_200_OK,
+        message="Sucursales públicas obtenidas exitosamente",
+        data=branches_data,
+    )
+
+
 @router.get("/", summary="Listar sucursales filtradas por tenant")
 async def list_branches_route(
     db: Session = Depends(get_db),

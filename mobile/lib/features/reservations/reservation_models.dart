@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum ReservationStatus {
   pending('pending'),
   confirmed('confirmed'),
@@ -88,6 +90,9 @@ class Reservation {
     required this.items,
     this.updatedAt,
     this.cartId,
+    this.reservationCode,
+    this.qrPayload,
+    this.clientReservationId,
   });
 
   final String id;
@@ -102,6 +107,9 @@ class Reservation {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String? cartId;
+  final String? reservationCode;
+  final String? qrPayload;
+  final String? clientReservationId;
   final List<ReservationItem> items;
 
   bool get canCancel =>
@@ -127,6 +135,9 @@ class Reservation {
       createdAt: _requiredDateTime(json, 'created_at'),
       updatedAt: _optionalDateTime(json, 'updated_at'),
       cartId: _optionalString(json, 'cart_id'),
+      reservationCode: _optionalString(json, 'reservation_code'),
+      qrPayload: _optionalString(json, 'qr_payload'),
+      clientReservationId: _optionalString(json, 'client_reservation_id'),
       items: rawItems
           .map((item) {
             if (item is! Map) {
@@ -218,4 +229,68 @@ DateTime? _optionalDateTime(Map<String, dynamic> json, String key) {
   final value = DateTime.tryParse(rawValue.toString());
   if (value == null) throw FormatException('$key inválido');
   return value;
+}
+
+
+class PendingOfflineReservation {
+  const PendingOfflineReservation({
+    required this.clientReservationId,
+    required this.branchId,
+    this.branchName,
+    required this.visitDate,
+    required this.items,
+    required this.totalAmount,
+    required this.itemCount,
+    required this.createdAt,
+    this.syncStatus = 'PENDIENTE_SYNC',
+  });
+
+  final String clientReservationId;
+  final String branchId;
+  final String? branchName;
+  final DateTime visitDate;
+  final List<ReservationDraftItem> items;
+  final double totalAmount;
+  final int itemCount;
+  final DateTime createdAt;
+  final String syncStatus;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'client_reservation_id': clientReservationId,
+      'branch_id': branchId,
+      'branch_name': branchName ?? 'Sucursal seleccionada',
+      'visit_date': formatReservationDate(visitDate),
+      'items_json': jsonEncode([for (final i in items) i.toJson()]),
+      'total_amount': totalAmount,
+      'item_count': itemCount,
+      'created_at': createdAt.toIso8601String(),
+      'sync_status': syncStatus,
+    };
+  }
+
+  factory PendingOfflineReservation.fromMap(Map<String, dynamic> map) {
+    final rawItems = jsonDecode(map['items_json']?.toString() ?? '[]');
+    final itemsList = (rawItems is List ? rawItems : [])
+        .map((i) {
+          final itemMap = Map<String, dynamic>.from(i as Map);
+          return ReservationDraftItem(
+            variantId: itemMap['variant_id'].toString(),
+            quantity: (itemMap['quantity'] as num?)?.toInt() ?? 1,
+          );
+        })
+        .toList();
+
+    return PendingOfflineReservation(
+      clientReservationId: map['client_reservation_id'].toString(),
+      branchId: map['branch_id'].toString(),
+      branchName: map['branch_name']?.toString(),
+      visitDate: DateTime.tryParse(map['visit_date'].toString()) ?? DateTime.now(),
+      items: itemsList,
+      totalAmount: (map['total_amount'] as num?)?.toDouble() ?? 0.0,
+      itemCount: (map['item_count'] as num?)?.toInt() ?? itemsList.length,
+      createdAt: DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now(),
+      syncStatus: map['sync_status']?.toString() ?? 'PENDIENTE_SYNC',
+    );
+  }
 }

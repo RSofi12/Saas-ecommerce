@@ -1,7 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
-import { ApiResponse, Company, CompanyCreateDto, Plan, Subscription } from '../models/company.model';
+import {
+  ApiResponse,
+  Company,
+  CompanyCreateDto,
+  Plan,
+  PlanCreateDto,
+  PlanUpdateDto,
+  Subscription,
+  SubscriptionAssignDto,
+  SubscriptionUpdateDto,
+} from '../models/company.model';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyService {
@@ -20,9 +30,40 @@ export class CompanyService {
     );
   }
 
-  getPlans(): Observable<Plan[]> {
-    return this.api.get<ApiResponse<Plan[]>>('/saas/plans').pipe(
+  getPlans(includeInactive: boolean = false): Observable<Plan[]> {
+    const query = includeInactive ? '?include_inactive=true' : '';
+    return this.api.get<ApiResponse<Plan[]>>(`/saas/plans${query}`).pipe(
       map((res) => res.data || []),
+    );
+  }
+
+  getPlanById(id: string): Observable<Plan> {
+    return this.api.get<ApiResponse<Plan>>(`/saas/plans/${id}`).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  createPlan(dto: PlanCreateDto): Observable<Plan> {
+    return this.api.post<ApiResponse<Plan>>('/saas/plans', dto).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  updatePlan(id: string, dto: PlanUpdateDto): Observable<Plan> {
+    return this.api.put<ApiResponse<Plan>>(`/saas/plans/${id}`, dto).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  togglePlanStatus(id: string, isActive: boolean): Observable<Plan> {
+    return this.api.patch<ApiResponse<Plan>>(`/saas/plans/${id}/status`, { is_active: isActive }).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  deletePlan(id: string): Observable<Plan | null> {
+    return this.api.delete<ApiResponse<Plan | null>>(`/saas/plans/${id}`).pipe(
+      map((res) => res.data),
     );
   }
 
@@ -44,12 +85,14 @@ export class CompanyService {
     );
   }
 
-  assignSubscription(companyId: string, planId: string): Observable<Subscription> {
-    return this.api.post<ApiResponse<Subscription>>('/saas/subscriptions', {
-      company_id: companyId,
-      plan_id: planId,
-      status: 'ACTIVA',
-    }).pipe(
+  assignSubscription(dto: SubscriptionAssignDto): Observable<Subscription> {
+    return this.api.post<ApiResponse<Subscription>>('/saas/subscriptions', dto).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  updateSubscription(subscriptionId: string, dto: SubscriptionUpdateDto): Observable<Subscription> {
+    return this.api.put<ApiResponse<Subscription>>(`/saas/subscriptions/${subscriptionId}`, dto).pipe(
       map((res) => res.data),
     );
   }

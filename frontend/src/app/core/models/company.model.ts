@@ -1,12 +1,31 @@
 export interface Plan {
   id: string;
   name: string;
-  code: 'basic' | 'pro' | string;
+  code: string;
   description?: string | null;
   max_branches: number;
   has_ai_access: boolean;
   price_monthly: number;
   is_active: boolean;
+}
+
+export interface PlanCreateDto {
+  name: string;
+  code: string;
+  description?: string | null;
+  max_branches: number;
+  has_ai_access: boolean;
+  price_monthly: number;
+  is_active?: boolean;
+}
+
+export interface PlanUpdateDto {
+  name?: string;
+  description?: string | null;
+  max_branches?: number;
+  has_ai_access?: boolean;
+  price_monthly?: number;
+  is_active?: boolean;
 }
 
 export interface Subscription {
@@ -15,8 +34,23 @@ export interface Subscription {
   plan_id: string;
   start_date: string;
   end_date?: string | null;
-  status: 'ACTIVA' | 'VENCIDA' | 'CANCELADA';
+  status: 'ACTIVA' | 'VENCIDA' | 'CANCELADA' | string;
   plan?: Plan;
+}
+
+export interface SubscriptionAssignDto {
+  company_id: string;
+  plan_id: string;
+  start_date?: string;
+  end_date?: string | null;
+  status?: string;
+}
+
+export interface SubscriptionUpdateDto {
+  plan_id?: string;
+  start_date?: string;
+  end_date?: string | null;
+  status?: string;
 }
 
 export interface Company {
@@ -41,7 +75,7 @@ export interface CompanyCreateDto {
   subdomain: string;
   email?: string;
   phone?: string;
-  plan_code: 'basic' | 'pro';
+  plan_code: string;
   admin_name: string;
   admin_email: string;
   admin_password: string;

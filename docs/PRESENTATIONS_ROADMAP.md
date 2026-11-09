@@ -2,7 +2,7 @@
 ### FashionStore — Plataforma SaaS Multitenant E-Commerce
 **Materia:** Sistemas de Información 2 (2do Parcial)  
 **Modalidad de Presentación:** Entregas Incrementales Acumulativas (Sin Ciclos RUP)  
-**Total de Casos de Uso:** 28 Casos de Uso Oficiales
+**Total de Casos de Uso:** 25 Casos de Uso Oficiales
 
 ---
 
@@ -21,76 +21,72 @@ Cada presentación suma nuevas funcionalidades sobre la base anterior, garantiza
 gantt
     title Cronograma de Hitos de Presentación - 2do Parcial
     dateFormat  YYYY-MM-DD
-    section Presentación 1 (10 CUs)
+    section Presentación 1 (8 CUs)
     SaaS Multitenant, Planes y Catálogo Offline :done, 2026-10-20, 2026-10-25
-    section Presentación 2 (22 CUs Acum.)
-    POS Offline, Sync Idempotente, Políticas y Mapas :active, 2026-10-26, 2026-11-01
-    section Presentación 3 (28 CUs Acum.)
-    IA Gemini Voz, Modelos ML y Dashboard :2026-11-02, 2026-11-08
+    section Presentación 2 (18 CUs Acum.)
+    POS Offline, Sync Idempotente, Políticas y Stripe :active, 2026-10-26, 2026-11-01
+    section Presentación 3 (25 CUs Acum.)
+    IA Gemini Voz, Modelos ML, Rutas OSM y Dashboard :2026-11-02, 2026-11-08
     section Defensa Final
-    Defensa Integral del Sistema (28 CUs) :crit, 2026-11-09, 2026-11-10
+    Defensa Integral del Sistema (25 CUs) :crit, 2026-11-09, 2026-11-10
 ```
 
 ---
 
-### HITO 1: Presentación 1 (25 de Octubre de 2026)
+### HITO 1: Presentación 1 (25 de Octubre de 2026) — 100% COMPLETADO
 **Meta:** Establecer la infraestructura SaaS multitienda, control de cuotas por plan y catálogo de prendas con variantes de talla/precio y almacenamiento desconectado inicial.  
-**Alcance Acumulado:** 10 Casos de Uso (CU01 al CU10).
+**Alcance Acumulado:** 8 Casos de Uso (`CU01` al `CU08`).
 
 | Código | Caso de Uso | Paquete | Plataforma | Criterio de Aceptación / Verificación |
 | :---: | :--- | :---: | :---: | :--- |
-| **CU01** | Registrar y Gestionar Empresas (Tenants) | `p0` / `p1` | Web | Creación de tenant con `subdomain` único y aislamiento a nivel de base de datos. |
-| **CU02** | Gestionar Planes de Suscripción y Límites | `p0` | Web | Asignación de Plan Básico (máx. 2 sucursales) y Profesional (máx. 10 sucursales). |
-| **CU03** | Iniciar Sesión Multitenant con JWT | `p1` | Web / Móvil | Autenticación con claims de `tenant_id` y `role` en token criptográfico. |
-| **CU04** | Gestionar Sucursales Bajo Límites del Plan | `p1` | Web | Bloqueo estricto del backend si se intenta registrar una 3ra sucursal en Plan Básico. |
-| **CU05** | Gestionar Perfil y Preferencias de Usuario | `p1` | Web / Móvil | Edición de credenciales y datos de cuenta de usuario. |
-| **CU06** | Gestionar Prendas y Variantes de Precio/Talla | `p2` | Web | Registro de prendas con precios diferenciados por talla (ej. Talla M a Bs 50 vs Talla L a Bs 70). |
-| **CU07** | Consultar Catálogo Online con Búsqueda Facetada | `p2` | Web / Móvil | Filtros en vivo por categoría, rango de precios y tallas. |
-| **CU08** | Descargar Catálogo a Base Local (IndexedDB/SQLite)| `p3` | PWA / Móvil | Descarga y persistencia local del catálogo para consulta sin conexión. |
-| **CU09** | Consultar Catálogo Offline en Modo Desconectado | `p3` | PWA / Móvil | Navegación íntegra por prendas y tallas en modo avión o sin red. |
-| **CU10** | Consultar Disponibilidad de Stock por Sucursal | `p3` | Web / Móvil | Visualización del inventario desglosado por tienda física. |
+| **CU01** | Registrar y Gestionar Empresas (Tenants) | `p0` | Web | Creación de tenant con `subdomain` único y aislamiento multitenant estricto. |
+| **CU02** | Gestionar Planes de Suscripción (Básico, Pro, Empresarial) y Cuotas | `p0` | Web | Catálogo de planes: Básico (máx. 3 sucursales), Profesional (máx. 10) y Empresarial (máx. 25). |
+| **CU03** | Iniciar Sesión Multitenant con JWT | `p1` | Web / Móvil | Autenticación con inyección de claims `tenant_id`, `rol` y `branch_id`. |
+| **CU04** | Gestionar Sucursales Bajo Límites del Plan | `p1` | Web | Bloqueo estricto del backend si se sobrepasa el cupo contratado del plan. |
+| **CU05** | Gestionar Prendas y Variantes de Precio por Talla | `p2` | Web | Precios diferenciados por talla para habilitar políticas de cambio. |
+| **CU06** | Consultar Catálogo Online con Búsqueda Facetada | `p2` | Web / Móvil | Filtros en vivo por categoría, rango de precios y tallas. |
+| **CU07** | Sincronizar y Descargar Catálogo Local (PWA/SQLite)| `p3` | PWA / Móvil | Descarga y persistencia local del catálogo para consulta sin conexión. |
+| **CU08** | Consultar Catálogo Offline en Modo Desconectado | `p3` | PWA / Móvil | Navegación íntegra por prendas y tallas en modo desconectado. |
 
 ---
 
-### HITO 2: Presentación 2 (01 de Noviembre de 2026)
-**Meta:** Implementar el motor comercial completo: ventas online con Stripe y despacho condicionado, reservas físicas con caducidad, traslados entre tiendas, terminal POS offline con sincronización idempotente (`sync_operations`), políticas inviolables de cambio/devolución y navegación geográfica con OpenStreetMap en Flutter.  
-**Alcance Acumulado:** 22 Casos de Uso (10 anteriores + 12 nuevos = CU01 al CU22).
+### HITO 2: Presentación 2 (01 de Noviembre de 2026) — EN CURSO
+**Meta:** Implementar el motor comercial completo: ventas online con Stripe y despacho condicionado, reservas físicas con caducidad, terminal POS offline con sincronización idempotente (`sync_operations`) y políticas inviolables de cambio y devolución.  
+**Alcance Acumulado:** 18 Casos de Uso (8 anteriores + 10 nuevos = `CU01` al `CU18`).
 
 | Código | Caso de Uso | Paquete | Plataforma | Criterio de Aceptación / Verificación |
 | :---: | :--- | :---: | :---: | :--- |
-| **CU11** | Registrar y Autorizar Traslados de Mercadería | `p3` | Web | Movimiento de stock entre sucursales con control de origen y destino. |
-| **CU12** | Comprar Prendas con Stripe y Despacho Condicionado | `p4` | Web / Móvil | Cobro exitoso vía webhook Stripe; el despacho se autoriza **únicamente** cuando `status = 'paid'`. |
-| **CU13** | Crear Reserva de Prendas con Vencimiento | `p4` | Web / Móvil | Apartado de stock en sucursal con temporizador de caducidad (24h). |
-| **CU14** | Atender y Resolver Conflictos de Reservas | `p4` | Web / Backend | Liberación automática de stock vencido y venta de reserva asistida. |
-| **CU15** | Registrar Venta Directa en POS Online | `p5` | Web / Móvil POS | Venta presencial con descuento de inventario en tiempo real. |
-| **CU16** | Registrar Venta Offline en Efectivo con UUID | `p5` | PWA / Móvil POS | Venta desconectada **exclusivamente en efectivo**, con UUIDv4 y guardado local. |
-| **CU17** | Gestionar Bandeja Local de Operaciones Pendientes | `p5` | PWA / Móvil POS | Interfaz con contador numérico de ventas en estado `PENDIENTE_SYNC`. |
-| **CU18** | Sincronizar Lotes de Ventas con Idempotencia | `p5` | Background / API | Endpoint `/api/sales/offline/batch-sync` con auditoría en `sync_operations` (cero duplicados). |
-| **CU19** | Procesar Cambio de Prenda con Diferencia de Precio| `p5` | Web POS | Cambio de talla M a L: **se consolida solo si el cliente abona los Bs 20 de diferencia**. |
-| **CU20** | Procesar Devolución con Retención del 20%-50% | `p5` | Web POS | Retención operativa del 30% sobre el valor abonado y reembolso neto del 70%. |
-| **CU21** | Localizar Sucursales y Trazar Rutas (OpenStreetMap)| `p6` | Móvil Flutter | Mapa libre en Flutter con cálculo de rutas mediante OpenRouteService. |
-| **CU22** | Probar Prendas en Realidad Aumentada (AR) | `p6` | Móvil Flutter | Superposición de prenda sobre la silueta del cliente mediante cámara móvil. |
+| **CU09** | Comprar Prendas con Stripe y Despacho Condicionado | `p4` | Web / Móvil | Despacho condicionado: bloqueo estricto si `payment_status != 'paid'`. |
+| **CU10** | Crear Reserva Online de Prendas con Vencimiento | `p4` | Web / Móvil | Apartado de stock temporal (máx 7 días) con vencimiento a 24 horas post-visita. |
+| **CU11** | Registrar Reserva Offline en Modo Desconectado | `p4` | PWA / Móvil | Registro de apartados sin conexión con UUIDv4 local y outbox. |
+| **CU12** | Atender y Resolver Conflictos de Reservas Expiradas | `p4` | Web / Backend | Liberación automática de stock caducado y reasignación de reservas. |
+| **CU13** | Registrar Venta POS Desconectada en Efectivo UUIDv4 | `p5` | PWA / Móvil POS | Venta desconectada **exclusivamente en efectivo**, con UUIDv4 local. |
+| **CU14** | Gestionar Bandeja Local de Operaciones (Outbox) | `p5` | PWA / Móvil POS | Monitor de operaciones con contador visual y estados de sincronización. |
+| **CU15** | Sincronizar Lotes de Ventas con Idempotencia Central | `p5` | Background / API | Endpoint `/api/sales/offline/batch-sync` auditado en `sync_operations` (cero duplicados). |
+| **CU16** | Resolver Conflictos de Ventas Offline y Quiebres | `p5` | Web / POS | Tratamiento de sobreventas ocurridas durante la desconexión. |
+| **CU17** | Procesar Cambio de Prenda por Talla y Cobro de Diferencia | `p5` | Web / POS | Cobro obligatorio de diferencia ($\Delta$); prenda rechazada si no tiene etiqueta. |
+| **CU18** | Procesar Devolución con Retención (20%-50%) y Nota de Crédito | `p5` | Web / POS | Retención operativa y liquidación del saldo neto en efectivo o Nota de Crédito Digital. |
 
 ---
 
-### HITO 3: Presentación 3 (08 de Noviembre de 2026)
-**Meta:** Incorporar la capa de Inteligencia Artificial y Analítica Predictiva: consultas ejecutivas por voz con Gemini API (RAG), exportación formal a PDF/Excel, dataset sintético de retail de moda, modelo supervisado de demanda, clustering no supervisado K-Means y dashboard ejecutivo con KPIs.  
-**Alcance Acumulado:** 28 Casos de Uso Completos (22 anteriores + 6 nuevos = CU01 al CU28).
+### HITO 3: Presentación 3 (08 de Noviembre de 2026) — PROGRAMADO
+**Meta:** Incorporar la capa de Inteligencia Artificial, Servicios Geoespaciales y Analítica Predictiva: localización y rutas con OpenStreetMap/ORS, consultas ejecutivas por voz con Gemini API (RAG), exportación formal a PDF/Excel, dataset sintético textil, modelo supervisado de demanda, clustering no supervisado K-Means y dashboard ejecutivo con KPIs.  
+**Alcance Acumulado:** 25 Casos de Uso Completos (18 anteriores + 7 nuevos = `CU01` al `CU25`).
 
 | Código | Caso de Uso | Paquete | Plataforma | Criterio de Aceptación / Verificación |
 | :---: | :--- | :---: | :---: | :--- |
-| **CU23** | Generar Reportes Ejecutivos por Voz y Lenguaje Natural| `p7` | Web / Móvil | Consulta RAG a Gemini con entrada de voz y respuesta hablada (TTS) con gráficos. |
-| **CU24** | Exportar Balances Dinámicos a PDF y Excel | `p7` | Web | Generación de balances consolidados de ventas, retenciones y stock. |
-| **CU25** | Generar Dataset Sintético de Ventas y Estacionalidad| `p7` | Backend Script | Generación estocástica de 10,000+ registros con estacionalidad de moda. |
-| **CU26** | Predecir Demanda de Ropa (Supervisado) | `p7` | Web / Backend | Modelo Scikit-Learn de predicción de ventas por talla y categoría ($R^2 \ge 0.82$). |
-| **CU27** | Segmentar Clientes con K-Means (No Supervisado) | `p7` | Web / Backend | Algoritmo K-Means con 4 clusters según Recencia, Frecuencia, Gasto y Devoluciones. |
-| **CU28** | Visualizar Dashboard Ejecutivo con KPIs | `p7` | Web | Tablero de mando con métricas de ventas, stock crítico, retenciones y sincronización. |
+| **CU19** | Localizar Sucursales y Trazar Rutas (OSM / ORS) | `p6` | Móvil Flutter | Mapa vectorial libre en Flutter con trazado de rutas óptimas con OpenRouteService. |
+| **CU20** | Generar Reportes Ejecutivos por Voz (Gemini RAG) | `p6` | Web / Móvil | Consulta RAG a Gemini con entrada/salida de voz y contexto seguro del tenant. |
+| **CU21** | Exportar Reportes Empresariales a PDF y Excel | `p6` | Web | Generación de balances dinámicos consolidados de facturación y stock. |
+| **CU22** | Generar Dataset Sintético de Ventas y Estacionalidad | `p6` | Backend Script | Generador estocástico de 10,000+ registros con estacionalidad de moda textil. |
+| **CU23** | Predecir Demanda de Ropa (ML Supervisado) | `p6` | Web / Backend | Regresión RandomForest para proyectar demanda por talla y categoría ($R^2 \ge 0.80$). |
+| **CU24** | Segmentar Clientes con K-Means (ML No Supervisado) | `p6` | Web / Backend | Clustering K-Means con 4 clusters basados en RFM y devoluciones. |
+| **CU25** | Visualizar Dashboard Ejecutivo con KPIs y ML | `p6` | Web | Tablero interactivo con métricas en tiempo real e inferencias analíticas. |
 
 ---
 
 ### HITO 4: Defensa Final Oficial (10 de Noviembre de 2026)
 **Meta:** Defensa integral y rigurosa ante el tribunal docente de la plataforma FashionStore.
-- Demostración en vivo de los **28 Casos de Uso**.
+- Demostración en vivo de los **25 Casos de Uso**.
 - Presentación del informe formal bajo metodología **ICONIX** (Fichas de CU, Diagramas de Robustez con loops en Controlador, Diagramas de Secuencia y Clases).
-- Anexos con modelos del 1er Parcial (Diseño conceptual, lógico, despliegue y clases).
 - Verificación en vivo de resiliencia: corte de Internet en terminal POS, venta offline en efectivo, reconexión de red y sincronización idempotente sin transacciones duplicadas.

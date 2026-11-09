@@ -43,6 +43,13 @@ class ManagementPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _ManagementCard(
+          icon: Icons.storefront_outlined,
+          title: 'Nuestras boutiques',
+          subtitle: 'Encuentra tiendas, horarios y traza rutas de llegada.',
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.branchesMap),
+        ),
+        const SizedBox(height: 12),
+        _ManagementCard(
           icon: Icons.notifications_none,
           title: 'Notificaciones',
           subtitle: 'Consulta novedades y cambios de estado.',

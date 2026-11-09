@@ -27,6 +27,7 @@ from app.packages.p2_gestion_productos_catalogo.models.product import Product
 from app.packages.p2_gestion_productos_catalogo.models.product_variant import ProductVariant
 from app.models.inventory import Inventory
 from app.packages.p1_gestion_usuarios_acceso.models.provider import Provider
+from app.packages.p1_gestion_usuarios_acceso.models.branch import Branch
 from app.packages.p2_gestion_productos_catalogo.services.catalog_service import (
     create_name_item,
     create_color,
@@ -267,22 +268,25 @@ async def list_products(
     color_id: UUID | None = None,
     season_id: UUID | None = None,
     collection_id: UUID | None = None,
+    tenant_id: UUID | None = None,
 ):
-    rows = list_public_products(db, branch_id, category_id, size_id, color_id, season_id, collection_id, q)
+    rows = list_public_products(db, branch_id, category_id, size_id, color_id, season_id, collection_id, q, tenant_id=tenant_id)
     return response(status_code=200, message="Productos obtenidos exitosamente", data=rows)
 
 
 @router.get("/products/admin")
 async def list_admin_products_route(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(RolEnum.administrador)),
+    current_user: dict = Depends(require_roles(RolEnum.administrador)),
 ):
-    return response(status_code=200, message="Productos administrativos obtenidos exitosamente", data=list_admin_products(db))
+    tenant_id = UUID(current_user["tenant_id"]) if current_user.get("tenant_id") else None
+    return response(status_code=200, message="Productos administrativos obtenidos exitosamente", data=list_admin_products(db, tenant_id=tenant_id))
 
 
 @router.get("/products/pending")
-async def list_pending_products(db: Session = Depends(get_db), current_user: User = Depends(require_roles(RolEnum.administrador))):
-    products = list_pending_products_service(db)
+async def list_pending_products(db: Session = Depends(get_db), current_user: dict = Depends(require_roles(RolEnum.administrador))):
+    tenant_id = UUID(current_user["tenant_id"]) if current_user.get("tenant_id") else None
+    products = list_pending_products_service(db, tenant_id=tenant_id)
     return response(status_code=200, message="Productos pendientes obtenidos exitosamente", data=products)
 
 
@@ -309,8 +313,11 @@ async def record_product_view_route(
 @router.post("/products", status_code=status.HTTP_201_CREATED)
 async def create_product_route(payload: ProductCreate, db: Session = Depends(get_db), current_user: dict = Depends(require_roles(RolEnum.administrador))):
     _validate_product_provider_scope(db, payload.provider_id)
+    tenant_id = UUID(current_user["tenant_id"]) if current_user.get("tenant_id") else None
+    if not tenant_id and current_user.get("rol") != RolEnum.superadmin.value:
+        raise HTTPException(status_code=400, detail="El administrador debe estar vinculado a una empresa")
     try:
-        product = create_product(db, payload, provider_id=payload.provider_id, status=ProductStatusEnum.active)
+        product = create_product(db, payload, provider_id=payload.provider_id, status=ProductStatusEnum.active, tenant_id=tenant_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     serialized = serialize_product(db, product.id)
@@ -320,8 +327,9 @@ async def create_product_route(payload: ProductCreate, db: Session = Depends(get
 @router.put("/products/{product_id}")
 async def update_product_route(product_id: UUID, payload: ProductCreate, db: Session = Depends(get_db), current_user: dict = Depends(require_roles(RolEnum.administrador))):
     _validate_product_provider_scope(db, payload.provider_id)
+    tenant_id = UUID(current_user["tenant_id"]) if current_user.get("tenant_id") else None
     try:
-        product = update_product(db, product_id, payload)
+        product = update_product(db, product_id, payload, tenant_id=tenant_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if not product:
@@ -331,9 +339,10 @@ async def update_product_route(product_id: UUID, payload: ProductCreate, db: Ses
 
 
 @router.delete("/products/{product_id}")
-async def delete_product_route(product_id: UUID, db: Session = Depends(get_db), current_user: User = Depends(require_roles(RolEnum.administrador))):
+async def delete_product_route(product_id: UUID, db: Session = Depends(get_db), current_user: dict = Depends(require_roles(RolEnum.administrador))):
+    tenant_id = UUID(current_user["tenant_id"]) if current_user.get("tenant_id") else None
     try:
-        deleted = delete_product(db, product_id)
+        deleted = delete_product(db, product_id, tenant_id=tenant_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if not deleted:
@@ -459,24 +468,149 @@ async def delete_variant_image_route(
 
 
 @router.get("/availability")
-async def get_availability(product_id: UUID | None = None, variant_id: UUID | None = None, branch_id: UUID | None = None, db: Session = Depends(get_db)):
-    if branch_id is None:
-        raise HTTPException(status_code=422, detail="branch_id es requerido")
+async def get_availability(
+    product_id: UUID | None = None,
+    variant_id: UUID | None = None,
+    branch_id: UUID | None = None,
+    tenant_id: UUID | None = None,
+    db: Session = Depends(get_db),
+):
+    if not product_id and not variant_id:
+        raise HTTPException(status_code=422, detail="Debes enviar product_id o variant_id")
 
+    # Si se envía branch_id específico, mantenemos el contrato unitario histórico
+    if branch_id is not None:
+        if variant_id:
+            quantity = get_branch_quantity(db, variant_id, branch_id)
+            return response(
+                status_code=200,
+                message="Disponibilidad obtenida exitosamente",
+                data={"variant_id": variant_id, "branch_id": branch_id, "quantity": quantity},
+            )
+        if product_id:
+            product = db.query(Product).options(selectinload(Product.variants)).filter(Product.id == product_id).first()
+            if not product:
+                raise HTTPException(status_code=404, detail=f"Producto con id {product_id} no encontrado")
+            variant_ids = [variant.id for variant in product.variants if variant.status == ProductStatusEnum.active]
+            inventories = db.query(Inventory).filter(Inventory.variant_id.in_(variant_ids), Inventory.branch_id == branch_id).all()
+            quantity = sum(available_quantity(inventory.quantity, inventory.reserved_quantity) for inventory in inventories)
+            return response(
+                status_code=200,
+                message="Disponibilidad obtenida exitosamente",
+                data={"product_id": product_id, "branch_id": branch_id, "quantity": quantity},
+            )
+
+    # CU10: branch_id is None -> Consulta de disponibilidad multisede por sucursales activas
     if variant_id:
-        quantity = get_branch_quantity(db, variant_id, branch_id)
-        return response(status_code=200, message="Disponibilidad obtenida exitosamente", data={"variant_id": variant_id, "branch_id": branch_id, "quantity": quantity})
+        variant = db.query(ProductVariant).filter(ProductVariant.id == variant_id).first()
+        if not variant:
+            raise HTTPException(status_code=404, detail=f"Variante con id {variant_id} no encontrada")
+        product = db.query(Product).filter(Product.id == variant.product_id).first()
+        target_tenant = tenant_id or getattr(variant, "tenant_id", None) or (product.tenant_id if product else None)
+
+        branch_query = db.query(Branch).filter(Branch.is_active.is_(True))
+        if target_tenant:
+            branch_query = branch_query.filter(Branch.tenant_id == target_tenant)
+        branches = branch_query.order_by(Branch.name.asc()).all()
+
+        inventories = (
+            db.query(Inventory)
+            .filter(
+                Inventory.variant_id == variant_id,
+                Inventory.branch_id.in_([b.id for b in branches]),
+            )
+            .all()
+            if branches
+            else []
+        )
+        inv_map = {inv.branch_id: inv for inv in inventories}
+
+        branch_list = []
+        total_available = 0
+        for b in branches:
+            inv = inv_map.get(b.id)
+            qty = inv.quantity if inv else 0
+            res = inv.reserved_quantity if inv else 0
+            avail = max(qty - res, 0)
+            total_available += avail
+            branch_list.append({
+                "branch_id": b.id,
+                "branch_name": b.name,
+                "city": b.city,
+                "address": b.address,
+                "phone": b.phone,
+                "opening_hours": b.opening_hours,
+                "quantity": qty,
+                "reserved_quantity": res,
+                "available_quantity": avail,
+            })
+
+        return response(
+            status_code=200,
+            message="Disponibilidad en sucursales obtenida exitosamente",
+            data={
+                "variant_id": variant_id,
+                "product_id": variant.product_id,
+                "product_name": product.name if product else None,
+                "sku": variant.sku,
+                "total_available": total_available,
+                "branches": branch_list,
+            },
+        )
 
     if product_id:
         product = db.query(Product).options(selectinload(Product.variants)).filter(Product.id == product_id).first()
         if not product:
             raise HTTPException(status_code=404, detail=f"Producto con id {product_id} no encontrado")
-        variant_ids = [variant.id for variant in product.variants if variant.status == ProductStatusEnum.active]
-        inventories = db.query(Inventory).filter(Inventory.variant_id.in_(variant_ids), Inventory.branch_id == branch_id).all()
-        quantity = sum(available_quantity(inventory.quantity, inventory.reserved_quantity) for inventory in inventories)
-        return response(status_code=200, message="Disponibilidad obtenida exitosamente", data={"product_id": product_id, "branch_id": branch_id, "quantity": quantity})
+        target_tenant = tenant_id or product.tenant_id
+        active_variant_ids = [v.id for v in product.variants if v.status == ProductStatusEnum.active]
 
-    raise HTTPException(status_code=422, detail="Debes enviar product_id o variant_id")
+        branch_query = db.query(Branch).filter(Branch.is_active.is_(True))
+        if target_tenant:
+            branch_query = branch_query.filter(Branch.tenant_id == target_tenant)
+        branches = branch_query.order_by(Branch.name.asc()).all()
+
+        inventories = (
+            db.query(Inventory)
+            .filter(
+                Inventory.variant_id.in_(active_variant_ids),
+                Inventory.branch_id.in_([b.id for b in branches]),
+            )
+            .all()
+            if branches and active_variant_ids
+            else []
+        )
+
+        branch_list = []
+        total_available = 0
+        for b in branches:
+            b_invs = [inv for inv in inventories if inv.branch_id == b.id]
+            qty = sum(inv.quantity for inv in b_invs)
+            res = sum(inv.reserved_quantity for inv in b_invs)
+            avail = sum(max(inv.quantity - inv.reserved_quantity, 0) for inv in b_invs)
+            total_available += avail
+            branch_list.append({
+                "branch_id": b.id,
+                "branch_name": b.name,
+                "city": b.city,
+                "address": b.address,
+                "phone": b.phone,
+                "opening_hours": b.opening_hours,
+                "quantity": qty,
+                "reserved_quantity": res,
+                "available_quantity": avail,
+            })
+
+        return response(
+            status_code=200,
+            message="Disponibilidad en sucursales obtenida exitosamente",
+            data={
+                "product_id": product_id,
+                "product_name": product.name,
+                "total_available": total_available,
+                "branches": branch_list,
+            },
+        )
 
 
 @router.put("/inventory")
@@ -496,3 +630,98 @@ async def set_inventory(product_id: UUID | None = None, variant_id: UUID | None 
 
     inv = create_or_update_inventory(db, resolved_variant_id, branch_id, quantity)
     return response(status_code=200, message="Inventario actualizado exitosamente", data={"variant_id": inv.variant_id, "branch_id": inv.branch_id, "quantity": inv.quantity})
+
+
+class OfflineBatchSyncRequest(BaseModel):
+    tenant_id: UUID | None = None
+    branch_id: UUID | None = None
+    operations: list[dict]
+
+
+@router.get("/offline-pack")
+async def get_offline_catalog_pack(
+    branch_id: UUID | None = None,
+    tenant_id: UUID | None = None,
+    db: Session = Depends(get_db),
+):
+    from app.models.catalog_cache import CatalogCache
+    from datetime import datetime, timezone
+
+    # 1. Obtener productos activos serializados filtrados por tenant
+    filtered_rows = list_public_products(db, branch_id=branch_id, tenant_id=tenant_id)
+
+    pack_data = {
+        "version": 1,
+        "tenant_id": str(tenant_id) if tenant_id else None,
+        "branch_id": str(branch_id) if branch_id else None,
+        "total_products": len(filtered_rows),
+        "products": filtered_rows,
+        "synced_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Guardar o actualizar snapshot en catalog_cache
+    try:
+        cache_entry = CatalogCache(
+            tenant_id=tenant_id,
+            version=1,
+            payload=pack_data,
+        )
+        db.add(cache_entry)
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return response(
+        status_code=200,
+        message="Paquete de catálogo offline descargado exitosamente",
+        data=pack_data,
+    )
+
+
+@router.post("/offline-sync", status_code=status.HTTP_201_CREATED)
+async def sync_offline_operations(
+    payload: OfflineBatchSyncRequest,
+    db: Session = Depends(get_db),
+):
+    from app.models.offline_operation import OfflineOperation
+    from datetime import datetime, timezone
+
+    processed = []
+    skipped = []
+
+    for op in payload.operations:
+        client_op_id = op.get("client_operation_id")
+        op_type = op.get("operation_type", "GENERIC_OFFLINE")
+        op_payload = op.get("payload", {})
+
+        # Validar idempotencia si tiene client_operation_id
+        if client_op_id:
+            existing = db.query(OfflineOperation).filter(OfflineOperation.client_operation_id == client_op_id).first()
+            if existing:
+                skipped.append({"client_operation_id": client_op_id, "reason": "ALREADY_SYNCED"})
+                continue
+
+        record = OfflineOperation(
+            tenant_id=payload.tenant_id,
+            branch_id=payload.branch_id,
+            operation_type=op_type,
+            client_operation_id=client_op_id,
+            payload=op_payload,
+            synced=True,
+            synced_at=datetime.now(timezone.utc),
+        )
+        db.add(record)
+        processed.append(client_op_id or str(record.id))
+
+    db.commit()
+
+    return response(
+        status_code=201,
+        message="Operaciones offline sincronizadas exitosamente",
+        data={
+            "processed_count": len(processed),
+            "skipped_count": len(skipped),
+            "processed": processed,
+            "skipped": skipped,
+        },
+    )

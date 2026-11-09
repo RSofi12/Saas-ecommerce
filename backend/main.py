@@ -14,27 +14,27 @@ from app.packages.p5_gestion_ventas_pos.router import p5_router
 from app.packages.p6_inteligencia_analitica.router import p6_router
 from app.core.error_handlers import register_error_handlers
 from app.core.database import SessionLocal
-from app.services.expiration_service import run_daily_expiration
-from app.services.order_service import expire_due_orders
+from app.services.expiration_service import run_daily_expiration, run_expiration_sweep
 
 
-async def _expire_orders_loop() -> None:
+async def _expiration_worker_loop() -> None:
+    """
+    Background worker continuo para FashionStore SaaS:
+    - Ejecuta un barrido inmediato al arrancar el servidor para reconciliar expiraciones pendientes.
+    - Se repite periódicamente cada 60 segundos barriendo y liberando existencias:
+      1. Reservas online vencidas (expires_at <= today) -> Restaura reserved_quantity a disponibilidad general.
+      2. Reservas transferidas al carrito cuyos pagos no se completaron.
+      3. Órdenes con plazo de pago caducado.
+    """
+    # 1. Barrido inicial al levantar la aplicación
+    try:
+        run_daily_expiration()
+    except Exception:
+        pass
+
+    # 2. Ciclo periódico cada 60 segundos
     while True:
         await asyncio.sleep(60)
-        db = SessionLocal()
-        try:
-            expire_due_orders(db)
-        except Exception:
-            db.rollback()
-        finally:
-            db.close()
-
-
-async def _daily_expiration_loop() -> None:
-    while True:
-        now = datetime.now()
-        next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        await asyncio.sleep(max((next_midnight - now).total_seconds(), 1))
         try:
             run_daily_expiration()
         except Exception:
@@ -43,17 +43,23 @@ async def _daily_expiration_loop() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    task = asyncio.create_task(_expire_orders_loop())
-    daily_task = asyncio.create_task(_daily_expiration_loop())
+    worker_task = asyncio.create_task(_expiration_worker_loop())
     try:
         yield
     finally:
-        task.cancel()
-        daily_task.cancel()
-        await asyncio.gather(task, daily_task, return_exceptions=True)
+        worker_task.cancel()
+        await asyncio.gather(worker_task, return_exceptions=True)
 
 
 app = FastAPI(title="FashionStore SaaS Multitenant API", lifespan=lifespan)
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to FashionStore API"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 # CORS
 app.add_middleware(

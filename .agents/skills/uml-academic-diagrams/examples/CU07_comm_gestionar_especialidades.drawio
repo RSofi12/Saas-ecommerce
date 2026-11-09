@@ -1,0 +1,246 @@
+<mxGraphModel dx="2742" dy="1318" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="950" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- TÍTULO DEL DIAGRAMA -->
+    <mxCell id="CU07-COMM-TITLE" parent="1" style="text;whiteSpace=wrap;html=1;labelBackgroundColor=none;" value="&lt;b style=&quot;font-weight:normal;&quot;&gt;&lt;p dir=&quot;ltr&quot; style=&quot;line-height:1.8;margin-top:0pt;margin-bottom:6pt;&quot;&gt;&lt;span style=&quot;font-size:12pt;font-family:Arial,sans-serif;color:#000000;font-weight:700;&quot;&gt;CU07 – Gestionar especialidades médicas (RF04 / Paquete 2: Recursos Clínicos)&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;font-size:9pt;color:#666666;margin:0;&quot;&gt;Diagrama de Comunicación UML • Flujo Actor - Boundary - Controller - Entities (Sin enlaces horizontales entre entidades ni entidades ociosas)&lt;/p&gt;&lt;/b&gt;" vertex="1">
+      <mxGeometry height="50" width="650" x="40" y="30" as="geometry" />
+    </mxCell>
+
+    <!-- ACTOR: :Administrador -->
+    <mxCell id="CU07-COMM-ACT" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontStyle=0;fontSize=10;labelBackgroundColor=none;fillColor=#fad9d5;strokeColor=#ae4132;" value=":Administrador" vertex="1">
+      <mxGeometry height="56" width="35" x="50" y="270" as="geometry" />
+    </mxCell>
+
+    <!-- BOUNDARY / INTERFACE: :SpecialtiesManager -->
+    <mxCell id="CU07-COMM-BND" parent="1" style="shape=umlBoundary;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":SpecialtiesManager" vertex="1">
+      <mxGeometry height="70" width="85" x="240" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- CONTROLLER: :SpecialtiesController -->
+    <mxCell id="CU07-COMM-CTRL" parent="1" style="ellipse;shape=umlControl;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":SpecialtiesController" vertex="1">
+      <mxGeometry height="75" width="75" x="500" y="260" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY: :Especialidad -->
+    <mxCell id="CU07-COMM-ENT-ESP" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Especialidad" vertex="1">
+      <mxGeometry height="42" width="42" x="840" y="100" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY: :Medico -->
+    <mxCell id="CU07-COMM-ENT-MED" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Medico" vertex="1">
+      <mxGeometry height="42" width="42" x="840" y="275" as="geometry" />
+    </mxCell>
+
+    <!-- ENTITY: :Bitacora -->
+    <mxCell id="CU07-COMM-ENT-BIT" parent="1" style="ellipse;shape=umlEntity;whiteSpace=wrap;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;labelBackgroundColor=none;rounded=1;fontStyle=1;" value=":Bitacora" vertex="1">
+      <mxGeometry height="42" width="42" x="840" y="440" as="geometry" />
+    </mxCell>
+
+    <!-- ENLACES DE COMUNICACIÓN (LÍNEAS SÓLIDAS) -->
+    <!-- Enlace Actor - Boundary -->
+    <mxCell id="CU07-COMM-LNK-ACT-BND" edge="1" parent="1" source="CU07-COMM-ACT" target="CU07-COMM-BND" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Boundary - Controller -->
+    <mxCell id="CU07-COMM-LNK-BND-CTRL" edge="1" parent="1" source="CU07-COMM-BND" target="CU07-COMM-CTRL" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Controller - Especialidad -->
+    <mxCell id="CU07-COMM-LNK-CTRL-ESP" edge="1" parent="1" source="CU07-COMM-CTRL" target="CU07-COMM-ENT-ESP" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.9;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Controller - Medico -->
+    <mxCell id="CU07-COMM-LNK-CTRL-MED" edge="1" parent="1" source="CU07-COMM-CTRL" target="CU07-COMM-ENT-MED" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Enlace Controller - Bitacora -->
+    <mxCell id="CU07-COMM-LNK-CTRL-BIT" edge="1" parent="1" source="CU07-COMM-CTRL" target="CU07-COMM-ENT-BIT" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.9;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- MENSAJES Y FLECHAS DE DIRECCIÓN: SECUENCIA 1 (CONSULTA CATÁLOGO Y FILTROS) -->
+    <!-- 1: solicitarCatalogoEspecialidades() [Actor -> Boundary] -->
+    <mxCell id="CU07-COMM-M1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1: solicitarCatalogoEspecialidades()" vertex="1">
+      <mxGeometry height="26" width="165" x="80" y="180" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A1" edge="1" parent="1" source="CU07-COMM-M1" target="CU07-COMM-M1" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="140" y="175" as="sourcePoint" />
+        <mxPoint x="175" y="175" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.1: fetchSpecialties() [Boundary -> Controller] -->
+    <mxCell id="CU07-COMM-M11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.1: fetchSpecialties()" vertex="1">
+      <mxGeometry height="24" width="125" x="355" y="175" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A11" edge="1" parent="1" source="CU07-COMM-M11" target="CU07-COMM-M11" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="400" y="170" as="sourcePoint" />
+        <mxPoint x="430" y="170" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.2: query() [Controller -> Especialidad] -->
+    <mxCell id="CU07-COMM-M12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.2: query()" vertex="1">
+      <mxGeometry height="24" width="80" x="650" y="45" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A12" edge="1" parent="1" source="CU07-COMM-M12" target="CU07-COMM-M12" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="40" as="sourcePoint" />
+        <mxPoint x="710" y="40" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.3: activas()` [Controller -> Especialidad] -->
+    <mxCell id="CU07-COMM-M13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.3: activas()" vertex="1">
+      <mxGeometry height="24" width="80" x="650" y="70" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A13" edge="1" parent="1" source="CU07-COMM-M13" target="CU07-COMM-M13" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="65" as="sourcePoint" />
+        <mxPoint x="710" y="65" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.4: buscar() [Controller -> Especialidad] -->
+    <mxCell id="CU07-COMM-M14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.4: buscar()" vertex="1">
+      <mxGeometry height="24" width="85" x="650" y="95" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A14" edge="1" parent="1" source="CU07-COMM-M14" target="CU07-COMM-M14" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="90" as="sourcePoint" />
+        <mxPoint x="710" y="90" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.5: where() [Controller -> Especialidad (Filtro RF04 Edad)] -->
+    <mxCell id="CU07-COMM-M15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.5: where()" vertex="1">
+      <mxGeometry height="24" width="80" x="650" y="120" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A15" edge="1" parent="1" source="CU07-COMM-M15" target="CU07-COMM-M15" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="115" as="sourcePoint" />
+        <mxPoint x="710" y="115" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.6: withCount() [Controller -> Medico] -->
+    <mxCell id="CU07-COMM-M16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.6: withCount()" vertex="1">
+      <mxGeometry height="24" width="95" x="650" y="255" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A16" edge="1" parent="1" source="CU07-COMM-M16" target="CU07-COMM-M16" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="685" y="250" as="sourcePoint" />
+        <mxPoint x="715" y="250" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.7: get() [Controller -> Especialidad] -->
+    <mxCell id="CU07-COMM-M17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="1.7: get()" vertex="1">
+      <mxGeometry height="24" width="75" x="650" y="145" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A17" edge="1" parent="1" source="CU07-COMM-M17" target="CU07-COMM-M17" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="140" as="sourcePoint" />
+        <mxPoint x="710" y="140" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 1.8: mostrarCatalogoEspecialidades() [Retorno Controller -> Boundary] -->
+    <mxCell id="CU07-COMM-M18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontStyle=0;" value="1.8: mostrarCatalogoEspecialidades()" vertex="1">
+      <mxGeometry height="20" width="180" x="335" y="205" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A18" edge="1" parent="1" source="CU07-COMM-M18" target="CU07-COMM-M18" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="435" y="202" as="sourcePoint" />
+        <mxPoint x="400" y="202" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- MENSAJES Y FLECHAS DE DIRECCIÓN: SECUENCIA 2 (CREAR ESPECIALIDAD CON RF04) -->
+    <!-- 2: enviarRegistroEspecialidad() [Actor -> Boundary] -->
+    <mxCell id="CU07-COMM-M2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="2: enviarRegistroEspecialidad()" vertex="1">
+      <mxGeometry height="24" width="165" x="85" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A2" edge="1" parent="1" source="CU07-COMM-M2" target="CU07-COMM-M2" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="145" y="270" as="sourcePoint" />
+        <mxPoint x="180" y="270" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.1: createSpecialty() [Boundary -> Controller] -->
+    <mxCell id="CU07-COMM-M21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="2.1: createSpecialty()" vertex="1">
+      <mxGeometry height="24" width="125" x="355" y="275" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A21" edge="1" parent="1" source="CU07-COMM-M21" target="CU07-COMM-M21" style="endArrow=classic;html=1;rounded=1;strokeWidth=2;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="400" y="270" as="sourcePoint" />
+        <mxPoint x="430" y="270" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.2: slug() [Controller -> Especialidad] -->
+    <mxCell id="CU07-COMM-M22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="2.2: slug()" vertex="1">
+      <mxGeometry height="24" width="80" x="650" y="10" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A22" edge="1" parent="1" source="CU07-COMM-M22" target="CU07-COMM-M22" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="5" as="sourcePoint" />
+        <mxPoint x="710" y="5" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.3: where() [Controller -> Especialidad (Unicidad)] -->
+    <mxCell id="CU07-COMM-M23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="2.3: where()" vertex="1">
+      <mxGeometry height="24" width="80" x="650" y="-15" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A23" edge="1" parent="1" source="CU07-COMM-M23" target="CU07-COMM-M23" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="-20" as="sourcePoint" />
+        <mxPoint x="710" y="-20" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.4: create() [Controller -> Especialidad] -->
+    <mxCell id="CU07-COMM-M24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="2.4: create()" vertex="1">
+      <mxGeometry height="24" width="80" x="650" y="-40" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A24" edge="1" parent="1" source="CU07-COMM-M24" target="CU07-COMM-M24" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="680" y="-45" as="sourcePoint" />
+        <mxPoint x="710" y="-45" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.5: registrar() [Controller -> Bitacora] -->
+    <mxCell id="CU07-COMM-M25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;" value="2.5: registrar()" vertex="1">
+      <mxGeometry height="24" width="90" x="655" y="425" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A25" edge="1" parent="1" source="CU07-COMM-M25" target="CU07-COMM-M25" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="690" y="420" as="sourcePoint" />
+        <mxPoint x="720" y="420" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+    <!-- 2.6: notificarRegistroExitoso() [Retorno Controller -> Boundary] -->
+    <mxCell id="CU07-COMM-M26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=1;fontSize=10;labelBackgroundColor=none;fontStyle=0;" value="2.6: notificarRegistroExitoso()" vertex="1">
+      <mxGeometry height="20" width="165" x="340" y="305" as="geometry" />
+    </mxCell>
+    <mxCell id="CU07-COMM-A26" edge="1" parent="1" source="CU07-COMM-M26" target="CU07-COMM-M26" style="endArrow=classic;html=1;rounded=1;strokeWidth=1.5;fontSize=10;labelBackgroundColor=none;fontColor=default;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;" value="">
+      <mxGeometry height="50" relative="1" width="50" as="geometry">
+        <mxPoint x="430" y="302" as="sourcePoint" />
+        <mxPoint x="395" y="302" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

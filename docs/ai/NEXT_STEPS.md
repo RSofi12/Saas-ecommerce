@@ -1,44 +1,64 @@
 # NEXT STEPS — FASHIONSTORE SAAS MULTITENANT
-
-## Tareas Inmediatas de Implementación (Presentación 1: 25/10/2026)
-
-### Hito 1: Núcleo SaaS Multitenant y Planes Comerciales (CU01, CU02 & CU04 COMPLETADOS)
-1. **Paquete `backend/app/packages/p0_saas_plataforma/`:**
-   - [x] Modelos SQLAlchemy: `Company`, `Plan`, `Subscription` con descripciones comerciales y auditoría.
-   - [x] Schemas Pydantic: `CompanyCreate`, `CompanyRead`, `PlanRead`, `SubscriptionCreate`.
-   - [x] Servicios: `tenant_service.py` y `quota_service.py` (validar límite de sucursales e IA).
-   - [x] Router `p0_router`: `/api/saas/companies`, `/api/saas/plans` y `/api/saas/subscriptions` con *Downgrade Guard*.
-2. **Implementar Aislamiento por Tenant:**
-   - [x] Crear `backend/app/core/tenant_context.py` con dependencias FastAPI para resolver `tenant_id`.
-   - [x] Añadir columna `tenant_id` a `users` y `branches`.
-   - [x] Actualizar login JWT en `p1_gestion_usuarios_acceso/routes/auth.py` para emitir token con claim `tenant_id`.
-3. **Persistencia y Población de Datos Inicial (Migraciones 0038, 0039 y 0040):**
-   - [x] Ejecutadas migraciones `0038`, `0039` y `0040` (enriquecimiento de sucursales con coordenadas geo y auditoría).
-   - [x] Script de seed con planes Básico ($29) y Profesional ($99).
-   - [x] Alta de 2 empresas de prueba: "Boutique Elegance" y "Moda Urbana".
-   - [x] Alta del Superadministrador global (`superadmin@fashionstore.com`).
-4. **Frontend Master Portal (Superadmin - CU01 y CU02 Completados):**
-   - [x] Servicio Angular `company.service.ts` con consumo de empresas, planes y asignación de suscripciones.
-   - [x] Vista en Angular `tenants-page.component.ts` para listado, métricas KPI y búsqueda.
-   - [x] Modal de registro reactivo de empresas `tenant-form-modal.component.ts`.
-   - [x] Modal de gestión de suscripciones y cambio de plan `subscription-modal.component.ts` con alerta de cuotas.
-5. **Control de Sucursales Bajo Límites del Plan (CU04 Completado):**
-   - [x] Conectar `validate_branch_quota` y `get_branch_quota` en `branch_service.py` y `branch_routes.py`.
-   - [x] Endpoint `GET /api/branches/quota` y aislamiento estricto por `tenant_id`.
-   - [x] Frontend `admin-branch-page.component.ts` con widget de cuota comercial del plan, barra de progreso reactiva, alerta de saturación y formulario con geolocalización.
+### Hoja de Ruta Operativa y Próximos Pasos (25 Casos de Uso Oficiales)
+**Fecha:** 03 de Noviembre de 2026
 
 ---
 
-### Hito 2: Persistencia Local del Catálogo (PWA e IndexedDB - CU08 & CU09)
-1. **Frontend PWA:**
-   - [ ] Configurar `@angular/pwa`, Service Worker y Web App Manifest.
-   - [ ] Crear `src/app/core/offline/idb.service.ts` para almacenar catálogo de prendas y existencias conocidas.
-   - [ ] Agregar detector de conexión (`online` / `offline`) y banner visual con advertencia de datos locales.
-   - [ ] Endpoint backend `/api/catalog/offline-pack` para sincronizar lote ligero del catálogo de la empresa.
+## 🎯 Estado de Situación: 23 de 25 Casos de Uso Implementados (100% Verificados)
+
+### Casos de Uso Listos y Funcionales (Presentación 1 y 2 al 100% + CU19, CU20, CU21, CU22 y CU23):
+- [x] **`CU01` – Registrar y Gestionar Empresas Contratantes (Tenants)** (`p0_saas_plataforma`)
+- [x] **`CU02` – Gestionar Planes de Suscripción (Básico a 3 suc., Pro a 10 suc., Empresarial) y Cuotas** (`p0_saas_plataforma`)
+- [x] **`CU03` – Iniciar Sesión Multitenant con JWT y Claims de Tenant** (`p1_gestion_usuarios_acceso`)
+- [x] **`CU04` – Gestionar Sucursales Bajo Límites del Plan** (`p1_gestion_usuarios_acceso`)
+- [x] **`CU05` – Gestionar Prendas y Variantes de Precio por Talla** (`p2_gestion_productos_catalogo`)
+- [x] **`CU06` – Consultar Catálogo Online con Búsqueda Facetada** (`p2_gestion_productos_catalogo`)
+- [x] **`CU07` – Sincronizar y Descargar Catálogo a Almacenamiento Local (PWA / SQLite)** (`p3_gestion_inventario_disponibilidad`)
+- [x] **`CU08` – Consultar Catálogo Offline en Modo Desconectado** (`p3_gestion_inventario_disponibilidad`)
+- [x] **`CU09` – Comprar Prendas con Stripe y Despacho Condicionado** (`p4_gestion_compras_reservas`)
+- [x] **`CU10` – Crear Reserva Online de Prendas con Vencimiento y Bloqueo** (`p4_gestion_compras_reservas`)
+- [x] **`CU11` – Registrar Reserva de Prendas Offline en Modo Desconectado (PWA / SQLite)** (`p4_gestion_compras_reservas`)
+- [x] **`CU12` – Atender y Resolver Conflictos de Reservas Expiradas** (`p4_gestion_compras_reservas`)
+- [x] **`CU13` – Registrar Venta POS Desconectada en Efectivo con Contingencia UUIDv4** (`p5_gestion_ventas_pos`)
+- [x] **`CU14` – Gestionar Bandeja Local de Operaciones Pendientes (Outbox PWA / SQLite)** (`p5_gestion_ventas_pos`)
+- [x] **`CU15` – Sincronizar Lotes de Ventas con Idempotencia Central (`sync_operations`)** (`p5_gestion_ventas_pos`)
+- [x] **`CU16` – Gestionar y Resolver Conflictos de Ventas Offline y Quiebres de Stock Central** (`p5_gestion_ventas_pos`)
+- [x] **`CU17` – Procesar Cambio de Prenda por Talla con Cobro de Diferencia y Estado** (`p5_gestion_ventas_pos`)
+- [x] **`CU18` – Procesar Devolución de Prenda con Retención Operativa y Nota de Crédito** (`p5_gestion_ventas_pos`)
+- [x] **`CU19` – Localizar Sucursales y Trazar Rutas (Carril A: Mobile OpenStreetMap / ORS)** (`p1_gestion_usuarios_acceso` + Flutter)
+- [x] **`CU20` – Generar Reportes Ejecutivos por Voz y Gemini RAG (Carril D: Generative AI)** (`p6_inteligencia_analitica` + Angular PWA)
+- [x] **`CU21` – Exportar Reportes Empresariales a Formatos PDF y Excel (Carril B: Reportes)** (`p6_inteligencia_analitica`)
+- [x] **`CU22` – Generar Dataset Sintético de Ventas y Estacionalidad Textil (Carril C: Machine Learning)** (`p6_inteligencia_analitica`)
+- [x] **`CU23` – Predecir Demanda de Ropa por Talla (ML Supervisado)** (`p6_inteligencia_analitica` + Angular PWA - 100% Fullstack)
+- [x] **`CU24` – Segmentar Clientes con K-Means (ML No Supervisado - RFM+D)** (`p6_inteligencia_analitica` - Backend 100% / Frontend en chat paralelo)
+- [x] **`CU25` – Visualizar Dashboard Ejecutivo con KPIs y Métricas ML** (`p6_inteligencia_analitica` - Backend 100% verificado)
 
 ---
 
-### Hito 3: Catálogo de Prendas y Variantes Multitenant (CU06 & CU07)
-1. **Backend `p2_gestion_productos_catalogo`:**
-   - [ ] CRUD de prendas y variantes de talla/precio con clave `tenant_id`.
-   - [ ] Filtrado facetado por categoría, talla y rango de precio.
+## 🚀 Carriles de Trabajo en Paralelo para la 3ra Presentación (Consolidación)
+
+```
+[Carril A: Mobile] ---------> CU19 (Mapas / Rutas Flutter con OpenStreetMap / ORS) [¡LISTO Y VERIFICADO!]
+[Carril B: Reportes] -------> CU21 (Exportación PDF / Excel) [¡LISTO Y VERIFICADO!]
+[Carril D: Generative AI] --> CU20 (Gemini RAG por Voz Multitenant) [¡LISTO Y VERIFICADO!]
+[Carril C: Pipeline ML] ----> CU22 (Dataset Sintético de Moda Textil) [¡LISTO Y VERIFICADO!]
+                                   │
+                                   ├──> CU23 (ML Supervisado - RandomForestRegressor) [¡LISTO Y VERIFICADO!]
+                                   ├──> CU24 (ML No Supervisado - K-Means RFM+D) [Backend 100% / Frontend paralelo]
+                                   └──> CU25 (Dashboard Ejecutivo Unificado) [Backend 100% / Listo para Frontend]
+```
+
+### Tarea Inmediata Pendiente:
+1. **Frontend Web PWA Angular de `CU25` (Visualizar Dashboard Ejecutivo con KPIs y Métricas ML):**
+   - Implementar vistas ejecutivas en Angular PWA bajo directrices `/design-taste-frontend`.
+   - Tarjetas métricas con transiciones fluidas para KPIs de Sincronización Offline, Ingresos por Políticas (Retenciones y Diferencias $\Delta > 0$), Bloque de Inteligencia Analítica ML y Monitoreo de Cuotas SaaS del Plan.
+2. **Modelado ICONIX (UML 2.5+) para `CU25`:**
+   - Diagrama de Robustez BCE y Diagrama de Secuencia con scripts EA v15 y previsualización Mermaid.
+   - Clusterización K-Means con Scikit-Learn y visualización de segmentos (VIP, Prometedor, En Riesgo, Dormido).
+   - Selector reactivo de prenda, selector de horizonte (1 a 8 semanas).
+   - Tarjetas de bondad de ajuste del modelo ($R^2$, $MAE$, $RMSE$) y botón de reentrenamiento.
+   - Gráfica interactiva de barras/curvas por talla (S, M, L, XL) con intervalos de confianza y alertas tempranas de stock.
+2. **Carril C2 — ML No Supervisado (`CU24`):**
+   - Segmentación de clientes mediante K-Means clustering (Recencia, Frecuencia, Monto Monetario y tasa de Devolución) con detección de codo.
+3. **Cierre de Presentación 3 — Dashboard Analítico (`CU25`):**
+   - Tablero ejecutivo unificado con visualización interactiva de ventas, predicciones de demanda y segmentos de clientes.

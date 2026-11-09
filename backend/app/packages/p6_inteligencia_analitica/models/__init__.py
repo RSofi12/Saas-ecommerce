@@ -5,6 +5,7 @@ from app.packages.p6_inteligencia_analitica.models.recommendation import (
     CollaborativeEmbedding,
     UserProductInteraction,
 )
+from app.packages.p6_inteligencia_analitica.models.synthetic_dataset import SyntheticDataset
 
 __all__ = [
     "Conversation",
@@ -13,4 +14,5 @@ __all__ = [
     "DeviceToken",
     "UserProductInteraction",
     "CollaborativeEmbedding",
+    "SyntheticDataset",
 ]

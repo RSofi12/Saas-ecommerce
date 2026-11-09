@@ -8,7 +8,10 @@ from app.packages.p4_gestion_compras_reservas.services.cart_service import (
     remove_coupon,
     update_cart_item,
 )
-from app.packages.p4_gestion_compras_reservas.services.expiration_service import run_daily_expiration
+from app.packages.p4_gestion_compras_reservas.services.expiration_service import (
+    run_daily_expiration,
+    run_expiration_sweep,
+)
 from app.packages.p4_gestion_compras_reservas.services.order_service import (
     cancel_order,
     checkout_cash,
@@ -93,4 +96,5 @@ __all__ = [
     "collect_cash",
     "process_stripe_event",
     "run_daily_expiration",
+    "run_expiration_sweep",
 ]

@@ -1,9 +1,18 @@
 import { ApiResponse } from '../../../core/models/api.model';
 
-export type ReservationStatus = 'pending' | 'confirmed' | 'attended' | 'purchase_pending' | 'sold' | 'not_sold' | 'cancelled' | 'expired';
+export type ReservationStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'attended'
+  | 'purchase_pending'
+  | 'sold'
+  | 'not_sold'
+  | 'cancelled'
+  | 'expired';
 
 export interface ReservationItem {
   id: string;
+  tenant_id?: string | null;
   reservation_id: string;
   variant_id: string;
   quantity: number;
@@ -22,6 +31,7 @@ export interface ReservationItem {
 
 export interface Reservation {
   id: string;
+  tenant_id?: string | null;
   branch_id: string;
   branch_name: string;
   user_id: string;
@@ -32,6 +42,11 @@ export interface Reservation {
   status: ReservationStatus;
   total_amount: string;
   item_count: number;
+  reservation_code?: string;
+  qr_payload?: string;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
+  resolution_note?: string | null;
   created_at: string;
   updated_at: string | null;
   items: ReservationItem[];
@@ -46,7 +61,31 @@ export interface CreateReservationRequest {
   branch_id: string;
   visit_date: string;
   items: ReservationItemRequest[];
+  client_reservation_id?: string | null;
 }
 
 export type ReservationResponse = ApiResponse<Reservation>;
 export type ReservationListResponse = ApiResponse<Reservation[]>;
+
+export interface ItemStockAvailability {
+  variant_id: string;
+  product_name: string;
+  variant_sku: string;
+  requested_quantity: number;
+  available_quantity: number;
+  has_sufficient_stock: boolean;
+}
+
+export interface ReservationConflictItem extends Reservation {
+  can_reactivate: boolean;
+  items_stock: ItemStockAvailability[];
+}
+
+export type ConflictResolutionType = 'reactivate' | 'substitute' | 'close';
+
+export interface ReservationConflictResolveRequest {
+  resolution_type: ConflictResolutionType;
+  extended_days?: number;
+  substitute_variant_id?: string | null;
+  notes: string;
+}

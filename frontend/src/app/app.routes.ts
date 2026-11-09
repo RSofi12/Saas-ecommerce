@@ -117,6 +117,12 @@ export const routes: Routes = [
           import('./features/admin/pages/admin-inventory-page.component').then((m) => m.AdminInventoryPageComponent),
       },
       {
+        path: 'encargado/transfers',
+        canActivate: [roleGuard(['encargado'])],
+        loadComponent: () =>
+          import('./features/encargado/pages/transfers-page.component').then((m) => m.TransfersPageComponent),
+      },
+      {
         path: 'encargado/orders',
         canActivate: [roleGuard(['encargado'])],
         loadComponent: () => import('./features/encargado/pages/orders-page.component').then((m) => m.EncargadoOrdersPageComponent),
@@ -140,6 +146,22 @@ export const routes: Routes = [
         path: 'encargado/provider/:providerId/products',
         canActivate: [roleGuard(['encargado'])],
         loadComponent: () => import('./features/proveedor/pages/provider-products-page.component').then((m) => m.ProviderProductsPageComponent),
+      },
+      {
+        path: 'encargado/reports',
+        canActivate: [roleGuard(['encargado', 'administrador'])],
+        loadComponent: () =>
+          import('./features/admin/pages/admin-reports-page.component').then(
+            (m) => m.AdminReportsPageComponent,
+          ),
+      },
+      {
+        path: 'encargado/sale-conflicts',
+        canActivate: [roleGuard(['encargado', 'administrador'])],
+        loadComponent: () =>
+          import('./features/encargado/pages/sale-conflicts-page.component').then(
+            (m) => m.SaleConflictsPageComponent,
+          ),
       },
       {
         path: 'encargado/sales',
@@ -200,6 +222,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'transfers',
+            loadComponent: () =>
+              import('./features/encargado/pages/transfers-page.component').then(
+                (m) => m.TransfersPageComponent,
+              ),
+          },
+          {
             path: 'user',
             loadComponent: () =>
               import('./features/admin/pages/admin-user-page.component').then(
@@ -232,6 +261,38 @@ export const routes: Routes = [
             path: 'replenishment',
             loadComponent: () => import('./features/shared/pages/replenishment-page.component').then((m) => m.ReplenishmentPageComponent),
           },
+          {
+            path: 'reports',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-reports-page.component').then(
+                (m) => m.AdminReportsPageComponent,
+              ),
+          },
+          {
+            path: 'demand-forecast',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-demand-forecast-page.component').then(
+                (m) => m.AdminDemandForecastPageComponent,
+              ),
+          },
+          {
+            path: 'ml-dataset',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-ml-dataset-page.component').then(
+                (m) => m.AdminMlDatasetPageComponent,
+              ),
+          },
+          {
+            path: 'ml-segmentation',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-ml-segmentation-page.component').then(
+                (m) => m.AdminMlSegmentationPageComponent,
+              ),
+          },
+          {
+            path: 'orders',
+            loadComponent: () => import('./features/encargado/pages/orders-page.component').then((m) => m.EncargadoOrdersPageComponent),
+          },
         ],
       },
       {
@@ -248,6 +309,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/superadmin/pages/tenants-page.component').then(
                 (m) => m.TenantsPageComponent,
+              ),
+          },
+          {
+            path: 'plans',
+            loadComponent: () =>
+              import('./features/superadmin/pages/plans-page.component').then(
+                (m) => m.PlansPageComponent,
               ),
           },
         ],

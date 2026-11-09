@@ -17,8 +17,9 @@ Sistema integral de comercio electrónico multitenant para boutiques y tiendas d
 
 | Componente | Versión Requerida | Notas importantes |
 | :--- | :--- | :--- |
+| **Docker (Opcional)** | Docker Desktop 4.x+ | Para levantar todo el stack orquestado en contenedores. |
 | **Backend** | Python **3.12** | **Evitar Python 3.14**: paquetes fijados en `requirements.txt` no tienen wheels precompilados para 3.14 y fallarán al compilar en C++. |
-| **Base de Datos** | PostgreSQL **15+** | Servicio activo en local o remoto. |
+| **Base de Datos** | PostgreSQL **15+** | Servicio activo en local o remoto (o gestionado por Docker). |
 | **Frontend** | Node.js **20.19.x** o **22.13.x+** | Versiones LTS obligatorias. No usar versiones impares como Node 21. npm 10+. |
 | **Mobile** | Flutter SDK **3.x+** / Dart SDK | Android Studio / VS Code con extensiones Flutter. |
 
@@ -26,9 +27,59 @@ Sistema integral de comercio electrónico multitenant para boutiques y tiendas d
 
 ## 🚀 Puesta en Marcha
 
-### 1. Backend (FastAPI + PostgreSQL)
+Tienes dos alternativas para levantar y probar el proyecto:
 
-#### Primera vez:
+---
+
+### 🐳 Opción A: Docker Compose (Recomendado para Pruebas Integrales y Staging)
+
+Permite levantar todo el stack (**PostgreSQL 16**, **FastAPI Backend** y **Angular Frontend**) con un solo comando desde la raíz del proyecto, sin necesidad de instalar dependencias de Python o Node localmente.
+
+> [!NOTE]
+> Requiere tener **Docker Desktop** iniciado y en ejecución en Windows/Linux/macOS.
+
+#### 1. Iniciar los contenedores:
+```powershell
+docker compose up --build
+```
+*(Para ejecutarlo en segundo plano, añade la bandera `-d`: `docker compose up --build -d`)*.
+
+#### 2. Servicios disponibles:
+- **Frontend Web PWA:** [http://localhost:8080](http://localhost:8080)
+- **Backend API Docs (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Backend ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Healthcheck API:** [http://localhost:8000/health](http://localhost:8000/health)
+- **Base de Datos PostgreSQL:** Puerto `5432`
+
+#### 3. Comandos útiles de Docker Compose:
+- **Ver logs en tiempo real:**
+  ```powershell
+  docker compose logs -f
+  # o de un servicio específico:
+  docker compose logs -f backend
+  ```
+- **Poblar base de datos con datos demo (seed inicial):**
+  ```powershell
+  docker compose exec backend python seed_saas.py
+  ```
+- **Detener los servicios:**
+  ```powershell
+  docker compose down
+  ```
+- **Detener y reiniciar desde cero (eliminando volúmenes de PostgreSQL):**
+  ```powershell
+  docker compose down -v
+  ```
+
+---
+
+### 💻 Opción B: Ejecución Ligera en Terminales Nativas (Bajo Consumo de RAM)
+
+Ideal para el desarrollo diario continuo, recarga rápida (*hot-reload*) y mínimo consumo de recursos del sistema.
+
+#### 1. Backend (FastAPI + PostgreSQL)
+
+##### Primera vez:
 1. Abre una terminal en la carpeta `backend/` y crea el entorno virtual:
    ```powershell
    cd backend
@@ -61,7 +112,7 @@ Sistema integral de comercio electrónico multitenant para boutiques y tiendas d
    python seed.py
    ```
 
-#### Ejecuciones siguientes:
+##### Ejecuciones siguientes:
 ```powershell
 cd backend
 .\.venv\Scripts\Activate.ps1
@@ -74,9 +125,9 @@ python -m uvicorn main:app --reload
 
 ---
 
-### 2. Frontend (Angular 21 PWA)
+#### 2. Frontend (Angular 21 PWA)
 
-#### Versión de Node requerida:
+##### Versión de Node requerida:
 El proyecto valida la versión con `scripts/check-node.mjs`. Si usas NVM o FNM:
 ```bash
 nvm use 22
@@ -84,7 +135,7 @@ nvm use 22
 fnm use 22
 ```
 
-#### Primera vez (Instalación de dependencias):
+##### Primera vez (Instalación de dependencias):
 Abre una terminal en `frontend/`:
 
 ```powershell
@@ -97,14 +148,14 @@ npm install --legacy-peer-deps --ignore-scripts
 > - `--legacy-peer-deps`: Necesario para resolver restricciones estrictas entre componentes Spartan UI y librerías de Angular 21.
 > - `--ignore-scripts`: **Crucial en Windows**. Evita que librerías nativas de IA/C++ (`sharp`, `onnxruntime-node`) intenten compilar con `node-gyp` o descarguen binarios que cuelgan la terminal durante horas. La instalación terminará en 1 a 3 minutos.
 
-#### Verificación rápida de la instalación:
+##### Verificación rápida de la instalación:
 Comprueba que los tipos de TypeScript se instalaron correctamente:
 ```powershell
 Test-Path node_modules/@angular/core/types
 ```
 *(Debe responder `True`)*
 
-#### Ejecuciones siguientes (Levantar servidor local):
+##### Ejecuciones siguientes (Levantar servidor local):
 ```powershell
 cd frontend
 npm run start
@@ -116,9 +167,9 @@ Luego abre tu navegador en **`http://localhost:4200/`**.
 
 ---
 
-### 3. Mobile (Flutter)
+#### 3. Mobile (Flutter)
 
-#### Primera vez:
+##### Primera vez:
 1. Abre una terminal en `mobile/`:
    ```bash
    cd mobile

@@ -1,130 +1,173 @@
 # POLÍTICAS DE NEGOCIO Y REGLAS DE DOMINIO INVIOLABLES
 ### FashionStore — Plataforma SaaS Multitenant E-Commerce
 **Materia:** Sistemas de Información 2 (2do Parcial)  
-**Normativa:** Pliego Oficial de Requisitos y Directrices de Cátedra
+**Normativa:** Pliego Oficial de Requisitos, Metodología ICONIX y Directrices de Cátedra  
+**Alcance:** 25 Casos de Uso Definitivos
 
 ---
 
 ## 1. Justificación y Propósito
 
-En la comercialización de moda, calzado y confección textil, la rentabilidad y la integridad de inventario dependen del cumplimiento estricto de las reglas comerciales. Este documento codifica las políticas de negocio del sistema que **ningún componente de software puede omitir, puentear o relajar**.
+En la comercialización de moda, calzado y confección textil bajo un modelo SaaS multitenant, la rentabilidad, la integridad transaccional y la confianza del cliente dependen del cumplimiento incondicional de las reglas comerciales. Este documento codifica formalmente:
+1. **Políticas Globales de la Plataforma SaaS (Gobernanza del Superadmin).**
+2. **Políticas Comerciales de los Tenants (Personalizables por Boutique Elegance y Moda Urbana).**
+3. **Mecanismos de Consentimiento Explícito de Términos y Condiciones en Frontend.**
 
 ---
 
-## 2. Catálogo Oficial de Políticas de Negocio
+## 2. Mapa General de Políticas de Negocio
 
 ```mermaid
 flowchart TD
-    subgraph Politicas["Políticas de Negocio Inviolables"]
-        P1["1. Cambio de Prenda por Talla/Precio\n(Consolidación condicionada al pago de la diferencia)"]
-        P2["2. Devoluciones de Mercadería\n(Retención del 20%-50% y Reembolso del 50%-80%)"]
-        P3["3. Despacho Digital de Mercadería\n(Envío exclusivo contra pago confirmado en Stripe)"]
-        P4["4. Cuotas y Límites de Planes SaaS\n(Básico: máx 2 sucursales | Profesional: máx 10 sucursales)"]
-        P5["5. Ventas en Contingencia Offline\n(Pago exclusivo de contado en efectivo)"]
-        P6["6. Caducidad de Reservas de Stock\n(Liberación automática de prendas tras vencimiento)"]
+    subgraph SaaS_Policies["I. Políticas de la Plataforma SaaS (Superadmin)"]
+        SP1["P-SaaS-01: Cuotas y Límites de Planes (Básico: 3 suc. | Pro: 10 suc. | Empresarial: Sin límite)"]
+        SP2["P-SaaS-02: Políticas de Backup y Respaldo por Nivel de Suscripción"]
+        SP3["P-SaaS-03: Aislamiento Lógico Estricto Multitenant (tenant_id obligatorio)"]
+        SP4["P-SaaS-04: Contratación y No Reembolso de Cuotas Mensuales Consumidas"]
+    end
+
+    subgraph Tenant_Policies["II. Políticas Comerciales de Tienda (Tenant Admin)"]
+        TP1["P-Ten-01: Cambio de Prenda por Talla/Precio con Cobro Obligatorio de Diferencia"]
+        TP2["P-Ten-02: Condición Física de la Prenda (Etiqueta intacta y sin desgaste)"]
+        TP3["P-Ten-03: Devoluciones con Retención Operativa (20%-50%) y Modalidad de Reembolso"]
+        TP4["P-Ten-04: Despacho Digital Condicionado a Pago Confirmado en Stripe"]
+        TP5["P-Ten-05: Ventas en Contingencia Offline Exclusivamente en Efectivo"]
+        TP6["P-Ten-06: Caducidad y Liberación Automática de Reservas de Stock (24h-48h)"]
+    end
+
+    subgraph Legal_Compliance["III. Cumplimiento Legal y Consentimiento en UI"]
+        LC1["Consentimiento al Suscribirse a Plan SaaS (Tenant Admin)"]
+        LC2["Consentimiento al Checkout de Compra / Reserva (Cliente)"]
     end
 ```
 
 ---
 
-### POLÍTICA 1: Cambio de Prenda con Diferencia de Precio (CU19)
+## 3. Políticas Globales de la Plataforma SaaS (Superadmin)
 
-#### Declaración de la Regla:
-> *Al cambiar una prenda por otra talla o modelo de confección distinta, el precio de la prenda puede variar. El cambio de prenda se consolida **ÚNICAMENTE Y EXCLUSIVAMENTE CUANDO EL CLIENTE PAGA LA DIFERENCIA DE PRECIO**. Si el cliente no abona dicha diferencia, la operación queda cancelada y se restituye la prenda original o el pago.*
+### POLÍTICA P-SaaS-01: Niveles de Suscripción y Cuotas Comerciales (CU02 / CU04)
+El Superadmin gobierna la plataforma SaaS ofreciendo 3 planes oficiales configurables:
 
-#### Lógica y Casos de Prueba:
-- **Ejemplo Típico de la Cátedra:**
-  - Prenda Original: Vestido Modelo *Aurora*, Talla **M** — Precio abonado originalmente: **Bs 50**.
-  - Prenda Nueva Solicitada: Vestido Modelo *Aurora*, Talla **L** (o tela reforzada) — Precio de lista: **Bs 70**.
-  - **Cálculo de la Diferencia ($\Delta$):**
-    $$\Delta = \text{Precio Prenda Nueva} - \text{Precio Prenda Original} = 70.00 - 50.00 = +\text{Bs } 20.00$$
-- **Condición de Consolidación:**
-  1. Si el cliente abona los **Bs 20.00** en caja $\rightarrow$ Se asienta el cambio, se ingresa la talla M al inventario, se descuenta la talla L y se emite el comprobante de cambio consolidado.
-  2. Si el cliente **NO** abona los **Bs 20.00** $\rightarrow$ El sistema cancela la transacción de inmediato; no se mueve inventario y el cliente conserva su prenda talla M.
-- **Caso de Prenda Nueva de Menor Precio ($\Delta < 0$):**
-  - Si el cliente cambia una prenda de Bs 70 por una de Bs 50 ($\Delta = -20.00$), la tienda emite una **Nota de Crédito** o vale de compra a favor del cliente por Bs 20.00 para futuras compras.
+| Característica / Beneficio | Plan BÁSICO | Plan PROFESIONAL | Plan EMPRESARIAL |
+| :--- | :---: | :---: | :---: |
+| **Sucursales Físicas Activas** | **Hasta 3 sucursales** | **Hasta 10 sucursales** | **Ilimitadas (o hasta 25)** |
+| **Catálogo de Prendas y Tallas** | Ilimitado | Ilimitado | Ilimitado |
+| **PWA y Operaciones Offline** | Sí (IDB / SQLite) | Sí (IDB / SQLite) | Sí (IDB / SQLite) |
+| **Pasarela de Pagos Stripe** | Sí | Sí | Sí |
+| **Reportes Convencionales** | Sí | Sí | Sí |
+| **IA Generativa con Voz (Gemini)** | ❌ No disponible | ✅ Acceso Completo | ✅ Acceso Completo + Prioritario |
+| **Modelos Machine Learning** | ❌ No disponible | ✅ Supervisado / K-Means | ✅ Supervisado / K-Means + AutoML |
+| **Política de Backup** | Semanal Local | Diario en la Nube | Tiempo Real con Replicación |
+| **Precio Mensual de Referencia** | $29.00 USD / mes | $99.00 USD / mes | $199.00 USD / mes |
+
+* **Regla Inviolable de Creación de Sucursal (`POST /api/branches`):**
+  Si el número de sucursales activas alcanza la cuota del plan contratado (ej. 3 de 3 en Básico), el backend bloquea con `HTTP 403 Forbidden` cualquier intento de creación o reactivación hasta solicitar el ascenso de plan.
 
 ---
 
-### POLÍTICA 2: Devolución de Prendas con Retención Operativa (CU20)
+### POLÍTICA P-SaaS-02: Políticas de Backup y Recuperación por Suscripción
+Para garantizar la continuidad operativa de cada boutique:
+* **Plan Básico:** Exportación semanal manual de balance y catálogo en JSON descargable.
+* **Plan Profesional:** Respaldo automatizado diario ejecutado a medianoche en almacenamiento seguro central.
+* **Plan Empresarial:** Respaldo incremental continuo con replicación multi-región y restauración instantánea ante contingencias.
+
+---
+
+### POLÍTICA P-SaaS-03: Aislamiento Lógico Multitenant Inquebrantable
+* Toda tabla de empresa contiene la clave foránea `tenant_id UUID NOT NULL REFERENCES companies(id)`.
+* Ninguna consulta SQL o endpoint REST puede retornar información de un `tenant_id` diferente al token JWT validado en la cabecera `Authorization: Bearer <token>`.
+
+---
+
+## 4. Políticas Comerciales de las Tiendas Tenants (Boutiques)
+
+Cada empresa tenant define sus parámetros comerciales dentro de los límites legales establecidos por la plataforma:
+
+### Tabla Comparativa de Políticas para Tenants de Prueba:
+
+| Parámetro Comercial | Boutique Elegance | Moda Urbana |
+| :--- | :--- | :--- |
+| **Plazo Máximo para Cambios** | 15 días calendario tras la compra | 30 días calendario tras la compra |
+| **Plazo Máximo para Devoluciones**| 7 días calendario tras la compra | 15 días calendario tras la compra |
+| **Tasa de Retención Operativa ($R$)**| **30%** (Reembolso neto: 70%) | **20%** (Reembolso neto: 80%) |
+| **Modalidad de Reembolso Preferida**| **Nota de Crédito Digital** (Cupón) | **Efectivo** o **Nota de Crédito** |
+| **Condición de Etiqueta Textil** | Obligatoria e intacta sin excepción | Obligatoria o comprobante de compra |
+| **Horario de Atención de Caja** | Lunes a Sábado: 09:00 - 20:00 | Lunes a Domingo: 10:00 - 21:00 |
+
+---
+
+### POLÍTICA P-Ten-01: Cambio de Prenda por Talla y Cobro de Diferencia (CU17)
 
 #### Declaración de la Regla:
-> *La tienda aplica una política de retención porcentual parametrizable entre el **20% y el 50%** del valor abonado por concepto de costos logísticos, desinfección textil e inspección de calidad, reembolsando al cliente entre el **50% y el 80%** del importe pagado.*
+> *Al cambiar una prenda por otra talla o modelo de mayor precio, el cambio se consolida **ÚNICA Y EXCLUSIVAMENTE CUANDO EL CLIENTE ABONA LA DIFERENCIA DE PRECIO**. Si el cliente no abona dicha diferencia, la transacción queda cancelada en el acto, devolviendo la prenda original al cliente y dejando el stock intacto.*
 
-#### Parámetros del Tenant:
-Cada empresa tenant configura en su panel el porcentaje exacto de retención según su política comercial:
-- **Porcentaje de Retención ($R$):** Configurable en el rango $[20.00\%, 50.00\%]$.
-- **Porcentaje de Reembolso:** $100\% - R$ (resultando en el rango $[50.00\%, 80.00\%]$).
+#### Lógica Matemática:
+$$\Delta = \text{Precio Prenda Nueva} - \text{Precio Prenda Original}$$
+* **Caso $\Delta > 0$ (Prenda nueva más cara):**
+  - Ejemplo: Vestido M (Bs 50) cambiado por Vestido L (Bs 70) $\rightarrow \Delta = \text{Bs } 20.00$.
+  - Si abona Bs 20 en caja $\rightarrow$ **Aprobado:** Reingresa talla M, egresa talla L, comprobante emitido.
+  - Si no abona Bs 20 $\rightarrow$ **Rechazado:** La operación se aborta por el controlador.
+* **Caso $\Delta \le 0$ (Prenda nueva de igual o menor precio):**
+  - Si $\Delta = 0$ (misma prenda, diferente color) $\rightarrow$ Cambio directo sin costo.
+  - Si $\Delta < 0$ (prenda nueva más económica) $\rightarrow$ Se entrega la nueva prenda y la diferencia a favor del cliente se emite en una **Nota de Crédito Digital**.
 
-#### Lógica y Fórmulas:
-Sea $P_{\text{abonado}}$ el importe pagado por la prenda:
+---
+
+### POLÍTICA P-Ten-02: Inspección Física del Estado de la Prenda
+Previo a cualquier cambio o devolución, el personal de caja o encargado ejecuta una inspección física obligatoria:
+* **Criterios de Rechazo Inmediato:**
+  1. Prenda con signos evidentes de uso prolongado, lavado, desgarro o manchas.
+  2. Ausencia de la etiqueta original colgante o cosida de la boutique.
+  3. Prenda adquirida en venta final de liquidación ("Sale / Sin cambio").
+* **Efecto en el Software:** El cajero marca la casilla *"Prenda no apta para reingreso"* y el controlador rechaza la solicitud emitiendo el comprobante de inspección no conforme.
+
+---
+
+### POLÍTICA P-Ten-03: Devoluciones de Mercadería y Emisión de Notas de Crédito (CU18)
+
+#### ¿Qué es una Nota de Crédito Digital (Modalidad B)?:
+> *Una **Nota de Crédito Digital** es un cupón o vale comercial oficial emitido por el sistema a favor del cliente con un código alfanumérico único (`NC-YYYYMMDD-XXXX`), equivalente al monto del reembolso neto aprobado. Este saldo a favor puede ser utilizado por el cliente como medio de pago total o parcial en sus compras futuras dentro de la misma empresa tenant.*
+
+#### Ventajas para la Boutique:
+1. **Protección de Liquidez:** La tienda no retira efectivo físico del arqueo de caja de la jornada.
+2. **Retención de Cartera:** Asegura que el cliente reinvierta el valor reembolsado en el catálogo de la boutique.
+3. **Trazabilidad Contable:** Se descuenta formalmente de las cuentas por cobrar y se registra en auditoría.
+
+#### Fórmulas de Reembolso:
 $$\text{Monto Retención} = P_{\text{abonado}} \times \left(\frac{R}{100}\right)$$
-$$\text{Monto Reembolso} = P_{\text{abonado}} - \text{Monto Retención}$$
+$$\text{Monto Reembolso Neto} = P_{\text{abonado}} - \text{Monto Retención}$$
 
-- **Ejemplo con Retención del 30% ($R = 30\%$):**
-  - Precio abonado: $P_{\text{abonado}} = \text{Bs } 100.00$.
-  - Retención operativa (30%): $\text{Bs } 30.00$ (queda a favor de la empresa).
-  - Reembolso entregado al cliente (70%): $\text{Bs } 70.00$ (en efectivo o nota de crédito).
-- **Validación Física:** El cajero debe constatar que la prenda no presente signos de uso, conserve las etiquetas originales y se encuentre dentro de los días hábiles estipulados (ej. 7 días tras la compra).
-
----
-
-### POLÍTICA 3: Despacho Digital Condicionado a Pago Confirmado (CU12)
-
-#### Declaración de la Regla:
-> *El empaque, despacho o entrega de prendas adquiridas digitalmente se realiza **ÚNICA Y EXCLUSIVAMENTE CUANDO EL PAGO ESTÁ CONFIRMADO EN LA PASARELA STRIPE** (`status = 'paid'`). Ninguna orden en estado 'pendiente' o 'fallida' puede generar guía de despacho.*
-
-#### Protocolo de Validación:
-1. El cliente completa el formulario de pago en Stripe Elements.
-2. La orden de compra se crea provisionalmente con estado `PENDIENTE_PAGO`.
-3. El almacén logístico **NO** visualiza la orden en su cola de preparación de envíos.
-4. El webhook seguro de Stripe notifica al backend el evento `payment_intent.succeeded` con validación criptográfica de firma `stripe-signature`.
-5. El backend actualiza la orden a `PAGADA` y genera automáticamente la orden de despacho en estado `LISTA_PARA_ENVIO`.
+* **Ejemplo Boutique Elegance ($R = 30\%$):**
+  - Precio pagado: Bs 100.00.
+  - Retención operativa (desinfección y reacondicionamiento): Bs 30.00.
+  - Reembolso entregado: Bs 70.00 emitido en **Nota de Crédito Digital** con vigencia de 90 días.
 
 ---
 
-### POLÍTICA 4: Cuotas y Límites de Planes de Suscripción SaaS (CU02/CU04)
-
-#### Declaración de la Regla:
-> *El sistema SaaS impone cuotas operativas forzadas por el backend de acuerdo al plan contratado por la empresa:*
-> - **Plan Básico:** Permite un máximo de **2 sucursales físicas activas**. No tiene acceso a módulos de IA Generativa ni analítica avanzada.
-> - **Plan Profesional:** Permite hasta **10 sucursales físicas activas**, acceso ilimitado a consultas con IA Generativa (Gemini con voz), predicción de demanda supervisada y segmentación K-Means.
-
-#### Forzado a Nivel de API:
-- Endpoint `POST /api/branches`:
-  ```python
-  active_branches = repo.count_active_branches(tenant_id)
-  plan_limit = subscription.max_branches # 2 ó 10
-  if active_branches >= plan_limit:
-      raise HTTPException(
-          status_code=403, 
-          detail=f"Límite alcanzado ({active_branches}/{plan_limit} sucursales). Actualice su plan a Profesional."
-      )
-  ```
+### POLÍTICA P-Ten-04: Despacho Digital Condicionado a Pago Confirmado (CU09)
+> *El envío o preparación de pedidos digitales se ejecuta **ÚNICAMENTE CUANDO STRIPE CONFIRMA EL PAGO** (`payment_status = 'paid'`). Ninguna orden en estado 'pendiente' puede generar orden de despacho logístico.*
 
 ---
 
-### POLÍTICA 5: Venta en Contingencia Offline en Efectivo (CU16)
-
-#### Declaración de la Regla:
-> *Durante el modo desconectado (caída de Internet en la sucursal), la única forma de pago permitida es **EFECTIVO (Contado)**. La venta con tarjeta y crédito digital queda inhabilitada para prevenir fraudes financieros sin validación de fondos en línea.*
-
-#### Reglas de Operación:
-- Generación obligatoria de `operation_uuid` (UUIDv4) antes de asentar en la base local (IndexedDB / SQLite).
-- Estado transaccional inicial: `PENDIENTE_SYNC`.
-- Emisión de ticket impreso de contingencia con leyenda visible: *“Venta Offline - Sujeta a sincronización central”*.
+### POLÍTICA P-Ten-05: Ventas en Modo Desconectado Exclusivas en Efectivo (CU13)
+> *Durante caídas de red o trabajo offline, la única forma de pago autorizada es **EFECTIVO (Contado)**. Se genera un identificador `operation_uuid` (UUIDv4) y se asienta localmente con estado `PENDIENTE_SYNC`.*
 
 ---
 
-### POLÍTICA 6: Caducidad y Liberación de Reservas de Prendas (CU13/CU14)
+### POLÍTICA P-Ten-06: Caducidad y Liberación de Reservas de Stock (CU10 / CU12)
+> *Toda reserva online u offline bloquea stock por un plazo máximo de **24 a 48 horas**. Cumplido el plazo sin que el cliente consolide la compra en sucursal, el proceso de background libera las existencias automáticamente al stock general.*
 
-#### Declaración de la Regla:
-> *Toda reserva física de prenda cuenta con un tiempo límite de vigencia (ej. 24 horas). Si el cliente no acude a la sucursal a consolidar la compra dentro del plazo, el sistema **LIBERA EL STOCK AUTOMÁTICAMENTE**, devolviendo las unidades al inventario público.*
+---
 
-#### Lógica de Liberación:
-- Se ejecuta un proceso en segundo plano en el backend que evalúa:
-  $$\text{Condición de Caducidad: } \text{status} = \text{'RESERVADA'} \quad \land \quad \text{fecha\_actual} \ge \text{fecha\_expiracion}$$
-- Acción automática:
-  - Cambiar estado a `EXPIRADA_CANCELADA`.
-  - Decrementar `stock_reserved` en `branch_inventory`.
-  - Incrementar `stock_available` en `branch_inventory`.
+## 5. Mecanismos de Consentimiento Explícito en Frontend (Términos y Condiciones)
+
+Para garantizar la validez legal y el conocimiento previo de los clientes y tenants:
+
+### A. Al Registrar o Contratar un Plan SaaS (Portal Superadmin / Registro Tenant):
+El formulario de alta exige un checkbox bloqueante:
+> ☑️ *“He leído y acepto los Términos del Servicio SaaS, los límites de sucursales según el plan contratado y la política de aislamiento y seguridad de datos de FashionStore.”*
+
+### B. En el Checkout de Compra o Reserva Digital (Tienda Online Cliente):
+El carrito digital exige antes del botón de pago/reserva:
+> ☑️ *“Acepto las Políticas de Cambio (con cobro de diferencia de talla), Devolución (con retención operativa hasta el 30%) y Despacho Condicionado a Pago de [Nombre del Tenant].”*
+> *[Enlace interactivo a modal con el texto completo de las políticas].*

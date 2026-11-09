@@ -46,3 +46,7 @@ dist/
 
 # Local Firebase credentials
 .secrets/
+
+# ML models and datasets cache
+app/data/
+*.joblib

@@ -137,6 +137,20 @@ class _ReservationsPageState extends State<ReservationsPage> {
             title: 'Mis reservas',
             subtitle: 'Prepara prendas para probártelas en tienda.',
           ),
+          if (_controller.pendingReservations.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _PendingOfflineSection(
+              pendingList: _controller.pendingReservations,
+              isSyncing: _controller.isSyncing,
+              onSync: _syncOffline,
+              onDelete: (id) async {
+                await _controller.deletePendingOffline(id);
+                if (mounted) {
+                  AppSnackBar.show(context, 'Reserva offline descartada.', tone: AppSnackBarTone.neutral);
+                }
+              },
+            ),
+          ],
           const SizedBox(height: 20),
           if (_controller.reservations.isEmpty)
             AppEmptyView(
@@ -173,6 +187,24 @@ class _ReservationsPageState extends State<ReservationsPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _syncOffline() async {
+    final synced = await _controller.syncAllPending();
+    if (!mounted) return;
+    if (synced > 0) {
+      AppSnackBar.show(
+        context,
+        'Se sincronizaron $synced reserva(s) correctamente con el servidor.',
+        tone: AppSnackBarTone.success,
+      );
+    } else {
+      AppSnackBar.show(
+        context,
+        _controller.errorMessage ?? 'No se pudieron sincronizar las reservas. Verifica tu conexión.',
+        tone: AppSnackBarTone.error,
+      );
+    }
   }
 
   Future<void> _cancel(Reservation reservation) async {
@@ -328,6 +360,27 @@ class _ReservationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
+          if (reservation.reservationCode != null && reservation.reservationCode!.isNotEmpty) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.qr_code_2, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Cód: ${reservation.reservationCode}',
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, letterSpacing: 0.5),
+                  ),
+                ],
+              ),
+            ),
+          ],
           Text('Visita: ${_displayDate(reservation.visitDate)}'),
           Text(
             '${reservation.itemCount} prendas · Bs ${reservation.totalAmount.toStringAsFixed(2)}',
@@ -411,4 +464,114 @@ String _displayDate(DateTime date) {
   final day = date.day.toString().padLeft(2, '0');
   final month = date.month.toString().padLeft(2, '0');
   return '$day/$month/${date.year}';
+}
+
+
+class _PendingOfflineSection extends StatelessWidget {
+  const _PendingOfflineSection({
+    required this.pendingList,
+    required this.isSyncing,
+    required this.onSync,
+    required this.onDelete,
+  });
+
+  final List<PendingOfflineReservation> pendingList;
+  final bool isSyncing;
+  final VoidCallback onSync;
+  final ValueChanged<String> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFDE68A)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.cloud_off_outlined, color: Color(0xFFD97706), size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Reservas offline pendientes (${pendingList.length})',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: Color(0xFF92400E),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Estas reservas se crearon en tu dispositivo sin conexión a internet.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF78350F)),
+          ),
+          const SizedBox(height: 12),
+          for (final item in pendingList) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.branchName ?? 'Sucursal asignada',
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        ),
+                        Text(
+                          'Visita: ${item.visitDate} · ${item.itemCount} prenda(s) · Bs ${item.totalAmount.toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
+                    tooltip: 'Descartar',
+                    onPressed: () => onDelete(item.clientReservationId),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: isSyncing ? null : onSync,
+              icon: isSyncing
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.sync_outlined, size: 18),
+              label: Text(
+                isSyncing ? 'Sincronizando reservas...' : 'Sincronizar reservas offline',
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFD97706),
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -5,6 +5,7 @@ export interface CatalogBranch {
   name: string;
   city: string;
   is_default: boolean;
+  address?: string | null;
 }
 
 export interface CatalogNameItem {
@@ -33,6 +34,8 @@ export interface CatalogProductVariant {
   discount_amount?: string;
   size_id: string | null;
   color_id: string | null;
+  size_name?: string | null;
+  color_name?: string | null;
   image_url?: string | null;
   image_public_id?: string | null;
   garment_points: Point[] | null;
@@ -50,6 +53,9 @@ export interface CatalogProduct {
   id: string;
   name: string;
   description: string | null;
+  category_name?: string | null;
+  has_discount?: boolean;
+  discounted_price?: string | null;
   discount_type?: DiscountType | null;
   discount_value?: string | null;
   provider_id?: string | null;
@@ -138,6 +144,27 @@ export interface UpdateProductRequest {
   status?: ProductStatus;
   sku?: string;
   variants: CreateProductVariantRequest[];
+}
+
+export interface BranchStockItem {
+  branch_id: string;
+  branch_name: string;
+  city: string;
+  address: string;
+  phone: string;
+  opening_hours: string;
+  quantity: number;
+  reserved_quantity: number;
+  available_quantity: number;
+}
+
+export interface VariantMultiBranchAvailability {
+  variant_id: string;
+  product_id: string;
+  product_name: string;
+  sku: string;
+  total_available: number;
+  branches: BranchStockItem[];
 }
 
 export type ListResponse<T> = ApiResponse<T[]>;

@@ -14,7 +14,7 @@ El subsistema de Inteligencia Analítica proporciona a los administradores de ca
 
 ---
 
-## 2. IA Generativa Asistida por Voz (CU23)
+## 2. IA Generativa Asistida por Voz (CU20)
 
 ### 2.1. Arquitectura RAG (Retrieval-Augmented Generation)
 
@@ -64,7 +64,7 @@ Instrucciones:
 
 ---
 
-## 3. Generación de Dataset Sintético de Ropa (CU25)
+## 3. Generación de Dataset Sintético de Ropa (CU22)
 
 Dado que un proyecto académico carece de años de historial transaccional real, se implementa un generador sintético estocástico (`backend/scripts/generate_synthetic_data.py`) que produce **10,000+ registros realistas** con parámetros de la industria de la moda:
 
@@ -80,7 +80,7 @@ Dado que un proyecto académico carece de años de historial transaccional real,
 
 ---
 
-## 4. Machine Learning Supervisado: Predicción de Demanda (CU26)
+## 4. Machine Learning Supervisado: Predicción de Demanda (CU23)
 
 ### 4.1. Definición del Problema
 Predecir la **cantidad de unidades a vender** ($y$) por cada variante de prenda en las próximas 4 semanas para orientar los traslados de mercadería y compras a proveedores.
@@ -101,7 +101,7 @@ Predecir la **cantidad de unidades a vender** ($y$) por cada variante de prenda 
 
 ---
 
-## 5. Machine Learning No Supervisado: Segmentación K-Means (CU27)
+## 5. Machine Learning No Supervisado: Segmentación K-Means (CU24)
 
 ### 5.1. Definición del Problema
 Clasificar la cartera de clientes en **grupos homogéneos (*clusters*)** para personalizar promociones y detectar patrones de compra y cambios excesivos.
@@ -125,7 +125,7 @@ Clasificar la cartera de clientes en **grupos homogéneos (*clusters*)** para pe
 
 ---
 
-## 6. Dashboard Ejecutivo con KPIs en Tiempo Real (CU28)
+## 6. Dashboard Ejecutivo con KPIs en Tiempo Real (CU25)
 
 El dashboard centraliza la información en un panel interactivo:
 - **Tarjetas Métricas (KPIs Principales):**

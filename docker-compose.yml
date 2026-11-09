@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fashionstore_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-fashionstore}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-fashionstore}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fashionstore_net
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: fashionstore_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && exec uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: "8000"
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-fashionstore}
+      SECRET_KEY: ${SECRET_KEY:-supersecretkey1234567890localdev}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-your_cloud_name}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-your_api_key}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-your_api_secret}
+      CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-fashionstore}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_CURRENCY: ${STRIPE_CURRENCY:-usd}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.6-flash}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-30}
+      FIREBASE_SERVICE_ACCOUNT_PATH: ${FIREBASE_SERVICE_ACCOUNT_PATH:-./.secrets/firebase-service-account.json}
+    env_file:
+      - path: backend/.env
+        required: false
+    networks:
+      - fashionstore_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fashionstore_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8000/api}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+    networks:
+      - fashionstore_net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  fashionstore_net:
+    driver: bridge

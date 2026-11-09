@@ -100,10 +100,12 @@ void main() {
     expect(find.text('Preparar reserva'), findsOneWidget);
     expect(find.text('Blusa demo'), findsOneWidget);
     expect(find.text('Pantalón demo'), findsOneWidget);
-    await tester.tap(find.text('Selecciona una sucursal'));
-    await tester.pump();
-    await tester.tap(find.text('Sucursal Central · La Paz'));
-    await tester.pump();
+    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sucursal Central · La Paz').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Confirmar reserva'));
+    await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Confirmar reserva'));
     await tester.pumpAndSettle();
 
@@ -131,23 +133,32 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(),
-        home: ReservationCreatePage(
-          authController: authController,
-          controller: controller,
-          arguments: const ReservationArguments(
-            items: [
-              ReservationDraftItem(
-                variantId: 'variant-id',
-                quantity: 1,
-                productName: 'Blusa demo',
-              ),
-            ],
-          ),
-        ),
+        initialRoute: AppRoutes.reservationCreate,
         onGenerateRoute: (settings) {
+          if (settings.name == AppRoutes.reservationCreate) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (_) => ReservationCreatePage(
+                authController: authController,
+                controller: controller,
+                arguments: const ReservationArguments(
+                  items: [
+                    ReservationDraftItem(
+                      variantId: 'variant-id',
+                      quantity: 1,
+                      productName: 'Blusa demo',
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           routeName = settings.name;
-          arguments = settings.arguments as ReservationArguments;
+          if (settings.arguments is ReservationArguments) {
+            arguments = settings.arguments as ReservationArguments;
+          }
           return MaterialPageRoute<void>(
+            settings: settings,
             builder: (_) => const SizedBox.shrink(),
           );
         },
@@ -155,7 +166,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Agregar otra prenda'));
+    final btn = find.widgetWithText(OutlinedButton, 'Agregar otra prenda');
+    await tester.ensureVisible(btn);
+    await tester.pumpAndSettle();
+    await tester.tap(btn);
     await tester.pumpAndSettle();
 
     expect(routeName, AppRoutes.catalog);
@@ -244,6 +258,7 @@ class _FakeReservationApi extends ReservationApi {
     required String branchId,
     required DateTime visitDate,
     required List<ReservationDraftItem> items,
+    String? clientReservationId,
   }) async {
     createCalls++;
     return ReservationResult(

@@ -1,45 +1,106 @@
 # CURRENT STATE — FASHIONSTORE SAAS MULTITENANT
-
-## Estado Consolidado del Proyecto (25 de Octubre de 2026)
-
-### 1. Resumen de Casos de Uso (Total: 28 CUs)
-* **Casos de Uso del 1er Parcial (Modificados/Preservados):** 12 CUs (Base operativa lista; con `tenant_id` y aislamiento en base de datos activo).
-* **Casos de Uso Exclusivos del 2do Parcial (Nuevos/Extras):** 16 CUs (En proceso de implementación incremental).
-* **Progreso Global Consolidado:**
-  - `CU01` (Tenants): Backend, base de datos y portal Superadmin operativos.
-  - `CU02` (Planes y Suscripciones): Catálogo de planes, auditoría y Downgrade Guard operativos.
-  - `CU04` (Gestionar Sucursales Bajo Límites del Plan): Migración 0040 (geo/auditoría), endpoints `/api/branches/quota`, validación estricta de cuotas (2 vs 10 sucursales), aislamiento multitenant y UI en Angular 21 100% operativos.
+### Plataforma SaaS Multitenant E-Commerce (Sistemas 2 - 2026)
+**Fecha de Corte:** 31 de Octubre de 2026  
+**Alcance Oficial:** 25 Casos de Uso Definitivos (Consolidados para el 2do Parcial)
 
 ---
 
-### 2. Estado por Componente Arquitectónico
+## 1. Resumen de Estado de Casos de Uso (Total: 25 CUs)
 
-#### Base de Datos (PostgreSQL 15+)
-* **Migraciones 0038, 0039 y 0040 Aplicadas:**
-  - Tablas `companies`, `plans` y `subscriptions` creadas y enriquecidas con descripciones comerciales y campos de auditoría.
-  - Tabla `branches` enriquecida con `address`, `phone`, `opening_hours`, `latitude`, `longitude`, `created_at` y `updated_at`.
-* **Datos Sembrados (`seed_saas.py`):**
-  - Planes: `BASICO` (2 sucursales, sin IA, $29/mes) y `PROFESIONAL` (10 sucursales, con IA, $99/mes).
-  - Superadmin Global: `superadmin@fashionstore.com`.
-  - 2 Tenants Activos: "Boutique Elegance" (Plan Básico, 2 sucursales activas - cuota saturada) y "Moda Urbana" (Plan Básico, 1 sucursal activa - 1 cupo disponible).
+| Estado | Cantidad de CUs | Casos de Uso Comprendidos |
+| :--- | :---: | :--- |
+| **Implementados y Verificados (100% Fullstack)** | **24 CUs** | `CU01`, `CU02`, `CU03`, `CU04`, `CU05`, `CU06`, `CU07`, `CU08`, `CU09`, `CU10`, `CU11`, `CU12`, `CU13`, `CU14`, `CU15`, `CU16`, `CU17`, `CU18`, `CU19`, `CU20`, `CU21`, `CU22`, `CU23`, `CU25` |
+| **En Progreso (Backend 100% / Frontend en Paralelo)** | **1 CU** | `CU24` (Segmentación K-Means RFM+D - Frontend en curso paralelo) |
+| **Programados (Presentación 3)** | **0 CUs** | ¡Todos los 25 Casos de Uso del pliego se encuentran implementados en Backend y 24 al 100% Fullstack! |
 
-#### Backend (FastAPI + SQLAlchemy)
-* **Estructura:** Modularizada en 7 paquetes de dominio autónomos (`p0_saas_plataforma` a `p6_inteligencia_analitica`).
-* **Endpoints:** 108+ rutas REST verificadas en la especificación OpenAPI de Swagger (incluyendo `/api/branches/quota`, `/api/saas/companies`, `/api/saas/plans` y `/api/saas/subscriptions`).
-* **Aislamiento Multitenant & Cuotas:**
-  - Middleware y dependencias de autenticación por JWT (`tenant_id`, `branch_id`, `rol`).
-  - Validación de cuotas comerciales en `branch_service.py` (`validate_branch_quota`) y `quota_service.py` con bloqueo `HTTP 400 Bad Request`.
+---
 
-#### Frontend Web (Angular 21 PWA)
-* **Estructura:** Organizada por roles (`features/superadmin/`, `features/cliente/`, `features/admin/`, `features/cajero/`, `features/encargado/`, `features/proveedor/`).
-* **Portal Master Superadmin (CU01 y CU02 Implementados):**
-  - Modelos y servicios en [`frontend/src/app/core/services/company.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/company.service.ts) (CRUD de tenants, gestión de suscripciones y cambio reactivo de planes).
-  - Vistas y modales: [`tenants-page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/superadmin/pages/tenants-page.component.ts), modal de alta de tenant y modal de gestión de suscripciones con *Downgrade Guard*.
-* **Portal Administración de Sucursales (CU04 Implementado):**
-  - Modelos y servicios en [`admin-branch.model.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/admin/models/admin-branch.model.ts) y [`admin-branch.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/admin/services/admin-branch.service.ts).
-  - Vista [`admin-branch-page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/admin/pages/admin-branch-page.component.ts) con widget de cuota comercial del plan, barra de progreso reactiva, alerta de saturación, coordenadas GPS y modal extendido.
-* **Pendiente Inmediato:** Service Worker e IndexedDB para catálogo offline (CU08/CU09), catálogo de prendas multitenant (CU06).
+### Detalle de Avance de los Casos de Uso Implementados:
 
-#### Aplicación Móvil (Flutter / Dart)
-* **Estructura:** `mobile/lib/` con features desacopladas.
-* **Pendiente Inmediato:** Integración de persistencia local en SQLite (`sqflite`), mapa con OpenStreetMap (`flutter_map` consumiendo coordenadas del CU04 / CU21) y cola de sincronización offline.
+1. **`CU01: Registrar y Gestionar Empresas (Tenants)` [Nuevo 2P - 100%]:**  
+   Backend `p0_saas_plataforma` con aislamiento por `tenant_id`, tabla `companies`, base de datos central y portal Superadmin operativo en `/app/superadmin/tenants`.
+2. **`CU02: Gestionar Planes de Suscripción (Básico, Pro, Empresarial) y Cuotas` [Nuevo 2P - 100% Completo]:**  
+   Catálogo de planes comerciales flexibles (Básico máx. 3 sucursales, Profesional máx. 10 sucursales, Empresarial hasta 223 sucursales), endpoints completos CRUD en `/api/saas/plans` (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`), interfaz administrativa `/app/superadmin/plans` bajo `/design-taste-frontend`, timestamps de auditoría, Downgrade Guard en `/api/saas/subscriptions` y modal reactivo de asignación de plan.
+3. **`CU03: Iniciar Sesión Multitenant con JWT y Claims de Tenant` [Modificado 1P - 100%]:**  
+   Token JWT con inyección obligatoria de `sub`, `rol`, `tenant_id` y `branch_id`. Login desacoplado de dependencias externas en `environment.ts` y selector de 2 actores (`Clientes` vs `Administrativos`).
+4. **`CU04: Gestionar Sucursales Bajo Límites del Plan` [Modificado 1P - 100% Blindado]:**  
+   Migración `0040` (geolocalización y auditoría), endpoints `/api/branches/quota`, validación estricta de cuota comercial del plan (3 en Básico, 10 en Pro, 25 en Empresarial), soft-delete defensivo ante registros históricos con dependencias FK, y liberación reactiva e inmediata de cuota sin requerir reinicio del servidor. Suite `test_cu04_branch_quota_release.py` verificada con 6/6 pruebas aprobadas.
+5. **`CU05: Gestionar Prendas y Variantes de Precio por Talla` [Modificado 1P - 100%]:**  
+   CRUD de prendas en `p2_gestion_productos_catalogo`, persistencia transaccional con `db.commit()`, aislamiento por `tenant_id`, matriz de variantes con precios diferenciados por talla para habilitar políticas de cambio. Suite de pruebas pasando 4/4.
+6. **`CU06: Consultar Catálogo Online con Búsqueda Facetada` [Modificado 1P - 100%]:**  
+   Tienda online pública con filtros dinámicos multicriterio (categoría, talla, color, rango de precio) indexados en PostgreSQL.
+7. **`CU07: Sincronizar y Descargar Catálogo a Almacenamiento Local (PWA / SQLite)` [Nuevo 2P - 100%]:**  
+   Endpoint `/api/catalog/offline-pack?branch_id=...`, persistencia IndexedDB nativa en Angular con `IdbCatalogService` (`fashionstore_local_db` v1) y SQLite nativo en Flutter (`local_catalog_db.dart`).
+8. **`CU08: Consultar Catálogo Offline en Modo Desconectado` [Nuevo 2P - 100%]:**  
+   Detección reactiva de conectividad mediante `NetworkStatusService` con conmutación transparente a caché local ante caídas de red y banner de advertencia de datos locales.
+9. **`CU09: Comprar Prendas con Stripe y Despacho Condicionado` [Modificado 1P - 100%]:**  
+   Integración con Stripe Elements en Web y Stripe PaymentSheet en Móvil Flutter. Cumplimiento incondicional de la **Política de Negocio 3**: despacho bloqueado si `payment_status != 'paid'`, generación de código de rastreo formal `DSP-YYYYMMDD-XXXX` y stepper ICONIX de 5 etapas.
+10. **`CU10: Crear Reserva Online de Prendas con Vencimiento y Bloqueo` [Modificado 1P - 100% Blindado]:**  
+    Bloqueo atómico de inventario en `p4_gestion_compras_reservas` (`reserved_quantity`), código amigable `RES-XXXXXXXX`, QR digital, validación de fechas (hoy a +7 días), recordatorio de caducidad a 24h y vista boutique en Angular con tickets de reserva. **Blindado y Automatizado:** Background worker continuo asíncrono en `main.py` (`_expiration_worker_loop`) y endpoint administrativo `POST /api/reservations/sweeper` que auditan reservas vencidas (`expires_at <= today`), liberan de inmediato el stock bloqueado devolviéndolo a disponibilidad general y limpian reservas en carrito abandonado (15 min). Suite `test_cu10_reservation_expiration_sweeper.py` verificada con 4/4 pruebas aprobadas.
+11. **`CU11: Registrar Reserva de Prendas Offline en Modo Desconectado (PWA / SQLite)` [Nuevo 2P - 100%]:**  
+    Persistencia desconectada con UUIDv4 local (`client_reservation_id`), bandeja Outbox de reservas offline tanto en PWA Web (`IdbReservationsService` en IndexedDB) como en Mobile Flutter (`local_pending_reservations` en SQLite con `LocalCatalogDb`), sincronización reactiva al reconectar con backend `POST /reservations/` garantizando idempotencia transaccional y validación de stock. Suite de pruebas pasando 7/7 en backend y 8/8 en Flutter.
+12. **`CU12: Atender y Resolver Conflictos de Reservas Expiradas` [Nuevo 2P - 100%]:**  
+    Gestión operativa de discrepancias cuando un cliente asiste tras la expiración del apartado. Backend `p4_gestion_compras_reservas` con endpoints `GET /reservations/branch/conflicts` y `POST /reservations/{id}/resolve-conflict`, validación atómica de inventario físico remanente en percha, reactivación (+24h/48h) con re-bloqueo de `reserved_quantity`, sustitución de prenda/talla disponible o cierre definitivo con nota de auditoría obligatoria. Frontend PWA Angular en `/app/encargado/reservations` con bandeja visual de diagnóstico de percha y modal de resolución adaptativa. Suite `test_cu12_resolve_expired_reservations.py` aprobada 7/7.
+13. **`CU13: Registrar Venta POS Desconectada en Efectivo con Contingencia UUIDv4` [Nuevo 2P - 100%]:**  
+    Venta de mostrador POS desconectada en `p5_gestion_ventas_pos` con cumplimiento estricto de la **Política de Negocio 5**: cobro en efectivo exclusivo (`cash`), validación de `client_sale_id` UUIDv4 e idempotencia transaccional (reintentos no duplican decremento de inventario). Frontend PWA Angular en `/app/cajero/caja` con bandeja local IndexedDB (`IdbSalesService`), calculadora de cambio en vivo con atajos de efectivo, bloqueo visual de métodos electrónicos en modo desconectado y modal de comprobante térmico con hash UUIDv4 (`TCK-OFF-XXXXXX`). Suite `test_cu13_offline_pos_sales.py` aprobada 5/5.
+14. **`CU14: Gestionar Bandeja Local de Operaciones Pendientes (Outbox PWA / SQLite)` [Nuevo 2P - 100%]:**  
+    Módulo de bandeja local outbox en Angular PWA (`CajaPageComponent`) y backend `p5_gestion_ventas_pos`. Endpoint de conciliación de estado `POST /api/sales/offline/check-status` para verificar qué ventas ya fueron consolidadas en el servidor central. Panel con 3 tarjetas de métricas en vivo (Efectivo en Gaveta Offline `totalPendingCash`, comprobantes en cola, estado de conexión), sincronización individual y por lotes, verificación reactiva con backend, purga de comprobantes sincronizados y previsualización de tickets térmicos con UUIDv4. Suite `test_cu14_outbox_operations.py` aprobada 4/4 y verificación TypeScript limpia.
+15. **`CU15: Sincronizar Lotes de Ventas con Idempotencia Central (sync_operations)` [Nuevo 2P - 100%]:**  
+    Módulo de sincronización en lote centralizada con idempotencia estricta en `p5_gestion_ventas_pos`. Endpoint `POST /api/sales/offline/batch-sync` con validación de pagos en efectivo exclusivo (`payment_method: cash`), aislamiento multitenant, bloqueo pesimista `with_for_update()` en inventario y persistencia en tabla `sync_operations` (con `client_operation_id` indexado). Garantía de idempotencia dual: reenvíos por reintentos de red son detectados y respondidos con HTTP 200 sin duplicar ventas ni descontar inventario doblemente. Manejo desacoplado de sobreventa para `CU16` (estado `EN_CONFLICTO`). En Frontend Web PWA Angular (`caja-page.component.ts`), conexión directa de `syncAllPending()` con el endpoint de lote, actualización de marcas locales en IndexedDB (`IdbSalesService.markAsSynced`), panel de auditoría de lote bajo directrices `/frontend-design` con desglose de ítems consolidados, duplicados y conflictos. Suite unitaria `test_cu15_batch_sync_idempotency.py` aprobada 5/5 (100%) y regresión total de 14/14 pasando.
+16. **`CU16: Gestionar y Resolver Conflictos de Ventas Offline y Quiebres de Stock Central` [Nuevo 2P - 100%]:**  
+    Conciliación y resolución de sobreventas ocurridas durante operaciones desconectadas en `p5_gestion_ventas_pos`. Endpoints `GET /api/sales/conflicts` y `POST /api/sales/conflicts/{sale_id}/resolve`. Soporte completo de las 3 vías reglamentarias: (1) `negative_stock` (autorización con stock negativo y reposición prioritaria), (2) `substitute` (sustitución por variante con stock confirmado en sucursal mediante bloqueo pesimista `with_for_update()`), y (3) `credit_note` (anulación formal contable y emisión de Nota de Crédito digital `NC-YYYYMMDD-XXXX` por el 100% pagado, retención 0%). Auditoría obligatoria con justificación mínima de 5 caracteres. Frontend Web PWA Angular en `/app/encargado/sale-conflicts` con bandeja interactiva, cards de diagnóstico de quiebre, modal de resolución de 3 vías con transiciones fluidas y validaciones reactivas en tiempo real. Suite `test_cu16_resolve_offline_sale_conflicts.py` aprobada 7/7 (100%).
+17. **`CU17: Procesar Cambio de Prenda por Talla con Cobro de Diferencia y Validación de Estado` [Nuevo 2P - 100%]:**  
+    Implementación rigurosa de la **Política de Negocio 1 (P-Ten-01)** en `p5_gestion_ventas_pos`. Endpoints `POST /api/exchanges/quote`, `POST /api/exchanges` y `GET /api/exchanges`. Cálculo dinámico de diferencia de precio ($\Delta = P_{\text{nueva}} - P_{\text{original}}$). Si $\Delta > 0$, el cambio se consolida **única y exclusivamente si el cliente abona la diferencia** en caja (`difference_paid = True`); de lo contrario, se rechaza con HTTP 400 y el inventario no se altera. Validación de etiqueta intacta (`good_with_tags`), plazo de cambio (máx. 30 días), actualización física atómica de inventario (+1 vieja, -1 nueva con `with_for_update`) y persistencia en tabla `garment_exchanges`. Suite `test_cu17_garment_exchange.py` con 8/8 pruebas aprobadas (100%).
+18. **`CU18: Procesar Devolución de Prenda con Retención Operativa (20%–50%) y Nota de Crédito` [Nuevo 2P - 100%]:**  
+    Cumplimiento riguroso de la **Política de Negocio 2 (P-Ten-03)** en `p5_gestion_ventas_pos`. Endpoints `POST /api/returns/quote`, `POST /api/returns` y `GET /api/returns`. Retención operativa configurada por tenant entre el 20% y el 50% (30% en Elegance, 20% en Urbana) y reembolso neto entre el 50% y 80%. Modalidades de liquidación: emisión de Nota de Crédito digital (`NC-YYYYMMDD-XXXX`) o reembolso en efectivo. Validación de prenda intacta con etiqueta adherida (`good_with_tags`) y plazo permitido. Reingreso físico de inventario atómico con bloqueo pesimista `with_for_update`. Frontend Web PWA Angular en `/app/cajero/caja` con cotización previa interactiva y modal de Nota de Crédito. Suite `test_cu18_garment_return.py` con 8/8 pruebas aprobadas (100%) y regresión total de 26/26 pruebas.
+19. **`CU19: Localizar Sucursales y Trazar Rutas (OpenStreetMap / ORS)` [Nuevo 2P - 100%]:**  
+    Geolocalización interactiva de boutiques y trazado de rutas multimodales en aplicación móvil Flutter. Backend `p1_gestion_usuarios_acceso` con endpoint público `GET /api/branches/public` filtrado estrictamente por `tenant_id`, y base de datos poblada en `seed_saas.py` con georreferenciación de sucursales en Santa Cruz y Cochabamba. En Mobile Flutter, integración de `flutter_map: ^7.0.2` y `latlong2: ^0.9.1`, servicio híbrido de ruteo en `routing_service.dart` (Nivel 1 OSRM público sin API Key obligatoria, Nivel 2 OpenRouteService oficial y Nivel 3 fallback geodésico Haversine), controlador `BranchesMapController` con GPS del dispositivo y selector multimodal (`driving` y `walking`), y pantalla completa `BranchesMapPage` diseñada bajo directrices `/frontend-design` con paleta midnight/champagne gold, pines estilizados con halo radiante y tarjeta flotante con distancia y tiempo estimado de llegada. Suite `test_cu19_branch_public_map.py` 2/2 PASSED y unit tests móviles de ruteo en `routing_service_test.dart`.
+20. **`CU21: Exportar Reportes Empresariales a Formatos PDF y Excel` [Modificado 1P - 100%]:**  
+    Emisión y exportación multi-formato de reportes de Ventas, Stock e Inventario y Movimientos de Almacén en `p6_inteligencia_analitica`. Integración de ReportLab 5.1.0 para documentos PDF oficiales apaisados con numeración dinámica "Página X de Y", membrete y tarjetas KPI; OpenPyXL 3.1.5 para hojas de cálculo Excel XLSX con formatos contables y fórmulas `=SUM(...)`; y CSV plano. Proyección granular y dinámica de columnas solicitadas por el usuario (`columns`). Aislamiento multitenant estricto y restricción por sucursal para rol `encargado`. En Frontend Web PWA Angular en `/app/admin/reports` y `/app/encargado/reports` con tabuladores fluidos, selector interactivo de columnas visibles y descarga vía blob. Suite `test_cu21_export_reports.py` con 9/9 pruebas PASSED (100%) y 9 casos formalizados en `PRUEBAS_CAJA_NEGRA.md`.
+21. **`CU20: Generar Reportes Ejecutivos por Voz y Lenguaje Natural (Gemini RAG)` [Nuevo 2P - 100%]:**  
+    Procesamiento y locución de consultas analíticas ejecutivas mediante lenguaje natural y voz en `p6_inteligencia_analitica` y Angular PWA. Endpoints `POST /api/reports/voice-query` y `GET /api/reports/voice-query/capabilities`. Cumplimiento estricto de gobernanza de planes SaaS (Plan Básico bloqueado HTTP 403 Forbidden según CU02/CU04; Planes PRO y Empresarial habilitados con `has_ai_access`). Ensamble dinámico de contexto multitenant en PostgreSQL (métricas de ventas, ticket promedio, top prendas vendidas por talla/color con `SaleItem.line_total`, stock crítico <= 5 unidades y políticas de negocio de devoluciones con retención 20-50% y cambios con cobro de diferencia). Integración con Google Gemini 2.5 Flash mediante `google.genai` Client, System Prompt analítico estructurado y generación de `speech_text` optimizado para locución auditiva. Motor heurístico local resiliente ante caídas o cuotas de red (`is_fallback: true`). En Frontend Web PWA Angular, componente modal `VoiceAssistantModalComponent` integrado en `AdminReportsPageComponent` con directrices `/design-taste-frontend`: captura por voz con Web Speech API (`webkitSpeechRecognition`), síntesis de voz con `SpeechSynthesis`, animación de ondas de audio, chips sugeridos, cards de KPIs y tabla de detalle. Suite backend `test_cu20_voice_rag_reports.py` con 4/4 pruebas PASSED (100%). Diagramación ICONIX completada con scripts EA v15 (`CU20_secuencia_reportes_voz_gemini_EA.js` y `CU20_comm_reportes_voz_gemini_EA.js`), tabla comparativa y previsualización Mermaid en `docsUML/SEQUENCE_DIAGRAM_GUIDE.md`.
+22. **`CU22: Generar Dataset Sintético de Ventas y Estacionalidad Textil` [Nuevo 2P - Backend 100%]:**  
+    Generación estocástica vectorial rápida (< 2 segundos) en Python (`numpy`/`pandas`) de $\ge 1,000$ (y por defecto 10,000) transacciones sintéticas históricas en `p6_inteligencia_analitica`. Resuelve el problema del "Cold Start" de IA para nuevos suscriptores del Plan Profesional/Empresarial. Modela estacionalidad textil boliviana (otoño/invierno vs primavera/verano), distribución gaussiana de tallas (M y L predominantes), picos quincenales y de fin de mes, simulación de cambios de prenda (CU17) y devoluciones con retención del 20% al 50% (CU18). Endpoints `POST /api/ml/synthetic-dataset/generate`, `GET /api/ml/synthetic-dataset/latest` y `GET /api/ml/synthetic-dataset/{id}/download`. Gobernanza de planes SaaS con `validate_ai_access` (Plan Básico denegado con HTTP 403 Forbidden), control de acceso por rol (`administrador` y `superadmin`), y persistencia física en CSV. Suite `test_cu22_synthetic_dataset.py` con 5/5 pruebas PASSED (100%) y 5 casos formalizados en `PRUEBAS_CAJA_NEGRA.md`.
+23. **`CU23: Predecir Demanda de Ropa por Talla` [Nuevo 2P - 100%]:**  
+    Entrenamiento y calibración de modelo supervisado `RandomForestRegressor` con Scikit-Learn en `p6_inteligencia_analitica`. Extracción y preprocesamiento de features temporales y estacionales (`size_code`, `month`, `week_of_year`, `day_of_month`, `day_of_week`, `is_cold_season`, `is_payday_window`, `unit_price`). Aseguramiento de métricas $R^2 \ge 0.84$, $MAE$ y $RMSE$, con persistencia del artefacto serializado en `joblib` y registro de auditoría en la tabla `ml_models`. Inferencia semanal (1 a 8 semanas) por talla (S, M, L, XL), cálculo de desbalance con inventario en percha (`inventory` table) y emisión de alertas tempranas de reabastecimiento en `demand_forecasts`. Endpoints `POST /api/ml/demand/train`, `POST /api/ml/demand/forecast`, `GET /api/ml/demand/alerts` y `GET /api/ml/demand/latest-model`. Frontend Web PWA Angular en `/app/admin/demand-forecast` con directrices `/design-taste-frontend`: selector de horizontes temporales, tarjetas KPI, gráfico interactivo de stock vs demanda proyectada con intervalos de confianza al 95%, bandeja priorizada de alertas de reabastecimiento y panel de control de re-entrenamiento del modelo. Suite `test_cu23_demand_forecasting.py` con 5/5 pruebas PASSED (100%) y 5 casos formalizados en `PRUEBAS_CAJA_NEGRA.md`.
+24. **`CU24: Segmentar Clientes con K-Means (ML No Supervisado - RFM+D)` [Nuevo 2P - Backend 100%]:**  
+    Entrenamiento y calibración de clustering no supervisado en `p6_inteligencia_analitica`. Matriz RFM+D (Recencia, Frecuencia, Monto Monetario y Tasa de Retorno/Cambio) con `StandardScaler` + `KMeans(k=4)`. Coeficiente Silhouette ($s \ge 0.50$) e inercia calculadas. Perfiles conductuales desde centroides desescalados: VIP / Embajadores, Compradores de Temporada, Cazadores de Ofertas y Alto Retorno. Serialización `.joblib` en `ml_models` y asignación de clientes en `customer_segments`. Endpoints `/api/ml/customer-segmentation/train`, `/status`, `/scatter-points` y `/customers`. Suite `test_cu24_customer_segmentation.py` 5/5 PASSED (100%).
+25. **`CU25: Visualizar Dashboard Ejecutivo con KPIs y Métricas ML` [Modificado 1P - 100% Fullstack]:**  
+    Modernización integral del motor analítico directivo en `p6_inteligencia_analitica` y PWA Angular (`admin-home-page.component.ts/.html`) bajo directrices `/design-taste-frontend`. Preservación retrocompatible de métricas operativas y adición de 4 bloques enriquecidos: (1) `OfflineSyncKpi` (ventas desconectadas, desglose de operaciones en lote y tasa de éxito de sincronización), (2) `PolicyRevenueKpi` (conciliación de retenciones operativas del 20-50% en `garment_returns` y diferencias abonadas $\Delta > 0$ en `garment_exchanges`), (3) `MachineLearningKpi` (unidades proyectadas por talla de CU23, distribución poblacional de clústeres RFM de CU24 y metadatos de modelos activos), (4) `PlanQuotaKpi` (monitoreo de sucursales activas frente al límite del plan y estado de IA). Degradación grácil ante inquilinos con Plan Básico (`has_ml_access: False`, HTTP 200 sin excepciones) y aislamiento multitenant estricto por `tenant_id`. En Frontend, 4 pestañas de filtrado ejecutivo ("Visión 360°", "Finanzas & Políticas", "Offline & Sync", "Inteligencia ML"), gráficos interactivos de área y donut, barras de distribución de segmentos RFM y exportador formal a CSV. Suite `test_cu25_executive_dashboard.py` 5/5 PASSED (100%).
+
+---
+
+## 2. Estado por Componente Arquitectónico
+
+### Base de Datos (PostgreSQL 15+ / Alembic Head 0044)
+* **Consolidación Definitiva (Migración 0044 Maestro):**
+  - Todas las tablas, relaciones, foreign keys e índices para los 25 Casos de Uso están creados y verificados en PostgreSQL (`0044_complete_database_schema_all_use_cases.py`).
+  - La base de datos relacional está congelada: no se requieren nuevas migraciones DDL estructurales.
+* **Aislamiento Multitenant:** `tenant_id UUID NOT NULL REFERENCES companies(id)` garantizado en todas las entidades de dominio.
+
+### Backend (Python + FastAPI)
+* Organizado en 7 paquetes canónicos de arquitectura profunda:
+  - `p0_saas_plataforma`: Tenants, suscripciones, cuotas comerciales y auditoría.
+  - `p1_gestion_usuarios_acceso`: Usuarios, autenticación JWT, sucursales y proveedores.
+  - `p2_gestion_productos_catalogo`: Prendas, variantes de precio por talla, colores y categorías.
+  - `p3_gestion_inventario_disponibilidad`: Inventario multisede, pack offline y disponibilidad.
+  - `p4_gestion_compras_reservas`: Carrito, órdenes Stripe, despacho y reservas con vencimiento.
+  - `p5_gestion_ventas_pos`: Ventas offline con UUIDv4, outbox, batch sync idempotente, cambios y devoluciones.
+  - `p6_inteligencia_analitica`: Gemini RAG voz/texto, dataset sintético (`CU22`), modelos ML (`CU23`/`CU24`) y OpenStreetMap.
+
+### Frontend Web (Angular 21 PWA)
+* Desacoplado de servidores externos mediante `runtime-config.js` y detección de localhost en `environment.ts`.
+* Almacenamiento local estructurado en IndexedDB (`fashionstore_local_db`).
+* Componentes reactivos, Spartan UI, diseño de alta costura (`frontend-design`) y accesibilidad.
+
+### Aplicación Móvil (Flutter / Dart)
+* Persistencia local con SQLite embebido (`sqflite`).
+* Geolocalización completa con OpenStreetMap (`flutter_map` + `latlong2`), motor híbrido OSRM/ORS con fallback Haversine y trazado de rutas vehiculares y peatonales (`CU19`).
+* Pasarela Stripe integrada mediante `flutter_stripe`.
+
+---
+
+## 3. Próxima Tarea Inmediata (Presentación 3)
+* **`CU23` – Predecir Demanda de Ropa (ML Supervisado - RandomForestRegressor / Ridge).**
+* **`CU24` – Segmentar Clientes con K-Means (ML No Supervisado - RFM y Devoluciones).**
+* **`CU25` – Visualizar Dashboard Ejecutivo con KPIs y Métricas ML.**

@@ -23,6 +23,9 @@ export interface BranchQuota {
   current_active_branches: number;
   remaining_slots: number;
   can_create_branch: boolean;
+  has_ai_access?: boolean;
+  subscription_status?: string;
+  end_date?: string | null;
 }
 
 export interface CreateBranchRequest {

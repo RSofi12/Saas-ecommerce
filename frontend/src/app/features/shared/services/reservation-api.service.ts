@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { ApiResponse } from '../../../core/models/api.model';
 import { ApiService } from '../../../core/services/api.service';
-import { CreateReservationRequest, Reservation, ReservationListResponse, ReservationResponse } from '../models/reservation.model';
+import { CreateReservationRequest, Reservation, ReservationConflictItem, ReservationConflictResolveRequest, ReservationListResponse, ReservationResponse } from '../models/reservation.model';
 import { CartResponse } from '../models/cart.model';
 
 @Injectable({ providedIn: 'root' })
@@ -47,5 +47,19 @@ export class ReservationApiService {
   cancelBranchReservation(reservationId: string, branchId?: string) {
     const query = branchId ? `?branch_id=${encodeURIComponent(branchId)}` : '';
     return this.api.patch<ReservationResponse>(`/reservations/${reservationId}/branch-cancel${query}`, {});
+  }
+
+  listBranchConflicts(branchId?: string) {
+    const query = branchId ? `?branch_id=${encodeURIComponent(branchId)}` : '';
+    return this.api.get<ApiResponse<ReservationConflictItem[]>>(`/reservations/branch/conflicts${query}`);
+  }
+
+  runSweeper() {
+    return this.api.post<ApiResponse<{ expired_reservations: number; expired_orders: number }>>('/reservations/sweeper', {});
+  }
+
+  resolveConflict(reservationId: string, payload: ReservationConflictResolveRequest, branchId?: string) {
+    const query = branchId ? `?branch_id=${encodeURIComponent(branchId)}` : '';
+    return this.api.post<ReservationResponse>(`/reservations/${encodeURIComponent(reservationId)}/resolve-conflict${query}`, payload);
   }
 }

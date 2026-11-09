@@ -22,6 +22,7 @@ export class SessionService {
 
   readonly token = this.tokenSignal.asReadonly();
   readonly user = this.userSignal.asReadonly();
+  readonly userRole = computed(() => this.userSignal()?.rol ?? null);
   readonly isLoading = this.loadingSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.tokenSignal() && !!this.userSignal());
 

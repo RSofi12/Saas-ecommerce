@@ -56,6 +56,7 @@ class _FakeReservationApi extends ReservationApi {
     required String branchId,
     required DateTime visitDate,
     required List<ReservationDraftItem> items,
+    String? clientReservationId,
   }) async {
     return ReservationResult(
       reservation: _createdReservation,

@@ -2,6 +2,43 @@ import { ApiResponse } from '../../../core/models/api.model';
 import { PaymentMethodEnum, PaymentStatusEnum } from './order.model';
 
 export type ReportType = 'sales' | 'inventory' | 'movements';
+export type ReportExportFormat = 'csv' | 'excel' | 'pdf';
+
+export interface ReportColumnDef {
+  key: string;
+  label: string;
+  defaultSelected: boolean;
+}
+
+export const SALES_REPORT_COLUMNS: ReportColumnDef[] = [
+  { key: 'branch_name', label: 'Sucursal', defaultSelected: true },
+  { key: 'product_name', label: 'Producto', defaultSelected: true },
+  { key: 'variant_sku', label: 'SKU / Talla', defaultSelected: true },
+  { key: 'type', label: 'Canal', defaultSelected: true },
+  { key: 'quantity_sold', label: 'Cantidad', defaultSelected: true },
+  { key: 'gross_sales', label: 'Total (Bs.)', defaultSelected: true },
+  { key: 'payment_method', label: 'Método Pago', defaultSelected: true },
+  { key: 'payment_status', label: 'Estado Pago', defaultSelected: false },
+  { key: 'sale_status', label: 'Estado Venta', defaultSelected: false },
+];
+
+export const INVENTORY_REPORT_COLUMNS: ReportColumnDef[] = [
+  { key: 'branch_name', label: 'Sucursal', defaultSelected: true },
+  { key: 'product_name', label: 'Producto', defaultSelected: true },
+  { key: 'variant_sku', label: 'SKU / Talla', defaultSelected: true },
+  { key: 'quantity', label: 'Stock Físico', defaultSelected: true },
+  { key: 'reserved_quantity', label: 'Reservado', defaultSelected: true },
+  { key: 'available_quantity', label: 'Disponible', defaultSelected: true },
+];
+
+export const MOVEMENTS_REPORT_COLUMNS: ReportColumnDef[] = [
+  { key: 'branch_name', label: 'Sucursal', defaultSelected: true },
+  { key: 'product_name', label: 'Producto', defaultSelected: true },
+  { key: 'variant_sku', label: 'SKU / Talla', defaultSelected: true },
+  { key: 'movement_type', label: 'Tipo Movimiento', defaultSelected: true },
+  { key: 'quantity', label: 'Unidades Movidas', defaultSelected: true },
+  { key: 'movements_count', label: 'Transacciones', defaultSelected: true },
+];
 
 export interface ReportQuery {
   branch_id?: string | null;
@@ -83,3 +120,31 @@ export interface NaturalReportPayload {
 }
 
 export type NaturalReportResponse = ApiResponse<NaturalReportPayload>;
+
+export interface ExecutiveKPICard {
+  title: string;
+  value: string;
+  subtext?: string | null;
+  trend?: 'up' | 'down' | 'neutral' | null;
+  color?: string | null;
+}
+
+export interface VoiceReportResponse {
+  query: string;
+  executive_summary: string;
+  speech_text: string;
+  kpis: ExecutiveKPICard[];
+  data_preview: Array<Record<string, any>>;
+  model_used: string;
+  is_fallback: boolean;
+  generated_at: string;
+}
+
+export interface VoiceCapabilitiesResponse {
+  ai_available: boolean;
+  model: string;
+  language: string;
+  supported_topics: string[];
+  suggested_queries: string[];
+}
+

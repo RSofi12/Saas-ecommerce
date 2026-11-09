@@ -30,14 +30,19 @@ class ReservationApi {
     required String branchId,
     required DateTime visitDate,
     required List<ReservationDraftItem> items,
+    String? clientReservationId,
   }) async {
+    final Map<String, dynamic> payload = {
+      'branch_id': branchId,
+      'visit_date': formatReservationDate(visitDate),
+      'items': [for (final item in items) item.toJson()],
+    };
+    if (clientReservationId != null) {
+      payload['client_reservation_id'] = clientReservationId;
+    }
     final response = await _client.post<Reservation>(
       'reservations/',
-      data: {
-        'branch_id': branchId,
-        'visit_date': formatReservationDate(visitDate),
-        'items': [for (final item in items) item.toJson()],
-      },
+      data: payload,
       parser: _parseReservation,
     );
     return _result(response.data, response.message);

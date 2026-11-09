@@ -14,6 +14,30 @@ from app.packages.p3_gestion_inventario_disponibilidad.schemas.inventory_schema 
 
 class ReportExportFormatEnum(str, Enum):
     csv = "csv"
+    excel = "excel"
+    xlsx = "xlsx"
+    pdf = "pdf"
+
+
+REPORT_COLUMN_LABELS: dict[str, str] = {
+    "branch_id": "ID Sucursal",
+    "branch_name": "Sucursal",
+    "product_id": "ID Prenda",
+    "product_name": "Prenda",
+    "variant_id": "ID Talla",
+    "variant_sku": "Talla / SKU",
+    "type": "Canal",
+    "quantity_sold": "Cant. Vendida",
+    "gross_sales": "Total Ventas (Bs)",
+    "payment_method": "Método Pago",
+    "payment_status": "Estado Pago",
+    "sale_status": "Estado Venta",
+    "quantity": "Stock Físico",
+    "reserved_quantity": "Stock Reservado",
+    "available_quantity": "Stock Disponible",
+    "movement_type": "Tipo Movimiento",
+    "movements_count": "N° Operaciones",
+}
 
 
 class ReportSummary(BaseModel):

@@ -16,13 +16,16 @@ from app.auth.hash import hash_password
 
 
 def get_default_or_by_code_plan(db: Session, plan_code: str) -> Plan:
-    plan = db.query(Plan).filter(Plan.code == plan_code.lower().strip(), Plan.is_active.is_(True)).first()
+    clean_code = plan_code.lower().strip()
+    plan = db.query(Plan).filter(Plan.code == clean_code, Plan.is_active.is_(True)).first()
     if not plan:
-        # Si no existe, crear los planes estándar si la tabla está vacía
-        if plan_code.lower() == "pro" or plan_code.lower() == "profesional":
+        # Si no existe, crear los planes estandar si la tabla esta vacia
+        if clean_code in ("enterprise", "empresarial"):
+            plan = Plan(name="EMPRESARIAL", code="enterprise", max_branches=223, has_ai_access=True, price_monthly=199.00)
+        elif clean_code in ("pro", "profesional"):
             plan = Plan(name="PROFESIONAL", code="pro", max_branches=10, has_ai_access=True, price_monthly=99.00)
         else:
-            plan = Plan(name="BASICO", code="basic", max_branches=2, has_ai_access=False, price_monthly=29.00)
+            plan = Plan(name="BASICO", code="basic", max_branches=3, has_ai_access=False, price_monthly=29.00)
         db.add(plan)
         db.commit()
         db.refresh(plan)

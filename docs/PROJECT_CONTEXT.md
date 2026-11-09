@@ -25,13 +25,14 @@ FashionStore resuelve estos problemas combinando una arquitectura web progresiva
 
 ## 3. Alcance del Sistema (2do Parcial)
 
-El alcance del segundo parcial unifica y amplía la plataforma en **7 dimensiones clave**, estructuradas bajo **28 Casos de Uso oficiales**:
+El alcance del segundo parcial unifica y amplía la plataforma en **7 dimensiones clave**, estructuradas bajo **25 Casos de Uso oficiales**:
 
 ### A. Modelo SaaS Multitenant y Suscripciones (Paquete 1)
 - Separación lógica estricta mediante `tenant_id UUID` en todas las tablas transaccionales.
 - Suscripción por planes con límites forzados por el backend:
-  - **Plan Básico:** Hasta 2 sucursales activas, sin módulo de IA Generativa.
-  - **Plan Profesional:** Hasta 10 sucursales activas, acceso completo a IA generativa, analítica predictiva y soporte multisede.
+  - **Plan Básico:** Hasta 3 sucursales activas, sin módulo de IA Generativa.
+  - **Plan Profesional:** Hasta 10 sucursales activas, acceso completo a IA generativa y analítica predictiva.
+  - **Plan Empresarial:** Hasta 25 sucursales activas, acceso ilimitado a IA y copias de seguridad continuas.
 - Autenticación unificada con JWT conteniendo claims de usuario, rol y `tenant_id`.
 
 ### B. Catálogo de Ropa con Variantes y Filtros Avanzados (Paquete 2)
@@ -58,8 +59,8 @@ El alcance del segundo parcial unifica y amplía la plataforma en **7 dimensione
   - Bandeja local de operaciones pendientes con contador visual para el cajero.
   - Sincronización por lotes (*batch sync*) con el backend mediante la tabla de auditoría `sync_operations` para garantizar **idempotencia transaccional** (cero ventas duplicadas).
 - **Políticas de Negocio Inviolables:**
-  - **Cambio de Prenda (CU19):** Al solicitar cambio por otra talla/prenda con diferencia de precio (ej. M a Bs 50 por L a Bs 70), el cambio se consolida **exclusivamente si el cliente paga la diferencia de precio**. Si el cliente no acepta pagar la diferencia, el sistema cancela la operación y restituye la prenda o el importe original.
-  - **Devolución de Prenda (CU20):** La tienda aplica una retención del 20% al 50% por concepto de gastos operativos, inspección y desinfección textil, reembolsando entre el 50% y el 80% del valor abonado (vía reintegro monetario o vale de compra/nota de crédito).
+  - **Cambio de Prenda (CU17):** Al solicitar cambio por otra talla/prenda con diferencia de precio (ej. M a Bs 50 por L a Bs 70), el cambio se consolida **exclusivamente si el cliente paga la diferencia de precio**. Si el cliente no acepta pagar la diferencia, el sistema cancela la operación y restituye la prenda o el importe original.
+  - **Devolución de Prenda (CU18):** La tienda aplica una retención del 20% al 50% por concepto de gastos operativos, inspección y desinfección textil, reembolsando entre el 50% y el 80% del valor abonado (vía reintegro monetario o vale de compra/nota de crédito).
 
 ### F. Geolocalización Móvil y Probador Virtual (Paquete 6)
 - Integración de mapas 100% de código abierto en Flutter: **OpenStreetMap** con renderizado vectorial y cálculo de rutas óptimas hacia sucursales cercanas mediante la API de **OpenRouteService**.

@@ -26,15 +26,16 @@ def seed_saas_data():
             basic_plan = Plan(
                 name="BASICO",
                 code="basic",
-                max_branches=2,
+                max_branches=3,
                 has_ai_access=False,
                 price_monthly=Decimal("29.00"),
                 is_active=True,
             )
             db.add(basic_plan)
-            print("   -> Creado Plan BASICO (max 2 sucursales, sin IA)")
+            print("   -> Creado Plan BASICO (max 3 sucursales, sin IA)")
         else:
-            print("   -> Plan BASICO ya existe")
+            basic_plan.max_branches = 3
+            print("   -> Plan BASICO actualizado (max 3 sucursales)")
 
         pro_plan = db.query(Plan).filter(Plan.code == "pro").first()
         if not pro_plan:
@@ -51,9 +52,25 @@ def seed_saas_data():
         else:
             print("   -> Plan PROFESIONAL ya existe")
 
+        enterprise_plan = db.query(Plan).filter(Plan.code == "enterprise").first()
+        if not enterprise_plan:
+            enterprise_plan = Plan(
+                name="EMPRESARIAL",
+                code="enterprise",
+                max_branches=25,
+                has_ai_access=True,
+                price_monthly=Decimal("199.00"),
+                is_active=True,
+            )
+            db.add(enterprise_plan)
+            print("   -> Creado Plan EMPRESARIAL (max 25 sucursales, con IA y backup continuo)")
+        else:
+            print("   -> Plan EMPRESARIAL ya existe")
+
         db.commit()
         db.refresh(basic_plan)
         db.refresh(pro_plan)
+        db.refresh(enterprise_plan)
 
         print("\n[2/4] Sembrando Cuenta de Superadministrador Global...")
         superadmin_email = "superadmin@fashionstore.com"
@@ -126,6 +143,11 @@ def seed_saas_data():
             branch_e1 = Branch(
                 name="Boutique Elegance - Central",
                 city="Santa Cruz",
+                address="Calle René Moreno #245, Casco Viejo",
+                phone="+591 3 3345678",
+                opening_hours="Lun-Sáb: 09:00 - 20:00",
+                latitude=-17.7833215,
+                longitude=-63.1821408,
                 tenant_id=elegance.id,
                 is_default=True,
                 is_active=True,
@@ -133,16 +155,61 @@ def seed_saas_data():
             branch_e2 = Branch(
                 name="Boutique Elegance - Equipetrol",
                 city="Santa Cruz",
+                address="Av. San Martín esq. Calle 7 Este, Equipetrol",
+                phone="+591 3 3451234",
+                opening_hours="Lun-Dom: 10:00 - 21:00",
+                latitude=-17.7658120,
+                longitude=-63.1952400,
                 tenant_id=elegance.id,
                 is_default=False,
                 is_active=True,
             )
-            db.add_all([branch_e1, branch_e2])
+            branch_e3 = Branch(
+                name="Boutique Elegance - Ventura Mall",
+                city="Santa Cruz",
+                address="4to Anillo esq. Av. San Martín, Ventura Mall Nivel 2",
+                phone="+591 3 3889012",
+                opening_hours="Lun-Dom: 10:00 - 22:00",
+                latitude=-17.7542100,
+                longitude=-63.1990300,
+                tenant_id=elegance.id,
+                is_default=False,
+                is_active=True,
+            )
+            db.add_all([branch_e1, branch_e2, branch_e3])
             db.commit()
-            print("   -> Tenant 'Boutique Elegance' creado con Plan PROFESIONAL y 2 sucursales.")
+            print("   -> Tenant 'Boutique Elegance' creado con Plan PROFESIONAL y 3 sucursales geolocalizadas.")
             print("      Admin: admin@elegance.com | Clave: AdminElegance2026!")
         else:
-            print("   -> Tenant 'Boutique Elegance' ya existe.")
+            existing_branches = db.query(Branch).filter(Branch.tenant_id == elegance.id).all()
+            coords = [
+                (-17.7833215, -63.1821408, "Calle René Moreno #245, Casco Viejo", "+591 3 3345678", "Lun-Sáb: 09:00 - 20:00"),
+                (-17.7658120, -63.1952400, "Av. San Martín esq. Calle 7 Este, Equipetrol", "+591 3 3451234", "Lun-Dom: 10:00 - 21:00"),
+                (-17.7542100, -63.1990300, "4to Anillo esq. Av. San Martín, Ventura Mall Nivel 2", "+591 3 3889012", "Lun-Dom: 10:00 - 22:00"),
+            ]
+            for i, b in enumerate(existing_branches):
+                if i < len(coords):
+                    b.latitude = coords[i][0]
+                    b.longitude = coords[i][1]
+                    b.address = coords[i][2]
+                    b.phone = coords[i][3]
+                    b.opening_hours = coords[i][4]
+            if len(existing_branches) == 2:
+                branch_e3 = Branch(
+                    name="Boutique Elegance - Ventura Mall",
+                    city="Santa Cruz",
+                    address="4to Anillo esq. Av. San Martín, Ventura Mall Nivel 2",
+                    phone="+591 3 3889012",
+                    opening_hours="Lun-Dom: 10:00 - 22:00",
+                    latitude=-17.7542100,
+                    longitude=-63.1990300,
+                    tenant_id=elegance.id,
+                    is_default=False,
+                    is_active=True,
+                )
+                db.add(branch_e3)
+            db.commit()
+            print("   -> Tenant 'Boutique Elegance' verificado con sucursales georreferenciadas.")
 
         print("\n[4/4] Sembrando Tenant 2: 'Moda Urbana' (Plan Basico)...")
         urbana = db.query(Company).filter(Company.subdomain == "modaurbana").first()
@@ -189,6 +256,11 @@ def seed_saas_data():
             branch_u1 = Branch(
                 name="Moda Urbana - Casco Viejo",
                 city="Cochabamba",
+                address="Av. Heroínas esq. Ayacucho #120",
+                phone="+591 4 4567890",
+                opening_hours="Lun-Sáb: 09:00 - 19:30",
+                latitude=-17.3935000,
+                longitude=-66.1570000,
                 tenant_id=urbana.id,
                 is_default=True,
                 is_active=True,

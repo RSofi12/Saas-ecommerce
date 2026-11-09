@@ -1,3 +1,4 @@
+import '../../core/storage/local_catalog_db.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/network/api_client.dart';
@@ -15,6 +16,7 @@ class ReservationController extends ChangeNotifier {
     ReservationApi? api,
     CatalogApi? catalogApi,
     AuthController? authController,
+    LocalCatalogDb? localDb,
   }) : _api =
            api ??
            ReservationApi(
@@ -23,14 +25,18 @@ class ReservationController extends ChangeNotifier {
                onUnauthorized: authController?.handleUnauthorized,
              ),
            ),
-       _catalogApi = catalogApi ?? CatalogApi();
+       _catalogApi = catalogApi ?? CatalogApi(),
+       _localDb = localDb ?? LocalCatalogDb();
 
   final ReservationApi _api;
   final CatalogApi _catalogApi;
+  final LocalCatalogDb _localDb;
 
   ReservationControllerStatus status = ReservationControllerStatus.idle;
   List<Reservation> reservations = const [];
   List<Branch> branches = const [];
+  List<PendingOfflineReservation> pendingReservations = const [];
+  bool isSyncing = false;
   Reservation? selectedReservation;
   String? errorMessage;
   String? feedbackMessage;
@@ -49,6 +55,11 @@ class ReservationController extends ChangeNotifier {
       final reservationResult = results[0] as ReservationListResult;
       reservations = reservationResult.reservations;
       branches = results[1] as List<Branch>;
+      try {
+        pendingReservations = await _localDb.getPendingReservations();
+      } catch (_) {
+        pendingReservations = const [];
+      }
       feedbackMessage = reservationResult.message;
       status = ReservationControllerStatus.ready;
     } catch (error) {
@@ -145,6 +156,98 @@ class ReservationController extends ChangeNotifier {
       errorMessage = _messageFor(error);
     }
     notifyListeners();
+  }
+
+
+  Future<void> loadPendingOffline() async {
+    try {
+      pendingReservations = await _localDb.getPendingReservations();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> saveOfflineReservation({
+    required String branchId,
+    String? branchName,
+    required DateTime visitDate,
+    required List<ReservationDraftItem> items,
+    double totalAmount = 0.0,
+  }) async {
+    status = ReservationControllerStatus.saving;
+    errorMessage = null;
+    feedbackMessage = null;
+    notifyListeners();
+
+    try {
+      final now = DateTime.now();
+      final clientReservationId = 'offline-${now.millisecondsSinceEpoch}-${items.length}';
+      final offlineRes = PendingOfflineReservation(
+        clientReservationId: clientReservationId,
+        branchId: branchId,
+        branchName: branchName,
+        visitDate: visitDate,
+        items: items,
+        totalAmount: totalAmount,
+        itemCount: items.fold(0, (sum, i) => sum + i.quantity),
+        createdAt: now,
+        syncStatus: 'PENDIENTE_SYNC',
+      );
+
+      await _localDb.savePendingReservation(offlineRes);
+      pendingReservations = await _localDb.getPendingReservations();
+      feedbackMessage = 'Reserva registrada localmente (Modo Desconectado). Se sincronizará al reanudar conexión.';
+      status = ReservationControllerStatus.ready;
+    } catch (e) {
+      status = ReservationControllerStatus.error;
+      errorMessage = 'Error guardando reserva offline: $e';
+    }
+    notifyListeners();
+  }
+
+  Future<int> syncAllPending() async {
+    if (pendingReservations.isEmpty) return 0;
+    isSyncing = true;
+    errorMessage = null;
+    notifyListeners();
+
+    int syncedCount = 0;
+    try {
+      for (final item in List<PendingOfflineReservation>.from(pendingReservations)) {
+        try {
+          await _api.create(
+            branchId: item.branchId,
+            visitDate: item.visitDate,
+            items: item.items,
+            clientReservationId: item.clientReservationId,
+          );
+          await _localDb.deletePendingReservation(item.clientReservationId);
+          syncedCount++;
+        } catch (e) {
+          debugPrint('Error sincronizando reserva ${item.clientReservationId}: $e');
+        }
+      }
+      pendingReservations = await _localDb.getPendingReservations();
+      final refreshed = await _api.getMine();
+      reservations = refreshed.reservations;
+      feedbackMessage = syncedCount > 0
+          ? 'Se sincronizaron $syncedCount reservas offline exitosamente.'
+          : 'No se pudieron sincronizar las reservas pendientes.';
+    } catch (e) {
+      errorMessage = 'Fallo durante la sincronización: $e';
+    } finally {
+      isSyncing = false;
+      notifyListeners();
+    }
+    return syncedCount;
+  }
+
+  Future<void> deletePendingOffline(String clientReservationId) async {
+    try {
+      await _localDb.deletePendingReservation(clientReservationId);
+      pendingReservations = await _localDb.getPendingReservations();
+      feedbackMessage = 'Reserva offline descartada localmente.';
+      notifyListeners();
+    } catch (_) {}
   }
 
   static String _messageFor(Object error) {

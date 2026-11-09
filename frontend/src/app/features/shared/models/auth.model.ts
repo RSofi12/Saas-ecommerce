@@ -12,6 +12,7 @@ export interface UsuarioAuth {
   rol: RolUsuario;
   tenant_id?: string | null;
   branch_id: string | null;
+  branch_name?: string | null;
   is_active?: boolean;
 }
 

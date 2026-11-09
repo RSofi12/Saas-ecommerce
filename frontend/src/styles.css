@@ -121,12 +121,14 @@
 	--sidebar-ring: oklch(0.8 0.08 12);
 }
 
-html,
-body {
+html {
 	min-height: 100%;
+	scroll-behavior: smooth;
+	scroll-padding-top: 5.5rem;
 }
 
 body {
+	min-height: 100%;
 	margin: 0;
 	font-family: var(--font-sans);
 	background: var(--background);
@@ -137,6 +139,25 @@ header {
 	color: var(--primary);
 }
 
+/* Sidebar Typography (Montserrat Regular - 400 y active - 600) */
+[hlmSidebarContent],
+[hlmSidebarMenu],
+[hlmSidebarMenuItem],
+[hlmSidebarFooter] {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+[hlmSidebarMenu] a,
+[hlmSidebarMenu] button {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em;
+}
+
+[hlmSidebarMenu] a[data-active="true"],
+[hlmSidebarMenu] button[data-active="true"] {
+  font-weight: 600 !important;
+}
 
 .btn-brand {
   background-color: #f8baa3;
@@ -154,4 +175,47 @@ header {
 .btn-brand:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+
+/* ============================================================
+   TRANSICIONES GLOBALES FLUIDAS DE PÁGINA Y COMPONENTES
+   (design-taste-frontend + accesibilidad con prefers-reduced-motion)
+   ============================================================ */
+
+/* Animación sutil de entrada para cada vista enrutada */
+router-outlet + * {
+  display: block;
+  animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Soporte para usuarios con preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  router-outlet + * {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Transición suave y consistente para elementos interactivos */
+a, button, input, select, textarea {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 200ms;
 }

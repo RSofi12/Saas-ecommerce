@@ -11,6 +11,7 @@ import '../../shared/widgets/product_image.dart';
 import '../auth/auth_controller.dart';
 import '../auth/login_dialog.dart';
 import 'reservation_controller.dart';
+import '../../features/catalog/catalog_models.dart';
 import 'reservation_models.dart';
 
 class ReservationCreatePage extends StatefulWidget {
@@ -209,6 +210,14 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
             isLoading: isSaving,
             expand: true,
           ),
+          const SizedBox(height: 10),
+          AppButton(
+            label: 'Guardar reserva offline',
+            icon: const Icon(Icons.wifi_off_outlined),
+            variant: AppButtonVariant.outlined,
+            onPressed: isSaving ? null : _saveOfflineReservation,
+            expand: true,
+          ),
         ],
       ),
     );
@@ -260,6 +269,43 @@ class _ReservationCreatePageState extends State<ReservationCreatePage> {
       lastDate: _dateOnly(DateTime.now()).add(const Duration(days: 365)),
     );
     if (selected != null && mounted) setState(() => _visitDate = selected);
+  }
+
+  Future<void> _saveOfflineReservation() async {
+    if (_branchId == null) {
+      setState(() => _formError = 'Selecciona una sucursal.');
+      return;
+    }
+    if (_items.isEmpty) {
+      setState(() => _formError = 'Agrega al menos una prenda.');
+      return;
+    }
+
+    final branch = _controller.branches.firstWhere(
+      (b) => b.id == _branchId,
+      orElse: () => Branch(
+        id: _branchId!,
+        name: 'Sucursal seleccionada',
+        city: '',
+        isActive: true,
+        isDefault: false,
+      ),
+    );
+
+    await _controller.saveOfflineReservation(
+      branchId: _branchId!,
+      branchName: '\ · ',
+      visitDate: _visitDate,
+      items: _items,
+    );
+
+    if (!mounted) return;
+    AppSnackBar.show(
+      context,
+      'Reserva guardada offline en el dispositivo. Sincronízala al reconectar.',
+      tone: AppSnackBarTone.success,
+    );
+    Navigator.of(context).pushReplacementNamed(AppRoutes.reservations);
   }
 
   Future<void> _createReservation() async {

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import type { Observable } from 'rxjs';
 
@@ -11,8 +12,13 @@ import { HlmCardImports } from '../../../components/card/src';
 import { HlmTable } from '../../../components/table/src';
 import { getErrorMessage } from '../../../core/utils/http-error.util';
 import { requestWithToast } from '../../../core/utils/request-toast.util';
-import { CatalogBranch } from '../../shared/models/catalog.model';
-import { Reservation } from '../../shared/models/reservation.model';
+import { CatalogBranch, CatalogProduct } from '../../shared/models/catalog.model';
+import {
+  ConflictResolutionType,
+  Reservation,
+  ReservationConflictItem,
+  ReservationConflictResolveRequest,
+} from '../../shared/models/reservation.model';
 import { CatalogApiService } from '../../shared/services/catalog-api.service';
 import { ReservationApiService } from '../../shared/services/reservation-api.service';
 import { SessionService } from '../../shared/services/session.service';
@@ -20,7 +26,7 @@ import { SessionService } from '../../shared/services/session.service';
 @Component({
   selector: 'app-encargado-reservations-page',
   standalone: true,
-  imports: [CommonModule, HlmButton, HlmTable, ...HlmBadgeImports, ...HlmCardImports],
+  imports: [CommonModule, FormsModule, HlmButton, HlmTable, ...HlmBadgeImports, ...HlmCardImports],
   templateUrl: './reservations-page.component.html',
 })
 export class ReservationsPageComponent {
@@ -30,9 +36,23 @@ export class ReservationsPageComponent {
 
   protected readonly branches = signal<CatalogBranch[]>([]);
   protected readonly reservations = signal<Reservation[]>([]);
+  protected readonly conflicts = signal<ReservationConflictItem[]>([]);
   protected readonly loading = signal(false);
+  protected readonly activeTab = signal<'all' | 'conflicts'>('all');
+
   protected readonly selectedReservationId = signal<string | null>(null);
   protected readonly updatingReservationId = signal<string | null>(null);
+
+  // Modal de resolución de conflictos (CU12)
+  protected readonly selectedConflict = signal<ReservationConflictItem | null>(null);
+  protected readonly resolutionType = signal<ConflictResolutionType>('reactivate');
+  protected readonly extendedDays = signal<number>(1);
+  protected readonly substituteVariantId = signal<string>('');
+  protected readonly resolutionNotes = signal<string>('');
+  protected readonly resolving = signal(false);
+  protected readonly sweeping = signal(false);
+  protected readonly branchProducts = signal<CatalogProduct[]>([]);
+  protected readonly loadingBranchProducts = signal(false);
 
   constructor() {
     void this.loadData();
@@ -52,6 +72,10 @@ export class ReservationsPageComponent {
 
   protected get expired(): number {
     return this.reservations().filter((item) => item.status === 'expired').length;
+  }
+
+  protected get conflictsCount(): number {
+    return this.conflicts().filter((item) => item.status === 'expired').length;
   }
 
   protected get selectedReservation(): Reservation | null {
@@ -78,7 +102,7 @@ export class ReservationsPageComponent {
       case 'sold': return 'Vendida';
       case 'not_sold': return 'No comprada';
       case 'cancelled': return 'Cancelada';
-      case 'expired': return 'Vencida';
+      case 'expired': return 'Vencida / En Conflicto';
       default: return status;
     }
   }
@@ -92,13 +116,33 @@ export class ReservationsPageComponent {
       case 'sold': return 'bg-emerald-100 text-emerald-700';
       case 'not_sold': return 'bg-slate-100 text-slate-700';
       case 'cancelled': return 'bg-rose-100 text-rose-700';
-      case 'expired': return 'bg-slate-100 text-slate-700';
+      case 'expired': return 'bg-rose-100 text-rose-800 font-semibold';
       default: return 'bg-slate-100 text-slate-700';
     }
   }
 
   protected async refresh(): Promise<void> {
     await this.loadReservations();
+    await this.loadConflicts();
+  }
+
+  protected async triggerSweeper(): Promise<void> {
+    this.sweeping.set(true);
+    try {
+      const resp = await firstValueFrom(this.reservationApi.runSweeper());
+      const data = resp.data;
+      const count = data?.expired_reservations ?? 0;
+      toast.success(
+        count > 0
+          ? `Barrido completado: ${count} reserva(s) vencida(s) liberadas y stock devuelto a inventario.`
+          : 'Barrido ejecutado: No se encontraron reservas pendientes vencidas en este momento.'
+      );
+      await this.refresh();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'No se pudo ejecutar el barrido de reservas vencidas.'));
+    } finally {
+      this.sweeping.set(false);
+    }
   }
 
   protected selectReservation(reservation: Reservation): void {
@@ -107,6 +151,64 @@ export class ReservationsPageComponent {
 
   protected closeReservationModal(): void {
     this.selectedReservationId.set(null);
+  }
+
+  // --- CU12: Métodos de Gestión y Resolución de Conflictos ---
+  protected openResolveModal(conflict: ReservationConflictItem): void {
+    this.selectedConflict.set(conflict);
+    this.resolutionType.set(conflict.can_reactivate ? 'reactivate' : 'substitute');
+    this.extendedDays.set(1);
+    this.substituteVariantId.set('');
+    this.resolutionNotes.set('');
+    if (this.branchProducts().length === 0) {
+      void this.loadBranchProducts();
+    }
+  }
+
+  protected closeResolveModal(): void {
+    this.selectedConflict.set(null);
+    this.resolving.set(false);
+  }
+
+  protected async submitConflictResolution(): Promise<void> {
+    const conflict = this.selectedConflict();
+    if (!conflict) return;
+
+    const notes = this.resolutionNotes().trim();
+    if (!notes || notes.length < 5) {
+      toast.error('Debe ingresar una justificación detallada de al menos 5 caracteres.');
+      return;
+    }
+
+    if (this.resolutionType() === 'substitute' && !this.substituteVariantId().trim()) {
+      toast.error('Debe especificar el identificador de la variante de prenda sustituta.');
+      return;
+    }
+
+    const payload: ReservationConflictResolveRequest = {
+      resolution_type: this.resolutionType(),
+      extended_days: Number(this.extendedDays()),
+      substitute_variant_id: this.resolutionType() === 'substitute' ? this.substituteVariantId().trim() : null,
+      notes,
+    };
+
+    this.resolving.set(true);
+    try {
+      const resp = await firstValueFrom(
+        this.reservationApi.resolveConflict(conflict.id, payload, this.branchId ?? undefined)
+      );
+      toast.success(
+        this.resolutionType() === 'close'
+          ? 'Conflicto cerrado y reserva anulada correctamente.'
+          : 'Reserva reactivada y stock reservado con éxito.'
+      );
+      this.closeResolveModal();
+      await this.refresh();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Error al resolver el conflicto de reserva expirada.'));
+    } finally {
+      this.resolving.set(false);
+    }
   }
 
   protected async confirmArrival(reservation: Reservation): Promise<void> {
@@ -129,7 +231,7 @@ export class ReservationsPageComponent {
     try {
       const [branches] = await Promise.all([firstValueFrom(this.catalogApi.listPublicBranches())]);
       this.branches.set(branches.data ?? []);
-      await this.loadReservations();
+      await Promise.all([this.loadReservations(), this.loadConflicts()]);
     } catch (error) {
       toast.error(getErrorMessage(error, 'No se pudieron cargar las reservas de sucursal.'));
     } finally {
@@ -156,6 +258,37 @@ export class ReservationsPageComponent {
     }
   }
 
+  private async loadConflicts(): Promise<void> {
+    const branchId = this.branchId;
+    if (!branchId) {
+      this.conflicts.set([]);
+      return;
+    }
+
+    try {
+      const response = await firstValueFrom(this.reservationApi.listBranchConflicts(branchId));
+      this.conflicts.set((response.data ?? []) as ReservationConflictItem[]);
+    } catch {
+      // Endpoint puede no tener conflictos
+      this.conflicts.set([]);
+    }
+  }
+
+  private async loadBranchProducts(): Promise<void> {
+    const branchId = this.branchId;
+    this.loadingBranchProducts.set(true);
+    try {
+      const resp = await firstValueFrom(
+        this.catalogApi.listProducts({ branch_id: branchId ?? undefined })
+      );
+      this.branchProducts.set((resp.data ?? []) as CatalogProduct[]);
+    } catch {
+      this.branchProducts.set([]);
+    } finally {
+      this.loadingBranchProducts.set(false);
+    }
+  }
+
   private async runAction(
     reservationId: string,
     loadingMessage: string,
@@ -170,7 +303,7 @@ export class ReservationsPageComponent {
         success: successMessage,
         error: errorMessage,
       });
-      await this.loadReservations();
+      await this.refresh();
     } catch {
       // toast handled by requestWithToast
     } finally {
