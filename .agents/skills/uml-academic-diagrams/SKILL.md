@@ -190,24 +190,46 @@ El Diagrama de Secuencia detalla la dimensión temporal y asignación formal de 
 
 ### 4.2. Especificaciones Técnicas del Script JScript (Enterprise Architect)
 * **Entorno:** Enterprise Architect 15.0+ (Motor JScript WSH).
-* **Participantes (Lifelines) Distribuidos Horizontalmente:**
-  - `<<Actor>>`, `<<Boundary>>`, `<<Controller>>`, `<<Entity>>`.
-  - Cajas rectangulares estándar con el **color por defecto de Enterprise Architect** (sin estilos personalizados).
-  - Trazado de **línea de vida (lifeline)** visible y continua.
+* **Participantes (Lifelines) con Recuadros Rectangulares Obligatorios:**
+  - Salvo los **Actores** (figura humana `Type = "Actor"`), **TODOS los participantes (Boundary/Interface, Controller y Entity) deben ser recuadros rectangulares Sequence**.
+  - Cada recuadro debe mostrar explícitamente el **estereotipo en la parte superior** (`«Interface»` o `«Boundary»`, `«Controller»`, `«Entity»`) y el **nombre del componente o clase con dos puntos en la parte inferior** (`:NombreComponente`).
+  - **⚠️ REGLA TÉCNICA INVIOLABLE EN ENTERPRISE ARCHITECT JSCRIPT:**  
+    Para evitar que Enterprise Architect reemplace el encabezado rectangular por los iconos circulares de robustez BCE (`|O`, `((↺))`, `( )`), se debe configurar sobre el objeto del diagrama:
+    ```javascript
+    dObj.Style = "usecustomart=0;HideIcon=1;";
+    ```
+    Y para las entidades de datos, asignar el estereotipo asegurando el renderizado rectangular:
+    ```javascript
+    var el = pkg.Elements.AddNew(":NombreEntidad", "Sequence");
+    el.Stereotype = "Entity" + String.fromCharCode(160); // Evita fallback a círculo en EA
+    el.Update();
+    var dObj = diagram.DiagramObjects.AddNew("l=" + left + ";r=" + right + ";t=-30;b=-3000;", "");
+    dObj.ElementID = el.ElementID;
+    dObj.Style = "usecustomart=0;HideIcon=1;";
+    dObj.Update();
+    ```
+* **⚠️ DECLARACIÓN FORMAL DE FRAGMENTOS COMBINADOS (`InteractionFragment`):**
+  - Los fragmentos combinados (`alt`, `loop`, `opt`) **NO deben limitarse a comentarios de código**. Deben crearse e instanciarse obligatoriamente en el diagrama de Enterprise Architect como elementos `InteractionFragment`:
+    ```javascript
+    function addCombinedFragment(pkg, diagram, type, guardLabel, left, right, top, bottom) {
+        var frag = pkg.Elements.AddNew(guardLabel, "InteractionFragment");
+        frag.Stereotype = type; // "alt", "loop", "opt"
+        frag.Update();
+
+        var dObj = diagram.DiagramObjects.AddNew("l=" + left + ";r=" + right + ";t=" + top + ";b=" + bottom + ";", "");
+        dObj.ElementID = frag.ElementID;
+        dObj.Update();
+        return frag;
+    }
+    ```
+  - Delimitar visualmente los bloques con comentarios descriptivos y coordenadas top/bottom que encierren los mensajes correspondientes.
+  - Máximo 3 fragmentos `alt` por diagrama para preservar legibilidad.
 * **⚠️ CONVENCIÓN DE PARÁMETROS (INVIOLABLE):**
   - Todas las funciones y métodos en los mensajes deben escribirse **ESTRICTAMENTE SIN PARÁMETROS**:
     - ✅ Correcto: `iniciarCheckout()`, `crearIntentoPago()`, `procesarCobro()`, `actualizarOrden()`
     - ❌ Prohibido: `iniciarCheckout(items, total)`, `crearIntentoPago(orderId, amount)`
 * **Validaciones Centralizadas en el Controller:**  
   Toda regla de validación lógica se modela como mensaje reflexivo (`self-call` del Controller).
-* **Fragmentos Combinados UML 2.5+ (`alt`, `loop`, `opt`):**
-  - Delimitación obligatoria en comentarios antes de cada bloque en JScript:
-    ```javascript
-    // FRAGMENTO ALT [Guardia / Condicion]: Abarca desde Mensaje X.X hasta Y.Y
-    // FRAGMENTO LOOP [Iteracion]: Abarca desde Mensaje Z.1 hasta Z.N
-    // FRAGMENTO OPT [Condicion]: Abarca Mensaje W.W
-    ```
-  - Máximo 3 fragmentos `alt` por diagrama para preservar legibilidad.
 
 ---
 
