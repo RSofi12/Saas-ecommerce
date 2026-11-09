@@ -58,3 +58,6 @@ class BranchQuotaOut(BaseModel):
     current_active_branches: int
     remaining_slots: int
     can_create_branch: bool
+    has_ai_access: bool = False
+    subscription_status: str = "ACTIVA"
+    end_date: datetime | None = None

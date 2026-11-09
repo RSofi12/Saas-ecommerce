@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { toast } from '@spartan-ng/brain/sonner';
@@ -52,6 +53,7 @@ export class CajaPageComponent {
   private readonly catalogApi = inject(CatalogApiService);
   private readonly salesApi = inject(SalesApiService);
   private readonly session = inject(SessionService);
+  private readonly router = inject(Router);
   protected readonly network = inject(NetworkStatusService);
   protected readonly idbSales = inject(IdbSalesService);
 
@@ -102,12 +104,16 @@ export class CajaPageComponent {
   protected readonly outboxSales = signal<PendingOfflineSale[]>([]);
   protected readonly syncingOutbox = signal(false);
   protected readonly verifyingOutbox = signal(false);
+  protected readonly retryingSaleId = signal<string | null>(null);
   protected readonly lastBatchSyncSummary = signal<BatchSyncSummary | null>(null);
   protected readonly lastBatchSyncDetails = signal<BatchSyncItemResult[]>([]);
   protected readonly showBatchSyncSummary = signal(false);
 
   protected readonly pendingSales = computed(() => this.outboxSales().filter((s) => !s.synced));
   protected readonly syncedSales = computed(() => this.outboxSales().filter((s) => s.synced));
+  protected readonly failedSales = computed(() =>
+    this.outboxSales().filter((s) => !s.synced && (Boolean(s.sync_error) || Boolean(s.error) || (s.retry_count ?? 0) > 0))
+  );
   protected readonly totalPendingCash = computed(() =>
     this.pendingSales().reduce((sum, s) => sum + s.total_amount, 0).toFixed(2)
   );
@@ -147,6 +153,8 @@ export class CajaPageComponent {
       return;
     }
 
+    this.retryingSaleId.set(sale.client_sale_id);
+
     try {
       const payload: CreateSaleRequest = {
         branch_id: sale.branch_id,
@@ -163,10 +171,33 @@ export class CajaPageComponent {
       toast.success(`Ticket ${sale.sale_code} sincronizado exitosamente con el servidor.`);
     } catch (error) {
       const msg = getErrorMessage(error, 'Fallo al sincronizar venta.');
-      this.idbSales.markAsError(sale.client_sale_id, msg);
+      this.idbSales.incrementRetry(sale.client_sale_id, msg);
       this.refreshOutbox();
       toast.error(msg);
+    } finally {
+      this.retryingSaleId.set(null);
     }
+  }
+
+  protected async retryFailedSales(): Promise<void> {
+    if (this.isOfflineEffective()) {
+      toast.error('No se puede sincronizar: el terminal está en modo desconectado.');
+      return;
+    }
+    const failed = this.failedSales();
+    if (failed.length === 0) {
+      toast.info('No hay operaciones fallidas pendientes de reintentar.');
+      return;
+    }
+    for (const sale of failed) {
+      this.idbSales.resetError(sale.client_sale_id);
+    }
+    await this.syncAllPending();
+  }
+
+  protected navigateToConflicts(): void {
+    this.closeBatchSyncSummary();
+    void this.router.navigate(['/app/encargado/sale-conflicts']);
   }
 
   // =========================================================================

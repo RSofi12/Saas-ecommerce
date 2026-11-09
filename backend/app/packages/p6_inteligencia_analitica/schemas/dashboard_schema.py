@@ -84,9 +84,60 @@ class DashboardInventoryPoint(BaseModel):
     available_quantity: int = 0
 
 
+# ============================================================================
+# CU25: Métricas Ejecutivas Avanzadas (Offline, Políticas, ML y Cuotas SaaS)
+# ============================================================================
+
+class OfflineSyncKpi(BaseModel):
+    total_offline_sales: int = 0
+    synced_operations: int = 0
+    pending_operations: int = 0
+    sync_success_rate: float = 100.0
+    offline_revenue_total: Decimal = Decimal('0.00')
+
+
+class PolicyRevenueKpi(BaseModel):
+    return_retention_total: Decimal = Decimal('0.00')
+    return_refunds_total: Decimal = Decimal('0.00')
+    total_returns_count: int = 0
+    exchange_difference_total: Decimal = Decimal('0.00')
+    total_exchanges_count: int = 0
+
+
+class RfmSegmentPoint(BaseModel):
+    segment_label: str
+    cluster_id: int
+    customer_count: int
+    percentage: float
+    average_monetary: Decimal = Decimal('0.00')
+    average_recency_days: float = 0.0
+
+
+class MachineLearningKpi(BaseModel):
+    has_ml_access: bool = False
+    latest_demand_model_version: str | None = None
+    latest_demand_model_r2: float | None = None
+    predicted_monthly_units: int = 0
+    critical_stock_alerts_count: int = 0
+    top_selling_size_predicted: str | None = None
+    rfm_segments_distribution: list[RfmSegmentPoint] = Field(default_factory=list)
+
+
+class PlanQuotaKpi(BaseModel):
+    plan_name: str = "Plan Básico"
+    active_branches: int = 1
+    max_branches: int = 3
+    branches_usage_pct: float = 33.3
+    has_ai_access: bool = False
+
+
 class DashboardResponse(BaseModel):
     filters: DashboardQuery = Field(default_factory=DashboardQuery)
     summary: DashboardSummary
+    offline_sync: OfflineSyncKpi = Field(default_factory=OfflineSyncKpi)
+    policy_revenue: PolicyRevenueKpi = Field(default_factory=PolicyRevenueKpi)
+    ml_kpis: MachineLearningKpi = Field(default_factory=MachineLearningKpi)
+    plan_quotas: PlanQuotaKpi = Field(default_factory=PlanQuotaKpi)
     sales_series: list[DashboardSeriesPoint]
     movement_series: list[DashboardMovementPoint]
     movement_by_branch: list[DashboardBranchMovementPoint]

@@ -121,9 +121,63 @@ El Diagrama de Robustez (también denominado Diagrama de Comunicación BCE) mues
    Auto-relación reflexiva curva sobre el Controller con los mensajes de validación apilados a un costado.
 
 ### 3.3. Estándar para JScript (Enterprise Architect — Comunicación / Robustez)
-* Guardado en `docsUML/CUrobustez/CUxx_comm_[nombre]_EA.js`.
-* Elementos creados con `Stereotype = "boundary"`, `"control"`, `"entity"`.
-* Mensajes con numeración jerárquica y **funciones estrictamente sin parámetros `metodo()`**.
+* **Directorio de salida:** Guardado en `docsUML/CUrobustez/CUxx_comm_[nombre]_EA.js`.
+* **Archivo de Referencia Canónico:** [`docsUML/CUrobustez/CU09_comm_comprar_prendas_stripe_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU09_comm_comprar_prendas_stripe_EA.js) (copiado también como plantilla en `.agents/skills/uml-academic-diagrams/examples/CU09_comm_comprar_prendas_stripe_EA.js`).
+
+#### ⚠️ REGLA DE ORO DE ICONOS BCE EN ENTERPRISE ARCHITECT (INVIOLABLE):
+En la API de automatización de Enterprise Architect, para que el motor gráfico dibuje los **iconos circulares canónicos BCE** (círculo con barra vertical `|O`, círculo con flecha superior `((↺))`, círculo con barra horizontal inferior `( )_`), el tipo de elemento **DEBE SER OBLIGATORIAMENTE `"Object"` (Instancia)**:
+* ✅ **CORRECTO:**
+  - Actores: `pkg.Elements.AddNew("NombreActor", "Actor")`
+  - Boundary: `pkg.Elements.AddNew("NombreBoundary", "Object")` con `Stereotype = "boundary"`
+  - Control: `pkg.Elements.AddNew("NombreControl", "Object")` con `Stereotype = "control"`
+  - Entity: `pkg.Elements.AddNew("NombreEntity", "Object")` con `Stereotype = "entity"`
+* ❌ **PROHIBIDO:** Usar `tipo = "Boundary"`, `tipo = "Control"` o `tipo = "Entity"`. Si se hace esto, Enterprise Architect dibuja cajas rectangulares genéricas con texto de estereotipo o clases cuadradas amarillas en lugar de los iconos circulares nativos.
+
+#### Función Canónica de Creación y Purga Atómica:
+Para evitar que elementos creados previamente con un tipo incorrecto persistan en la base de datos de EA, la función debe verificar si existe y, de tener un tipo diferente a `"Object"`, eliminarlo y recrearlo:
+```javascript
+function crearElementoConEsterotipo(pkg, name, tipo, estereotipo) {
+    for (var i = pkg.Elements.Count - 1; i >= 0; i--) {
+        var el = pkg.Elements.GetAt(i);
+        if (el.Name == name) {
+            if (el.Type == tipo) {
+                if (estereotipo && el.Stereotype != estereotipo) {
+                    el.Stereotype = estereotipo;
+                    el.Update();
+                }
+                return el;
+            } else {
+                pkg.Elements.Delete(i);
+                pkg.Elements.Refresh();
+                break;
+            }
+        }
+    }
+    var newEl = pkg.Elements.AddNew(name, tipo);
+    if (estereotipo && estereotipo.length > 0) {
+        newEl.Stereotype = estereotipo;
+    }
+    newEl.Update();
+    pkg.Elements.Refresh();
+    return newEl;
+}
+```
+
+#### Dimensiones Cuadradas (80x80 px):
+Para que Enterprise Architect dibuje círculos perfectos sin aplastamiento ni distorsión, las coordenadas espaciales deben ser estrictamente cuadradas ($80 \times 80$ px):
+```javascript
+// Izquierda, Derecha (L + 80), Arriba, Abajo (Top - 80)
+colocarElemento(diagram, bndComponent, 180, 260, -180, -260);
+```
+
+#### Actualización y Apertura Automática:
+Al finalizar el script, guardar, recargar y abrir el diagrama automáticamente:
+```javascript
+diagram.Update();
+Repo.SaveDiagram(diagram.DiagramID);
+Repo.ReloadDiagram(diagram.DiagramID);
+try { Repo.OpenDiagram(diagram.DiagramID); } catch(ex) {}
+```
 
 ---
 

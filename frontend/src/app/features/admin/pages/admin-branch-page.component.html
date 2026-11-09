@@ -22,18 +22,46 @@
 
   <!-- Quota Status Banner / Card -->
   @if (quota(); as q) {
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Plan Comercial SaaS:</span>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Plan e IA -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Plan SaaS:</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
             {{ q.plan_name }}
           </span>
-          <span class="text-xs text-slate-400">·</span>
-          <span class="text-xs text-slate-600 font-medium">Límite: hasta {{ q.max_branches }} sucursales activas</span>
+
+          @if (q.subscription_status === 'ACTIVA' || q.subscription_status === 'active' || q.subscription_status === 'trialing') {
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Suscripción Activa
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              Suscripción Vencida
+            </span>
+          }
+
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium"
+            [ngClass]="q.has_ai_access ? 'bg-violet-50 text-violet-700 border border-violet-200' : 'bg-slate-50 text-slate-500 border border-slate-200'">
+            {{ q.has_ai_access ? 'IA & Analítica Activa' : 'Sin IA' }}
+          </span>
+
+          @if (q.end_date) {
+            <span class="text-xs text-slate-500 ml-1">
+              (Vence: <strong>{{ q.end_date | date:'dd/MM/yyyy' }}</strong>)
+            </span>
+          }
         </div>
+
+        <!-- Cupo restante -->
         <div class="text-xs font-medium">
-          @if (q.can_create_branch) {
+          @if (q.subscription_status === 'VENCIDA') {
+            <span class="text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md border border-rose-200 font-semibold">
+              Servicio Suspendido por Vencimiento
+            </span>
+          } @else if (q.can_create_branch) {
             <span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
               {{ q.remaining_slots }} {{ q.remaining_slots === 1 ? 'cupo disponible' : 'cupos disponibles' }}
             </span>
@@ -46,25 +74,35 @@
       </div>
 
       <!-- Barra de progreso -->
-      <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-        <div
-          class="h-2 rounded-full transition-all duration-500"
-          [class.bg-emerald-600]="q.can_create_branch"
-          [class.bg-amber-500]="!q.can_create_branch"
-          [style.width.%]="(q.current_active_branches / q.max_branches) * 100"
-        ></div>
+      <div class="space-y-1.5">
+        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div
+            class="h-2 rounded-full transition-all duration-500"
+            [class.bg-emerald-600]="q.can_create_branch && q.subscription_status !== 'VENCIDA'"
+            [class.bg-amber-500]="!q.can_create_branch && q.subscription_status !== 'VENCIDA'"
+            [class.bg-rose-500]="q.subscription_status === 'VENCIDA'"
+            [style.width.%]="q.max_branches > 0 ? (q.current_active_branches / q.max_branches) * 100 : 0"
+          ></div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500">
+          <span>Consumo de cuota: <strong class="text-slate-800">{{ q.current_active_branches }}</strong> de <strong class="text-slate-800">{{ q.max_branches }}</strong> sucursales activas ({{ q.max_branches > 0 ? ((q.current_active_branches / q.max_branches) * 100 | number:'1.0-0') : 0 }}%)</span>
+          <span class="text-slate-400">Desactivar o eliminar sucursales libera el cupo de inmediato</span>
+        </div>
       </div>
 
-      <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-0.5">
-        <span>Consumo en tiempo real: <strong class="text-slate-800">{{ q.current_active_branches }}</strong> de <strong class="text-slate-800">{{ q.max_branches }}</strong> sucursales activas</span>
-        <span class="text-slate-400">Desactivar o eliminar sucursales libera el cupo de inmediato</span>
-      </div>
-
-      @if (!q.can_create_branch) {
+      @if (q.subscription_status === 'VENCIDA') {
+        <div class="rounded-lg bg-rose-50 border border-rose-200 p-3 flex items-start gap-2.5 text-xs text-rose-900">
+          <span class="text-base leading-none">⚠️</span>
+          <div>
+            <span class="font-bold">Suscripción Vencida:</span> Tu empresa tiene el plan vencido desde el {{ q.end_date | date:'dd/MM/yyyy' }}. La creación y activación de sucursales físicas se encuentra temporalmente restringida. Contacta al Superadministrador para renovar tu suscripción comercial.
+          </div>
+        </div>
+      } @else if (!q.can_create_branch) {
         <div class="rounded-lg bg-amber-50/80 border border-amber-200/80 p-3 flex items-start gap-3 text-xs text-amber-900">
           <span class="text-base leading-none">⚠️</span>
           <div>
-            <span class="font-semibold">Límite comercial alcanzado:</span> Tu empresa tiene activas {{ q.current_active_branches }} de {{ q.max_branches }} sucursales permitidas por el Plan {{ q.plan_name }}. Para habilitar hasta 10 sucursales físicas y funciones de IA, contacta al Superadministrador para ascender al <strong class="underline">Plan Profesional</strong>.
+            <span class="font-semibold">Límite comercial alcanzado:</span> Tu empresa tiene activas {{ q.current_active_branches }} de {{ q.max_branches }} sucursales permitidas por el Plan {{ q.plan_name }}. Para habilitar más sucursales físicas o módulos de IA, contacta al Superadministrador para solicitar una ampliación de plan.
           </div>
         </div>
       }

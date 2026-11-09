@@ -214,6 +214,7 @@ export class AppShellComponent {
               { label: 'Reportes', route: '/app/admin/reports', icon: 'lucideClipboardList', exact: true },
               { label: 'Dataset ML (CU22)', route: '/app/admin/ml-dataset', icon: 'lucideSparkles' },
               { label: 'Demanda Predictiva (CU23)', route: '/app/admin/demand-forecast', icon: 'lucideTrendingUp' },
+              { label: 'Segmentación K-Means (CU24)', route: '/app/admin/ml-segmentation', icon: 'lucideUsers' },
             ],
           },
           {

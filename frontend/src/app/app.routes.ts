@@ -283,6 +283,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'ml-segmentation',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-ml-segmentation-page.component').then(
+                (m) => m.AdminMlSegmentationPageComponent,
+              ),
+          },
+          {
             path: 'orders',
             loadComponent: () => import('./features/encargado/pages/orders-page.component').then((m) => m.EncargadoOrdersPageComponent),
           },

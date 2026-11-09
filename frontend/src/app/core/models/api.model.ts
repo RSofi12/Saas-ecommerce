@@ -4,4 +4,5 @@ export interface ApiResponse<T> {
   data?: T;
   countData?: number;
   error?: unknown;
+  success?: boolean;
 }

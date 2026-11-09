@@ -77,6 +77,48 @@ export interface DashboardInventoryPoint {
   available_quantity: number;
 }
 
+
+export interface OfflineSyncKpi {
+  total_offline_sales: number;
+  total_offline_revenue: string | number;
+  synced_operations: number;
+  pending_operations: number;
+  failed_operations: number;
+  sync_success_rate: number;
+}
+
+export interface PolicyRevenueKpi {
+  return_retention_total: string | number;
+  return_refund_total: string | number;
+  returns_count: number;
+  exchange_difference_total: string | number;
+  exchanges_count: number;
+}
+
+export interface RfmSegmentDistributionPoint {
+  segment_label: string;
+  customer_count: number;
+  percentage: number;
+}
+
+export interface MachineLearningKpi {
+  has_ml_access: boolean;
+  predicted_monthly_units: number;
+  rfm_segments_distribution: RfmSegmentDistributionPoint[];
+  critical_stockout_alerts_count: number;
+  active_demand_model_version?: string | null;
+  active_clustering_model_version?: string | null;
+}
+
+export interface PlanQuotaKpi {
+  plan_name: string;
+  plan_code: string;
+  active_branches: number;
+  max_branches: number;
+  quota_usage_percent: number;
+  has_ai_access: boolean;
+}
+
 export interface DashboardData {
   filters: DashboardQuery;
   summary: DashboardSummary;
@@ -86,6 +128,10 @@ export interface DashboardData {
   branch_kpis: DashboardBranchKpi[];
   top_products: DashboardProductKpi[];
   low_stock: DashboardInventoryPoint[];
+  offline_sync?: OfflineSyncKpi;
+  policy_revenue?: PolicyRevenueKpi;
+  ml_kpis?: MachineLearningKpi;
+  plan_quotas?: PlanQuotaKpi;
 }
 
 export type DashboardResponse = ApiResponse<DashboardData>;

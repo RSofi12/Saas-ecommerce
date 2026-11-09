@@ -31,6 +31,8 @@ export interface PendingOfflineSale {
   synced_at?: string | null;
   sync_error?: string | null;
   error?: string | null;
+  retry_count?: number;
+  last_retry_at?: string | null;
   items: PendingOfflineSaleItem[];
 }
 
@@ -93,6 +95,31 @@ export class IdbSalesService {
     const item = list.find((p) => p.client_sale_id === clientSaleId);
     if (item) {
       item.sync_error = error;
+      item.retry_count = (item.retry_count || 0) + 1;
+      item.last_retry_at = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  }
+
+  incrementRetry(clientSaleId: string, error?: string): void {
+    const list = this.getPending();
+    const item = list.find((p) => p.client_sale_id === clientSaleId);
+    if (item) {
+      item.retry_count = (item.retry_count || 0) + 1;
+      item.last_retry_at = new Date().toISOString();
+      if (error) {
+        item.sync_error = error;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  }
+
+  resetError(clientSaleId: string): void {
+    const list = this.getPending();
+    const item = list.find((p) => p.client_sale_id === clientSaleId);
+    if (item) {
+      item.sync_error = null;
+      item.error = null;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     }
   }

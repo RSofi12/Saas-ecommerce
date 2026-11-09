@@ -34,8 +34,23 @@ export interface Subscription {
   plan_id: string;
   start_date: string;
   end_date?: string | null;
-  status: 'ACTIVA' | 'VENCIDA' | 'CANCELADA' | 'trialing';
+  status: 'ACTIVA' | 'VENCIDA' | 'CANCELADA' | string;
   plan?: Plan;
+}
+
+export interface SubscriptionAssignDto {
+  company_id: string;
+  plan_id: string;
+  start_date?: string;
+  end_date?: string | null;
+  status?: string;
+}
+
+export interface SubscriptionUpdateDto {
+  plan_id?: string;
+  start_date?: string;
+  end_date?: string | null;
+  status?: string;
 }
 
 export interface Company {

@@ -30,10 +30,12 @@
 - [x] **`CU21` – Exportar Reportes Empresariales a Formatos PDF y Excel (Carril B: Reportes)** (`p6_inteligencia_analitica`)
 - [x] **`CU22` – Generar Dataset Sintético de Ventas y Estacionalidad Textil (Carril C: Machine Learning)** (`p6_inteligencia_analitica`)
 - [x] **`CU23` – Predecir Demanda de Ropa por Talla (ML Supervisado)** (`p6_inteligencia_analitica` + Angular PWA - 100% Fullstack)
+- [x] **`CU24` – Segmentar Clientes con K-Means (ML No Supervisado - RFM+D)** (`p6_inteligencia_analitica` - Backend 100% / Frontend en chat paralelo)
+- [x] **`CU25` – Visualizar Dashboard Ejecutivo con KPIs y Métricas ML** (`p6_inteligencia_analitica` - Backend 100% verificado)
 
 ---
 
-## 🚀 Carriles de Trabajo en Paralelo para la 3ra Presentación (2 CUs Restantes)
+## 🚀 Carriles de Trabajo en Paralelo para la 3ra Presentación (Consolidación)
 
 ```
 [Carril A: Mobile] ---------> CU19 (Mapas / Rutas Flutter con OpenStreetMap / ORS) [¡LISTO Y VERIFICADO!]
@@ -42,12 +44,16 @@
 [Carril C: Pipeline ML] ----> CU22 (Dataset Sintético de Moda Textil) [¡LISTO Y VERIFICADO!]
                                    │
                                    ├──> CU23 (ML Supervisado - RandomForestRegressor) [¡LISTO Y VERIFICADO!]
-                                   └──> CU24 (ML No Supervisado - Segmentación K-Means RFM) ──> CU25 (Dashboard)
+                                   ├──> CU24 (ML No Supervisado - K-Means RFM+D) [Backend 100% / Frontend paralelo]
+                                   └──> CU25 (Dashboard Ejecutivo Unificado) [Backend 100% / Listo para Frontend]
 ```
 
 ### Tarea Inmediata Pendiente:
-1. **`CU24` – Segmentar Clientes con K-Means (ML No Supervisado):**
-   - Implementar cálculo RFM (Recencia, Frecuencia, Monto Monetario) + tasa de devolución en `p6_inteligencia_analitica`.
+1. **Frontend Web PWA Angular de `CU25` (Visualizar Dashboard Ejecutivo con KPIs y Métricas ML):**
+   - Implementar vistas ejecutivas en Angular PWA bajo directrices `/design-taste-frontend`.
+   - Tarjetas métricas con transiciones fluidas para KPIs de Sincronización Offline, Ingresos por Políticas (Retenciones y Diferencias $\Delta > 0$), Bloque de Inteligencia Analítica ML y Monitoreo de Cuotas SaaS del Plan.
+2. **Modelado ICONIX (UML 2.5+) para `CU25`:**
+   - Diagrama de Robustez BCE y Diagrama de Secuencia con scripts EA v15 y previsualización Mermaid.
    - Clusterización K-Means con Scikit-Learn y visualización de segmentos (VIP, Prometedor, En Riesgo, Dormido).
    - Selector reactivo de prenda, selector de horizonte (1 a 8 semanas).
    - Tarjetas de bondad de ajuste del modelo ($R^2$, $MAE$, $RMSE$) y botón de reentrenamiento.

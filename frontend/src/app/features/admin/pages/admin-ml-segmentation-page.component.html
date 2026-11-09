@@ -1,0 +1,460 @@
+<div class="space-y-6 pb-12">
+  <!-- Encabezado Principal y Telemetría -->
+  <div class="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-bold tracking-tight text-foreground">Segmentación de Clientes (K-Means)</h1>
+        @if (hasActiveModel()) {
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            Modelo Activo
+          </span>
+        } @else {
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+            Sin Calibrar
+          </span>
+        }
+      </div>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Clustering no supervisado sobre vectores de comportamiento RFM+D (Recencia, Frecuencia, Gasto y Políticas de Retorno).
+      </p>
+    </div>
+
+    <!-- Barra de Calibración Rápida -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
+        <label for="kSelect" class="text-xs font-medium text-muted-foreground">Grupos (K):</label>
+        <select
+          id="kSelect"
+          [(ngModel)]="kClusters"
+          [disabled]="isTraining()"
+          class="rounded border border-input bg-background px-2 py-1 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option [value]="3">3 Clústeres</option>
+          <option [value]="4">4 Clústeres (Recomendado)</option>
+          <option [value]="5">5 Clústeres</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        (click)="handleTrainSegmentation()"
+        [disabled]="isTraining()"
+        class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        @if (isTraining()) {
+          <ng-icon name="lucideRefreshCw" class="h-4 w-4 animate-spin"></ng-icon>
+          <span>Ajustando K-Means...</span>
+        } @else {
+          <ng-icon name="lucideSparkles" class="h-4 w-4"></ng-icon>
+          <span>Ejecutar Segmentación</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Alertas de Error / Éxito -->
+  @if (errorMessage()) {
+    <div class="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive dark:border-destructive/40">
+      <ng-icon name="lucideAlertTriangle" class="h-5 w-5 shrink-0"></ng-icon>
+      <div class="flex-1 font-medium">{{ errorMessage() }}</div>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+      <ng-icon name="lucideCheckCircle2" class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"></ng-icon>
+      <div class="flex-1 font-medium">{{ successMessage() }}</div>
+    </div>
+  }
+
+  <!-- Métricas Clave de Telemetría (Honest KPIs) -->
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div class="text-xs font-medium text-muted-foreground">Silhouette Score</div>
+      <div class="mt-1 flex items-baseline gap-2">
+        <span class="text-2xl font-bold tracking-tight text-foreground">{{ silhouetteScore() | number:'1.2-3' }}</span>
+        <span
+          class="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold"
+          [ngClass]="silhouetteScore() >= 0.5 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'"
+        >
+          {{ silhouetteScore() >= 0.5 ? 'Robusto' : 'Aceptable' }}
+        </span>
+      </div>
+      <div class="mt-1 text-[11px] text-muted-foreground">Separación inter-clúster</div>
+    </div>
+
+    <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div class="text-xs font-medium text-muted-foreground">Inercia K-Means</div>
+      <div class="mt-1 flex items-baseline gap-2">
+        <span class="text-2xl font-bold tracking-tight text-foreground">{{ inertiaValue() | number:'1.1-1' }}</span>
+      </div>
+      <div class="mt-1 text-[11px] text-muted-foreground">Suma distancias al centroide</div>
+    </div>
+
+    <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div class="text-xs font-medium text-muted-foreground">Clientes Analizados</div>
+      <div class="mt-1 flex items-baseline gap-2">
+        <span class="text-2xl font-bold tracking-tight text-foreground">{{ analyzedCount() | number }}</span>
+        <span class="text-xs text-muted-foreground">perfiles</span>
+      </div>
+      <div class="mt-1 text-[11px] text-muted-foreground">Base de compradores activa</div>
+    </div>
+
+    <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div class="text-xs font-medium text-muted-foreground">Fuente de Datos</div>
+      <div class="mt-1 text-sm font-semibold text-foreground truncate">
+        {{ dataSourceLabel() }}
+      </div>
+      <div class="mt-1 text-[11px] text-muted-foreground">Resiliencia y cold-start activo</div>
+    </div>
+  </div>
+
+  <!-- Espacio Principal: Gráfica de Dispersión 2D + Perfiles de Clúster -->
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <!-- Panel Izquierdo: Gráfico de Dispersión 2D (Frecuencia vs Gasto) -->
+    <div class="rounded-xl border border-border bg-card p-5 shadow-sm lg:col-span-7">
+      <div class="flex items-center justify-between pb-3">
+        <div>
+          <h2 class="text-base font-semibold text-foreground">Distribución Multidimensional (RFM+D)</h2>
+          <p class="text-xs text-muted-foreground">Frecuencia de pedidos vs Gasto total acumulado en Bs.</p>
+        </div>
+        <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+          <span>Puntos interactivos</span>
+        </div>
+      </div>
+
+      <!-- Canvas SVG del Gráfico de Dispersión -->
+      <div class="relative mt-2 overflow-hidden rounded-lg border border-border/50 bg-background/50 p-2">
+        @if (projectedSvgPoints().length > 0) {
+          <svg
+            [attr.viewBox]="'0 0 ' + svgWidth + ' ' + svgHeight"
+            class="h-auto w-full select-none"
+          >
+            <!-- Cuadrícula Faint (3 a 5 líneas) -->
+            @for (yt of yTicks(); track yt.val) {
+              <line
+                [attr.x1]="60"
+                [attr.y1]="yt.y"
+                [attr.x2]="svgWidth - 30"
+                [attr.y2]="yt.y"
+                stroke="currentColor"
+                stroke-dasharray="3,3"
+                class="text-border/60"
+                stroke-width="1"
+              />
+              <text
+                [attr.x]="52"
+                [attr.y]="yt.y + 4"
+                text-anchor="end"
+                class="fill-muted-foreground text-[10px] font-mono"
+              >
+                {{ yt.val }}
+              </text>
+            }
+
+            @for (xt of xTicks(); track xt.val) {
+              <line
+                [attr.x1]="xt.x"
+                [attr.y1]="25"
+                [attr.x2]="xt.x"
+                [attr.y2]="svgHeight - 45"
+                stroke="currentColor"
+                stroke-dasharray="3,3"
+                class="text-border/40"
+                stroke-width="1"
+              />
+              <text
+                [attr.x]="xt.x"
+                [attr.y]="svgHeight - 30"
+                text-anchor="middle"
+                class="fill-muted-foreground text-[10px] font-mono"
+              >
+                {{ xt.val }}
+              </text>
+            }
+
+            <!-- Ejes X e Y -->
+            <line
+              x1="60"
+              [attr.y1]="svgHeight - 45"
+              [attr.x2]="svgWidth - 30"
+              [attr.y2]="svgHeight - 45"
+              stroke="currentColor"
+              class="text-border"
+              stroke-width="1.5"
+            />
+            <line
+              x1="60"
+              y1="25"
+              x1="60"
+              [attr.y2]="svgHeight - 45"
+              stroke="currentColor"
+              class="text-border"
+              stroke-width="1.5"
+            />
+
+            <!-- Etiquetas de Ejes -->
+            <text
+              [attr.x]="(svgWidth + 30) / 2"
+              [attr.y]="svgHeight - 12"
+              text-anchor="middle"
+              class="fill-foreground text-[11px] font-medium"
+            >
+              Frecuencia de Compra (Número de Pedidos) →
+            </text>
+
+            <text
+              x="18"
+              [attr.y]="(svgHeight - 20) / 2"
+              text-anchor="middle"
+              transform="rotate(-90 18 150)"
+              class="fill-foreground text-[11px] font-medium"
+            >
+              Gasto Acumulado (Bs.) →
+            </text>
+
+            <!-- Renderizado de Puntos de Clientes -->
+            @for (pt of projectedSvgPoints(); track pt.customer_id) {
+              <circle
+                [attr.cx]="pt.svgX"
+                [attr.cy]="pt.svgY"
+                [attr.r]="selectedClusterId() === null || selectedClusterId() === pt.cluster_id ? 5 : 3"
+                [attr.fill]="pt.color"
+                [attr.opacity]="selectedClusterId() === null || selectedClusterId() === pt.cluster_id ? 0.85 : 0.2"
+                stroke="#ffffff"
+                stroke-width="1"
+                class="cursor-pointer transition-all duration-150 hover:scale-150 hover:opacity-100"
+                (mouseenter)="onPointHover(pt, $event)"
+                (mouseleave)="onPointHover(null)"
+              />
+            }
+          </svg>
+
+          <!-- Tooltip Flotante del Puntero -->
+          @if (hoveredPoint()) {
+            <div
+              class="pointer-events-none absolute z-20 rounded-md border border-border bg-popover/95 p-2.5 text-xs shadow-md backdrop-blur-sm"
+              [style.left.px]="tooltipX"
+              [style.top.px]="tooltipY"
+            >
+              <div class="font-semibold text-popover-foreground">{{ hoveredPoint()!.customer_name }}</div>
+              <div class="text-[11px] text-muted-foreground">{{ hoveredPoint()!.cluster_name }}</div>
+              <div class="mt-1 space-y-0.5 border-t border-border/50 pt-1 text-[11px]">
+                <div class="flex justify-between gap-4">
+                  <span class="text-muted-foreground">Gasto Total:</span>
+                  <span class="font-mono font-medium text-foreground">Bs. {{ hoveredPoint()!.monetary_total | number:'1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <span class="text-muted-foreground">Frecuencia:</span>
+                  <span class="font-mono font-medium text-foreground">{{ hoveredPoint()!.frequency_count }} pedidos</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <span class="text-muted-foreground">Recencia:</span>
+                  <span class="font-mono font-medium text-foreground">{{ hoveredPoint()!.recency_days }} días</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <span class="text-muted-foreground">Tasa Devolución:</span>
+                  <span class="font-mono font-medium text-foreground">{{ hoveredPoint()!.return_rate * 100 | number:'1.0-1' }}%</span>
+                </div>
+              </div>
+            </div>
+          }
+        } @else {
+          <!-- Estado Vacío del Gráfico -->
+          <div class="flex h-[320px] flex-col items-center justify-center p-6 text-center">
+            <ng-icon name="lucideUsers" class="h-10 w-10 text-muted-foreground/40"></ng-icon>
+            <h3 class="mt-3 text-sm font-semibold text-foreground">Aún no hay clientes segmentados</h3>
+            <p class="mt-1 max-w-sm text-xs text-muted-foreground">
+              Presione el botón "Ejecutar Segmentación" para agrupar la clientela en perfiles conductuales homogéneos.
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- Leyenda Interactiva -->
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-3">
+        <button
+          type="button"
+          (click)="selectCluster(null)"
+          class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
+          [ngClass]="selectedClusterId() === null ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
+        >
+          <span>Todos</span>
+          <span class="rounded-full bg-background/20 px-1 text-[10px]">{{ rawPoints().length }}</span>
+        </button>
+
+        @for (prof of activeProfiles(); track prof.cluster_id) {
+          <button
+            type="button"
+            (click)="selectCluster(prof.cluster_id)"
+            class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
+            [ngClass]="selectedClusterId() === prof.cluster_id ? getBadgeColorClass(prof.badge_color) + ' ring-2 ring-primary/40' : 'border-border bg-card text-foreground hover:bg-muted'"
+          >
+            <span class="h-2 w-2 rounded-full" [ngClass]="getBadgeDotClass(prof.badge_color)"></span>
+            <span>{{ prof.name }}</span>
+            <span class="text-[10px] text-muted-foreground">({{ prof.customer_count }})</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Panel Derecho: 4 Tarjetas de Perfiles de Clúster -->
+    <div class="space-y-3.5 lg:col-span-5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-foreground">Perfiles Conductuales Inferidos</h2>
+        <span class="text-xs text-muted-foreground">{{ activeProfiles().length }} clústeres</span>
+      </div>
+
+      @for (prof of activeProfiles(); track prof.cluster_id) {
+        <div
+          class="relative rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/50"
+          [ngClass]="selectedClusterId() === prof.cluster_id ? 'border-primary ring-1 ring-primary/30' : 'border-border'"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full" [ngClass]="getBadgeDotClass(prof.badge_color)"></span>
+              <h3 class="text-sm font-semibold text-foreground">{{ prof.name }}</h3>
+            </div>
+            <span class="rounded px-2 py-0.5 text-xs font-semibold" [ngClass]="getBadgeColorClass(prof.badge_color)">
+              {{ prof.percentage }}% ({{ prof.customer_count }})
+            </span>
+          </div>
+
+          <p class="mt-2 text-xs text-muted-foreground leading-relaxed">
+            {{ prof.description }}
+          </p>
+
+          <!-- Métricas del Centroide (R, F, M, D) -->
+          <div class="mt-3 grid grid-cols-4 gap-1.5 rounded-lg border border-border/60 bg-muted/40 p-2 text-center">
+            <div>
+              <div class="text-[10px] text-muted-foreground">Recencia</div>
+              <div class="font-mono text-xs font-semibold text-foreground">{{ prof.centroid.recency_days }}d</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-muted-foreground">Frecuencia</div>
+              <div class="font-mono text-xs font-semibold text-foreground">{{ prof.centroid.frequency_count }} ped</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-muted-foreground">Gasto Med.</div>
+              <div class="font-mono text-xs font-semibold text-foreground">Bs. {{ prof.centroid.monetary_total | number:'1.0-0' }}</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-muted-foreground">Retorno</div>
+              <div class="font-mono text-xs font-semibold text-foreground">{{ prof.centroid.return_rate * 100 | number:'1.0-1' }}%</div>
+            </div>
+          </div>
+
+          <!-- Acción Comercial Recomendada -->
+          <div class="mt-3 flex items-start gap-2 border-t border-border/40 pt-2.5 text-[11px] text-muted-foreground">
+            <ng-icon name="lucideTag" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"></ng-icon>
+            <div class="flex-1 font-medium text-foreground">
+              {{ prof.recommended_action }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Explorador Detallado de Clientes (Drill-Down Table) -->
+  <div class="rounded-xl border border-border bg-card shadow-sm">
+    <div class="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-base font-semibold text-foreground">Explorador de Clientes por Segmento</h2>
+        <p class="text-xs text-muted-foreground">Inspeccione clientes individuales para campañas y acciones promocionales.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="relative w-full sm:w-64">
+          <ng-icon name="lucideSearch" class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground"></ng-icon>
+          <input
+            type="text"
+            [(ngModel)]="customerSearch"
+            placeholder="Buscar por nombre o correo..."
+            class="w-full rounded-lg border border-input bg-background pl-9 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Clientes -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="border-b border-border bg-muted/30 text-muted-foreground font-medium">
+          <tr>
+            <th class="py-3 px-4">Cliente</th>
+            <th class="py-3 px-4">Segmento Asignado</th>
+            <th class="py-3 px-4 text-right">Recencia</th>
+            <th class="py-3 px-4 text-right">Frecuencia</th>
+            <th class="py-3 px-4 text-right">Gasto Total</th>
+            <th class="py-3 px-4 text-right">Tasa Retorno</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          @for (c of filteredCustomers(); track c.id) {
+            <tr class="transition-colors hover:bg-muted/40">
+              <td class="py-3 px-4">
+                <div class="font-medium text-foreground">{{ c.customer_name }}</div>
+                <div class="text-[11px] text-muted-foreground">{{ c.customer_email }}</div>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium" [ngClass]="getBadgeColorClass(c.cluster_id === 0 ? 'emerald' : c.cluster_id === 1 ? 'blue' : c.cluster_id === 2 ? 'amber' : 'rose')">
+                  {{ c.segment_label }}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-muted-foreground">
+                {{ c.recency_days ?? '-' }} días
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-foreground font-medium">
+                {{ c.frequency_count ?? 0 }} pedidos
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-foreground font-medium">
+                Bs. {{ (c.monetary_total ?? 0) | number:'1.2-2' }}
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-muted-foreground">
+                {{ ((c.return_rate ?? 0) * 100) | number:'1.0-1' }}%
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="py-8 text-center text-muted-foreground">
+                No se encontraron clientes coincidentes con el criterio de búsqueda.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación de Tabla -->
+    <div class="flex items-center justify-between border-t border-border px-4 py-3 text-xs text-muted-foreground">
+      <div>
+        Mostrando {{ filteredCustomers().length }} de {{ totalCustomers() }} clientes
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="loadCustomersPage(currentPage() - 1)"
+          [disabled]="currentPage() <= 1"
+          class="inline-flex items-center gap-1 rounded border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <ng-icon name="lucideChevronLeft" class="h-3.5 w-3.5"></ng-icon>
+          <span>Anterior</span>
+        </button>
+        <span class="font-mono text-foreground">Página {{ currentPage() }}</span>
+        <button
+          type="button"
+          (click)="loadCustomersPage(currentPage() + 1)"
+          [disabled]="currentPage() * pageSize >= totalCustomers()"
+          class="inline-flex items-center gap-1 rounded border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <span>Siguiente</span>
+          <ng-icon name="lucideChevronRight" class="h-3.5 w-3.5"></ng-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

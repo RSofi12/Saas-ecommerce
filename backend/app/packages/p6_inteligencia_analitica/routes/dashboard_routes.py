@@ -11,7 +11,7 @@ from app.packages.p6_inteligencia_analitica.schemas.dashboard_schema import Dash
 from app.packages.p6_inteligencia_analitica.services.dashboard_service import get_dashboard
 from app.utils.response import response
 
-router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+router = APIRouter(prefix="/dashboard", tags=["Dashboard Ejecutivo (CU25)"])
 
 
 def _filters(
@@ -27,7 +27,28 @@ def _filters(
 def dashboard_route(
     db: Session = Depends(get_db),
     filters: DashboardQuery = Depends(_filters),
-    current_user: dict = Depends(require_roles(RolEnum.administrador)),
+    tenant_id: UUID | None = Query(default=None, description="Filtrar por tenant específico (superadmin)"),
+    current_user: dict = Depends(require_roles(RolEnum.administrador, RolEnum.superadmin)),
 ):
-    dashboard = get_dashboard(db, filters)
-    return response(status_code=200, message="Dashboard obtenido exitosamente", data=dashboard.model_dump())
+    """
+    Obtiene el tablero ejecutivo integral (CU25):
+    - Métricas comerciales (ingresos, órdenes, ticket promedio, top productos).
+    - Conciliación y tasa de sincronización offline con contingencia UUIDv4.
+    - Rendimiento contable de políticas de cambio y retención de devoluciones (20%-50%).
+    - Indicadores analíticos de Machine Learning (pronóstico RandomForest y clusters RFM K-Means).
+    - Estado de cuotas de sucursales frente al plan SaaS contratado.
+    """
+    # Si es administrador, se fuerza su propio tenant_id
+    resolved_tenant_id = None
+    user_tenant = current_user.get("tenant_id")
+    if user_tenant:
+        resolved_tenant_id = UUID(str(user_tenant))
+    elif current_user.get("rol") == RolEnum.superadmin.value and tenant_id:
+        resolved_tenant_id = tenant_id
+
+    dashboard = get_dashboard(db, filters, tenant_id=resolved_tenant_id)
+    return response(
+        status_code=200,
+        message="Dashboard ejecutivo obtenido exitosamente",
+        data=dashboard.model_dump(),
+    )

@@ -1,18 +1,151 @@
-<section class="space-y-4">
-  <header class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+<section class="space-y-5 pb-8">
+  <!-- 1. HEADER EJECUTIVO & CONTEXTO DE EMPRESA -->
+  <header class="flex flex-col gap-4 border-b border-slate-200/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-      <p class="text-sm text-slate-500">Ventas, inventario y reservas en tiempo real.</p>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Dashboard Ejecutivo</h1>
+        <span
+          class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold"
+          [ngClass]="planQuotas().has_ai_access ? 'border-sky-200 bg-sky-50 text-sky-800' : 'border-slate-200 bg-slate-100 text-slate-700'"
+        >
+          <ng-icon [name]="planQuotas().has_ai_access ? 'lucideCrown' : 'lucideBuilding2'" class="size-3" />
+          {{ planQuotas().plan_name }}
+        </span>
+      </div>
+      <p class="mt-0.5 text-xs text-slate-500">
+        Monitoreo unificado de ventas, cuotas SaaS, conciliación offline y analítica predictiva de moda.
+      </p>
     </div>
-    <button hlmBtn type="button" variant="outline" class="w-full sm:w-auto" (click)="refresh()" [disabled]="loading()">
-      Actualizar
-    </button>
+
+    <!-- Quick Actions: Exportar & Actualizar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
+        (click)="exportExecutiveReport()"
+        [disabled]="exporting() || loading()"
+      >
+        <ng-icon name="lucideDownload" class="size-3.5 text-slate-500" />
+        <span>{{ exporting() ? 'Exportando...' : 'Exportar CSV' }}</span>
+      </button>
+
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
+        (click)="refresh()"
+        [disabled]="loading()"
+      >
+        <ng-icon name="lucideRefreshCw" class="size-3.5 text-slate-500" [ngClass]="{ 'animate-spin': loading() }" />
+        <span>Actualizar</span>
+      </button>
+    </div>
   </header>
 
-  <section hlmCard class="bg-white shadow-xs rounded-xl border border-slate-200/80">
-    <div hlmCardContent class="grid gap-3 p-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      <div hlmSelect class="sm:col-span-2 lg:col-span-1 xl:col-span-2" [value]="selectedBranchId()" [itemToString]="branchSelectLabel" (valueChange)="onBranchChange($event)">
-        <hlm-select-trigger class="h-9 w-full" buttonId="dashboard-branch">
+  <!-- 2. GOBERNANZA SAAS: CUOTAS DE SUCURSALES & ESTADO DE PLAN -->
+  <section class="rounded-xl border border-slate-200/80 bg-white p-3.5 transition-all">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs">
+      <div class="flex items-center gap-3">
+        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+          <ng-icon name="lucideBuilding2" class="size-4" />
+        </div>
+        <div>
+          <span class="font-medium text-slate-900">Capacidad de Sucursales:</span>
+          <span class="ml-1.5 font-semibold text-slate-700">
+            {{ planQuotas().active_branches }} de {{ planQuotas().max_branches }} sucursales activas
+          </span>
+          <span class="text-slate-400 ml-1">({{ planQuotas().quota_usage_percent }}% de cuota)</span>
+        </div>
+      </div>
+
+      <!-- Barra de progreso discreta de cuota -->
+      <div class="flex items-center gap-3 sm:w-64">
+        <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div
+            class="h-full rounded-full transition-all duration-300"
+            [ngClass]="planQuotas().quota_usage_percent > 85 ? 'bg-amber-500' : 'bg-slate-900'"
+            [style.width.%]="planQuotas().quota_usage_percent"
+          ></div>
+        </div>
+        <span
+          class="shrink-0 font-mono text-[11px] font-semibold"
+          [ngClass]="planQuotas().has_ai_access ? 'text-sky-700' : 'text-slate-500'"
+        >
+          {{ planQuotas().has_ai_access ? 'IA Activa' : 'Sin IA' }}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. BARRA DE FILTROS DINÁMICOS & SELECTOR DE PESTAÑAS EJECUTIVAS -->
+  <section class="space-y-3">
+    <!-- Pestañas de Navegación Ejecutiva -->
+    <div class="flex items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-50/70 p-1" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all"
+        [class.bg-white]="viewMode() === 'all'"
+        [class.text-slate-900]="viewMode() === 'all'"
+        [class.shadow-xs]="viewMode() === 'all'"
+        [class.text-slate-600]="viewMode() !== 'all'"
+        (click)="setViewMode('all')"
+      >
+        <ng-icon name="lucideLayers" class="size-3.5" />
+        <span>Visión 360°</span>
+      </button>
+
+      <button
+        type="button"
+        role="tab"
+        class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all"
+        [class.bg-white]="viewMode() === 'finance'"
+        [class.text-slate-900]="viewMode() === 'finance'"
+        [class.shadow-xs]="viewMode() === 'finance'"
+        [class.text-slate-600]="viewMode() !== 'finance'"
+        (click)="setViewMode('finance')"
+      >
+        <ng-icon name="lucideCircleDollarSign" class="size-3.5 text-emerald-600" />
+        <span>Finanzas & Políticas</span>
+      </button>
+
+      <button
+        type="button"
+        role="tab"
+        class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all"
+        [class.bg-white]="viewMode() === 'offline'"
+        [class.text-slate-900]="viewMode() === 'offline'"
+        [class.shadow-xs]="viewMode() === 'offline'"
+        [class.text-slate-600]="viewMode() !== 'offline'"
+        (click)="setViewMode('offline')"
+      >
+        <ng-icon name="lucideWifi" class="size-3.5 text-sky-600" />
+        <span>Offline & Sync</span>
+      </button>
+
+      <button
+        type="button"
+        role="tab"
+        class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all"
+        [class.bg-white]="viewMode() === 'ml'"
+        [class.text-slate-900]="viewMode() === 'ml'"
+        [class.shadow-xs]="viewMode() === 'ml'"
+        [class.text-slate-600]="viewMode() !== 'ml'"
+        (click)="setViewMode('ml')"
+      >
+        <ng-icon name="lucideBrainCircuit" class="size-3.5 text-violet-600" />
+        <span>Inteligencia ML</span>
+      </button>
+    </div>
+
+    <!-- Filtros de Consulta: Sucursal, Periodo y Rango de Fechas -->
+    <div class="grid gap-2.5 rounded-xl border border-slate-200/80 bg-white p-3 sm:grid-cols-2 lg:grid-cols-5">
+      <!-- Selector de Sucursal -->
+      <div hlmSelect class="w-full" [value]="selectedBranchId()" [itemToString]="branchSelectLabel" (valueChange)="onBranchChange($event)">
+        <hlm-select-trigger class="h-9 w-full text-xs" buttonId="dashboard-branch">
           <span hlmSelectValue placeholder="Todas las sucursales"></span>
         </hlm-select-trigger>
         <hlm-select-content>
@@ -23,8 +156,9 @@
         </hlm-select-content>
       </div>
 
+      <!-- Selector de Periodo -->
       <div hlmSelect class="w-full" [value]="period()" [itemToString]="periodSelectLabel" (valueChange)="onPeriodChange($event)">
-        <hlm-select-trigger class="h-9 w-full" buttonId="dashboard-period">
+        <hlm-select-trigger class="h-9 w-full text-xs" buttonId="dashboard-period">
           <span hlmSelectValue placeholder="Día"></span>
         </hlm-select-trigger>
         <hlm-select-content>
@@ -34,61 +168,233 @@
         </hlm-select-content>
       </div>
 
-      <input hlmInput type="date" class="w-full" [value]="fromDate()" (input)="onFromDateChange($event)" />
-      <input hlmInput type="date" class="w-full" [value]="toDate()" (input)="onToDateChange($event)" />
+      <!-- Fecha Desde -->
+      <input
+        hlmInput
+        type="date"
+        class="h-9 w-full text-xs"
+        placeholder="Desde"
+        [value]="fromDate()"
+        (input)="onFromDateChange($event)"
+      />
 
-      <button hlmBtn type="button" class="w-full sm:col-span-2 lg:col-span-3 xl:col-span-5" (click)="applyFilters()" [disabled]="loading()">
-        Aplicar Filtros
+      <!-- Fecha Hasta -->
+      <input
+        hlmInput
+        type="date"
+        class="h-9 w-full text-xs"
+        placeholder="Hasta"
+        [value]="toDate()"
+        (input)="onToDateChange($event)"
+      />
+
+      <!-- Botón Aplicar -->
+      <button
+        hlmBtn
+        type="button"
+        size="sm"
+        class="h-9 w-full bg-slate-900 text-white hover:bg-slate-800"
+        (click)="applyFilters()"
+        [disabled]="loading()"
+      >
+        Filtrar
       </button>
     </div>
   </section>
 
-  <!-- KPI Cards con Grid Responsivo y Sin Desbordes -->
-  <section class="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-8">
-    @for (card of summaryCards(); track card.label) {
-      <article hlmCard class="bg-white shadow-xs rounded-xl border border-slate-200/80 transition-all hover:shadow-sm">
-        <div hlmCardContent class="p-3.5">
-          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 truncate" [title]="card.label">
-            {{ card.label }}
-          </p>
-          <p class="mt-1 text-lg sm:text-xl font-bold tracking-tight truncate" [ngClass]="card.tone" [title]="card.value">
-            {{ card.value }}
-          </p>
-        </div>
-      </article>
-    }
+  <!-- 4. KPIS PRINCIPALES DE DIRECCIÓN EJECUTIVA (4 TARJETAS CLAVE) -->
+  <section class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Card 1: Ventas Totales y Ticket Promedio -->
+    <article class="rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:border-slate-300">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Ventas Registradas</span>
+        <span class="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+          {{ dashboard().summary.total_orders }} órdenes
+        </span>
+      </div>
+      <p class="mt-2 font-mono text-2xl font-bold tracking-tight text-slate-900">
+        Bs {{ dashboard().summary.total_sales }}
+      </p>
+      <div class="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2">
+        <span>Ticket promedio:</span>
+        <span class="font-medium text-slate-700">Bs {{ dashboard().summary.average_ticket }}</span>
+      </div>
+    </article>
+
+    <!-- Card 2: Políticas de Negocio (Retenciones Devolución + Diferencias Cambio) -->
+    <article class="rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:border-slate-300">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Ingreso por Políticas</span>
+        <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+          P1 & P2
+        </span>
+      </div>
+      <p class="mt-2 font-mono text-2xl font-bold tracking-tight text-emerald-700">
+        Bs {{ netPolicyGain() | number:'1.2-2' }}
+      </p>
+      <div class="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2">
+        <span>Retención (20-50%): <strong class="text-slate-700">Bs {{ policyRevenue().return_retention_total }}</strong></span>
+        <span>Diferencias Δ: <strong class="text-slate-700">Bs {{ policyRevenue().exchange_difference_total }}</strong></span>
+      </div>
+    </article>
+
+    <!-- Card 3: Operaciones Offline & Arqueo en Gaveta -->
+    <article class="rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:border-slate-300">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">POS Offline & Gaveta</span>
+        <span
+          class="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+          [ngClass]="offlineSync().sync_success_rate >= 90 ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700'"
+        >
+          {{ offlineSync().sync_success_rate }}% Sync
+        </span>
+      </div>
+      <p class="mt-2 font-mono text-2xl font-bold tracking-tight text-slate-900">
+        Bs {{ offlineSync().total_offline_revenue }}
+      </p>
+      <div class="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2">
+        <span>Tickets offline: <strong class="text-slate-700">{{ offlineSync().total_offline_sales }}</strong></span>
+        <span>Sincronizadas: <strong class="text-slate-700">{{ offlineSync().synced_operations }}</strong></span>
+      </div>
+    </article>
+
+    <!-- Card 4: Inteligencia Predictiva ML (Demanda & Alertas) -->
+    <article class="rounded-xl border border-slate-200/80 bg-white p-4 transition-all hover:border-slate-300">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Demanda Predictiva ML</span>
+        @if (mlKpis().has_ml_access) {
+          <span class="rounded-md bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+            CU23 Activo
+          </span>
+        } @else {
+          <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
+            Plan Básico
+          </span>
+        }
+      </div>
+      <p class="mt-2 font-mono text-2xl font-bold tracking-tight text-slate-900">
+        {{ mlKpis().has_ml_access ? (mlKpis().predicted_monthly_units | number) : '—' }}
+        <span class="text-sm font-normal text-slate-500">prendas/mes</span>
+      </p>
+      <div class="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2">
+        <span>Alertas preventivas:</span>
+        <span class="font-medium" [ngClass]="mlKpis().critical_stockout_alerts_count > 0 ? 'text-rose-600 font-semibold' : 'text-slate-700'">
+          {{ mlKpis().critical_stockout_alerts_count }} quiebres
+        </span>
+      </div>
+    </article>
   </section>
 
-  <section class="grid gap-4 xl:grid-cols-2">
-    <article hlmCard class="bg-white shadow-xs rounded-xl border border-slate-200/80">
-      <div hlmCardContent class="p-4">
+  <!-- 5. VISTA ESPECÍFICA: FINANZAS & POLÍTICAS (POLÍTICAS 1 Y 2) -->
+  @if (viewMode() === 'all' || viewMode() === 'finance') {
+    <section class="rounded-xl border border-slate-200/80 bg-white p-5">
+      <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h2 class="text-base font-semibold text-slate-900">Rendimiento Financiero de Políticas Comerciales</h2>
+          <p class="text-xs text-slate-500">
+            Auditoría de cumplimiento de las Políticas Inviolables del pliego (Retenciones 20%-50% y Diferencia de Talla Δ > 0).
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-600">
+            Total recuperado: <strong class="text-slate-900 font-mono">Bs {{ netPolicyGain() | number:'1.2-2' }}</strong>
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <!-- Detalle Política 2: Devoluciones -->
+        <div class="rounded-lg border border-slate-200/60 bg-slate-50/50 p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Política 2: Devolución de Prendas</span>
+            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+              CU18
+            </span>
+          </div>
+          <p class="mt-1 text-xs text-slate-500">
+            Retención operativa del 20% al 50% por manipulación física y costos de reabastecimiento.
+          </p>
+          <div class="mt-3 grid grid-cols-3 gap-2 border-t border-slate-200/60 pt-3 text-center">
+            <div>
+              <p class="text-[10px] uppercase text-slate-500">Retención Empresa</p>
+              <p class="font-mono text-sm font-bold text-emerald-700">Bs {{ policyRevenue().return_retention_total }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase text-slate-500">Reembolsado Cliente</p>
+              <p class="font-mono text-sm font-bold text-slate-700">Bs {{ policyRevenue().return_refund_total }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase text-slate-500">Casos Atendidos</p>
+              <p class="font-mono text-sm font-bold text-slate-900">{{ policyRevenue().returns_count }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalle Política 1: Cambios de Prenda -->
+        <div class="rounded-lg border border-slate-200/60 bg-slate-50/50 p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Política 1: Cambios por Talla/Modelo</span>
+            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+              CU17
+            </span>
+          </div>
+          <p class="mt-1 text-xs text-slate-500">
+            El cambio se consolida exclusivamente si el cliente abona la diferencia de precio (Δ > 0).
+          </p>
+          <div class="mt-3 grid grid-cols-2 gap-2 border-t border-slate-200/60 pt-3 text-center">
+            <div>
+              <p class="text-[10px] uppercase text-slate-500">Diferencias Cobradas</p>
+              <p class="font-mono text-sm font-bold text-emerald-700">Bs {{ policyRevenue().exchange_difference_total }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase text-slate-500">Cambios Consolidados</p>
+              <p class="font-mono text-sm font-bold text-slate-900">{{ policyRevenue().exchanges_count }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- 6. GRÁFICOS INTERACTIVOS (VENTAS Y MOVIMIENTOS) -->
+  @if (viewMode() === 'all' || viewMode() === 'finance') {
+    <section class="grid gap-4 xl:grid-cols-2">
+      <!-- Gráfico 1: Área de Ventas -->
+      <article class="rounded-xl border border-slate-200/80 bg-white p-4">
         <div class="mb-3 flex items-center justify-between">
           <div>
-            <h2 class="font-semibold text-slate-900">Ventas por periodo</h2>
-            <p class="text-xs text-slate-500">Sucursal: {{ branchLabel() }}</p>
+            <h2 class="font-semibold text-slate-900">Evolución de Ventas</h2>
+            <p class="text-xs text-slate-500">Filtro activo: {{ branchLabel() }}</p>
           </div>
-          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium">
-            {{ dashboard().sales_series.length }} puntos
+          <span class="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+            {{ dashboard().sales_series.length }} cortes
           </span>
         </div>
         @if (salesChartData().length) {
           <div hlmOnBrowser>
-            <ngx-area-chart [data]="salesChartData()" [categories]="salesCategories" [height]="180" [hideLegend]="true" [yGridLine]="true" [xNumTicks]="5" />
+            <ngx-area-chart
+              [data]="salesChartData()"
+              [categories]="salesCategories"
+              [height]="190"
+              [hideLegend]="true"
+              [yGridLine]="true"
+              [xNumTicks]="6"
+            />
           </div>
         } @else {
-          <p class="py-12 text-center text-sm text-slate-500">Sin datos para el periodo seleccionado.</p>
+          <p class="py-12 text-center text-sm text-slate-500">Sin datos de ventas para el período seleccionado.</p>
         }
-      </div>
-    </article>
+      </article>
 
-    <article hlmCard class="bg-white shadow-xs rounded-xl border border-slate-200/80">
-      <div hlmCardContent class="p-4">
+      <!-- Gráfico 2: Donut de Movimientos -->
+      <article class="rounded-xl border border-slate-200/80 bg-white p-4">
         <div class="mb-2 flex items-center justify-between">
           <div>
-            <h2 class="font-semibold text-slate-900">Movimientos</h2>
-            <p class="text-xs text-slate-500">Cantidades por sucursal.</p>
+            <h2 class="font-semibold text-slate-900">Movimientos de Inventario</h2>
+            <p class="text-xs text-slate-500">Flujo físico acumulado por sucursal.</p>
           </div>
         </div>
+
         <div class="mb-3 flex gap-1 rounded-lg bg-slate-100 p-1" role="tablist" aria-label="Tipo de movimiento">
           @for (tab of movementTabs; track tab.key) {
             <button
@@ -104,42 +410,233 @@
             </button>
           }
         </div>
+
         @if (movementDonutData().length) {
           <div hlmOnBrowser>
-            <ngx-donut-chart [data]="movementDonutData()" [categories]="movementDonutCategories()" [height]="180" [arcWidth]="28" />
+            <ngx-donut-chart
+              [data]="movementDonutData()"
+              [categories]="movementDonutCategories()"
+              [height]="190"
+              [arcWidth]="28"
+            />
           </div>
         } @else {
-          <p class="py-12 text-center text-sm text-slate-500">Sin movimientos para el periodo seleccionado.</p>
+          <p class="py-12 text-center text-sm text-slate-500">Sin movimientos registrados para el período.</p>
+        }
+      </article>
+    </section>
+  }
+
+  <!-- 7. VISTA ESPECÍFICA: INTELIGENCIA ANALÍTICA & MACHINE LEARNING (CU23 & CU24) -->
+  @if (viewMode() === 'all' || viewMode() === 'ml') {
+    <section class="rounded-xl border border-slate-200/80 bg-white p-5">
+      <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold text-slate-900">Inteligencia Analítica & Modelos Predictivos</h2>
+            <span class="rounded-md bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-800">
+              ML Pipeline
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">
+            Segmentación de clientes RFM+D (K-Means) y pronóstico supervisado de demanda por talla (Random Forest).
+          </p>
+        </div>
+
+        @if (mlKpis().has_ml_access) {
+          <div class="flex items-center gap-2">
+            <a
+              routerLink="/app/admin/demand-forecast"
+              class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <span>Ver Pronósticos</span>
+              <ng-icon name="lucideArrowRight" class="size-3" />
+            </a>
+            <a
+              routerLink="/app/admin/ml-segmentation"
+              class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <span>Ver Segmentos</span>
+              <ng-icon name="lucideArrowRight" class="size-3" />
+            </a>
+          </div>
         }
       </div>
-    </article>
-  </section>
 
-  <section class="grid gap-4 xl:grid-cols-2">
-    <article hlmCard class="bg-white shadow-xs rounded-xl border border-slate-200/80">
-      <div hlmCardContent class="p-4">
-        <h2 class="mb-3 font-semibold text-slate-900">Rendimiento por sucursal</h2>
+      <!-- Control de Degradación Grácil ante Plan Básico -->
+      @if (!mlKpis().has_ml_access) {
+        <div class="rounded-lg border border-amber-200 bg-amber-50/50 p-6 text-center">
+          <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+            <ng-icon name="lucideCrown" class="size-6" />
+          </div>
+          <h3 class="mt-3 text-sm font-semibold text-slate-900">Módulo de IA y Machine Learning no Habilitado</h3>
+          <p class="mx-auto mt-1 max-w-md text-xs text-slate-600">
+            Tu empresa se encuentra actualmente bajo el <strong>Plan Básico</strong>. Para acceder a predicciones de demanda por talla a 4 semanas, segmentación automática de clientes RFM y reportes por voz con Gemini RAG, actualiza a Plan Profesional.
+          </p>
+        </div>
+      } @else {
+        <!-- Contenido de Inteligencia ML cuando está activo -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <!-- Columna A: Distribución de Segmentos RFM (CU24) -->
+          <div>
+            <div class="mb-3 flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                Segmentación Conductual de Clientes (K-Means)
+              </span>
+              <span class="text-xs text-slate-400 font-mono">k=4 clusters</span>
+            </div>
+
+            @if (mlKpis().rfm_segments_distribution.length) {
+              <div class="space-y-3">
+                @for (seg of mlKpis().rfm_segments_distribution; track seg.segment_label) {
+                  @let meta = segmentMeta(seg.segment_label);
+                  <div class="rounded-lg border border-slate-200/70 p-3 transition-colors hover:bg-slate-50/50">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold" [ngClass]="meta.badgeClass">
+                        {{ seg.segment_label }}
+                      </span>
+                      <span class="font-mono font-medium text-slate-700">
+                        {{ seg.customer_count }} clientes ({{ seg.percentage }}%)
+                      </span>
+                    </div>
+                    <p class="mt-1 text-[11px] text-slate-500">{{ meta.description }}</p>
+                    <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div class="h-full rounded-full transition-all duration-300" [ngClass]="meta.barColor" [style.width.%]="seg.percentage"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="rounded-lg border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500">
+                No hay clústeres entrenados aún. Ve a la sección de Segmentación para calibrar el modelo.
+              </div>
+            }
+          </div>
+
+          <!-- Columna B: Pronóstico de Demanda y Quiebres Preventivos (CU23) -->
+          <div class="flex flex-col justify-between">
+            <div>
+              <div class="mb-3 flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                  Pronóstico de Demanda & Quiebres (Random Forest)
+                </span>
+                <span class="text-xs text-slate-400 font-mono">R² >= 0.84</span>
+              </div>
+
+              <div class="rounded-lg border border-slate-200/70 p-4 bg-slate-50/50">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-600">Demanda estimada mes en curso:</span>
+                  <span class="font-mono text-base font-bold text-slate-900">{{ mlKpis().predicted_monthly_units }} prendas</span>
+                </div>
+                <div class="mt-2 flex items-center justify-between text-xs border-t border-slate-200/60 pt-2 text-slate-600">
+                  <span>Alertas preventivas de quiebre de stock:</span>
+                  <span class="font-mono font-bold" [ngClass]="mlKpis().critical_stockout_alerts_count > 0 ? 'text-rose-600' : 'text-emerald-700'">
+                    {{ mlKpis().critical_stockout_alerts_count }} tallas en riesgo
+                  </span>
+                </div>
+              </div>
+
+              <!-- Metadatos de auditoría de los modelos -->
+              <div class="mt-4 space-y-2 text-xs text-slate-500">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span>Modelo Supervisado (Demanda):</span>
+                  <span class="font-mono text-slate-700">{{ mlKpis().active_demand_model_version ?? 'RandomForest v1.0' }}</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span>Modelo No Supervisado (Clustering):</span>
+                  <span class="font-mono text-slate-700">{{ mlKpis().active_clustering_model_version ?? 'K-Means RFM v1.0' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-lg border border-slate-200/60 bg-white p-3 text-xs text-slate-500">
+              <span class="font-medium text-slate-700">Trazabilidad ICONIX:</span> Las proyecciones se sincronizan automáticamente con las compras asistidas y órdenes de reposición a proveedores.
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- 8. VISTA ESPECÍFICA: OFFLINE & CONCILIACIÓN CENTRAL (CU13, CU14, CU15) -->
+  @if (viewMode() === 'all' || viewMode() === 'offline') {
+    <section class="rounded-xl border border-slate-200/80 bg-white p-5">
+      <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h2 class="text-base font-semibold text-slate-900">Conciliación de Ventas POS Offline e Idempotencia</h2>
+          <p class="text-xs text-slate-500">
+            Control de contingencia con UUIDv4, gaveta física y sincronización por lotes sin duplicidades.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-600 font-mono">
+            {{ offlineSync().synced_operations }} procesadas / {{ offlineSync().pending_operations }} pendientes
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-lg border border-slate-200/70 p-3.5 bg-slate-50/50">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Efectivo en Gaveta Offline</p>
+          <p class="mt-1 font-mono text-xl font-bold text-slate-900">Bs {{ offlineSync().total_offline_revenue }}</p>
+          <p class="mt-1 text-[11px] text-slate-500">Exclusivo efectivo (Política 5 de venta offline).</p>
+        </div>
+
+        <div class="rounded-lg border border-slate-200/70 p-3.5 bg-slate-50/50">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tickets de Contingencia</p>
+          <p class="mt-1 font-mono text-xl font-bold text-slate-900">{{ offlineSync().total_offline_sales }} ventas</p>
+          <p class="mt-1 text-[11px] text-slate-500">Identificados con UUIDv4 e idempotencia garantizada.</p>
+        </div>
+
+        <div class="rounded-lg border border-slate-200/70 p-3.5 bg-slate-50/50">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tasa de Efectividad Sync</p>
+          <p class="mt-1 font-mono text-xl font-bold text-emerald-700">{{ offlineSync().sync_success_rate }}%</p>
+          <p class="mt-1 text-[11px] text-slate-500">Cero quiebres duplicados en la base central.</p>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- 9. TABLAS DE RENDIMIENTO: SUCURSALES & TOP PRENDAS -->
+  @if (viewMode() === 'all') {
+    <section class="grid gap-4 xl:grid-cols-2">
+      <!-- Sucursales Performance -->
+      <article class="rounded-xl border border-slate-200/80 bg-white p-4">
+        <h2 class="mb-3 font-semibold text-slate-900">Rendimiento por Sucursal</h2>
         @if (branchPerformanceChartData().length) {
           <div hlmOnBrowser>
-            <ngx-bar-chart [data]="branchPerformanceChartData()" [categories]="{ sales: { name: 'Ventas', color: '#10b981' } }" [yAxis]="['sales']" [height]="180" [hideLegend]="true" [yGridLine]="true" />
+            <ngx-bar-chart
+              [data]="branchPerformanceChartData()"
+              [categories]="{ sales: { name: 'Ventas (Bs)', color: '#0284c7' } }"
+              [yAxis]="['sales']"
+              [height]="180"
+              [hideLegend]="true"
+              [yGridLine]="true"
+            />
           </div>
         } @else {
-          <p class="py-12 text-center text-sm text-slate-500">Sin rendimiento por sucursal.</p>
+          <p class="py-12 text-center text-sm text-slate-500">Sin ventas por sucursal registradas.</p>
         }
-      </div>
-    </article>
+      </article>
 
-    <article hlmCard class="bg-white shadow-xs rounded-xl border border-slate-200/80">
-      <div hlmCardContent class="p-4">
-        <h2 class="mb-3 font-semibold text-slate-900">Top productos</h2>
+      <!-- Top Productos -->
+      <article class="rounded-xl border border-slate-200/80 bg-white p-4">
+        <h2 class="mb-3 font-semibold text-slate-900">Prendas de Mayor Rotación</h2>
         @if (topProductsChartData().length) {
           <div hlmOnBrowser>
-            <ngx-bar-chart [data]="topProductsChartData()" [categories]="{ sales: { name: 'Ventas', color: '#8b5cf6' } }" [yAxis]="['sales']" [height]="180" [hideLegend]="true" [yGridLine]="true" />
+            <ngx-bar-chart
+              [data]="topProductsChartData()"
+              [categories]="{ sales: { name: 'Ventas (Bs)', color: '#7c3aed' } }"
+              [yAxis]="['sales']"
+              [height]="180"
+              [hideLegend]="true"
+              [yGridLine]="true"
+            />
           </div>
         } @else {
-          <p class="py-12 text-center text-sm text-slate-500">Sin ventas por producto.</p>
+          <p class="py-12 text-center text-sm text-slate-500">Sin productos vendidos en el período.</p>
         }
-      </div>
-    </article>
-  </section>
+      </article>
+    </section>
+  }
 </section>

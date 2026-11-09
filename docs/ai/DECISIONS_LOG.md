@@ -304,21 +304,26 @@
 
 
 
-### Registro 27: 2026-11-08 — Gobernanza y CRUD de Planes Comerciales SaaS en Panel Superadmin (CU02)
+### Registro 28: 2026-11-08 — Machine Learning No Supervisado: Segmentación K-Means RFM+D y Asignación Heurística de Perfiles (CU24)
 * **Decisión:**
-  1. **Expansión de la API de Planes SaaS (`p0_saas_plataforma`):**
-     - Se completó el ciclo REST del catálogo de planes comerciales implementando en [`plan_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/routes/plan_routes.py):
-       - `PUT /saas/plans/{plan_id}`: Actualización atómica de nombre, tarifas mensuales, cuotas de sucursales físicas y flags de IA.
-       - `PATCH /saas/plans/{plan_id}/status`: Conmutación de estado activo/en pausa del plan.
-       - `DELETE /saas/plans/{plan_id}`: Eliminación física si no tiene suscripciones vinculadas o desactivación automática preventiva si existen contratos activos.
-       - Parámetro `include_inactive=true` en `GET /saas/plans` para auditoría del Superadmin.
-     - Esquemas Pydantic v2 en [`plan_schema.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/schemas/plan_schema.py): `PlanUpdate` y `PlanStatusUpdate`.
-  2. **Actualización de Cuota Máxima del Plan Empresarial:**
-     - Se ajustó el límite superior del plan EMPRESARIAL a **223 sucursales activas** en seeder y servicios (`tenant_service.py`, `quota_service.py`), permitiendo al Superadmin gobernar cadenas masivas de boutiques con total flexibilidad.
-  3. **Interfaz de Gestión de Planes en Frontend Web (Angular 21):**
-     - Diseñada bajo la directriz `/design-taste-frontend` (`references/app-screens.md`):
-       - Componente de página [`plans-page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/superadmin/pages/plans-page.component.ts) con tarjetas de métricas honestas (sin ornamentos slop), barra de navegación por pestañas (`Empresas` $\leftrightarrow$ `Planes & Cuotas`), filtrado reactivo de planes activos y cuadrícula de tarjetas comerciales de alta fidelidad.
-       - Modal de gestión [`plan-form-modal.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/superadmin/components/plan-form-modal.component.ts) con validaciones Pydantic/TypeScript reactivas y feedback con Sonner toast.
-       - Integración en [`CompanyService`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/company.service.ts), [`company.model.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/models/company.model.ts), [`app.routes.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/app.routes.ts) (`/app/superadmin/plans`) y barra lateral en [`app-shell.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/layouts/app-shell.component.ts).
-* **Motivo:** El Superadmin carecía de una vista de control para gobernar las cuotas técnicas y tarifas comerciales de la plataforma SaaS sin manipular directamente la base de datos SQL.
-* **Impacto:** Gobernanza total del CU02 en Frontend y Backend con arquitectura desacoplada.
+  1. **Modelado Vectorial Multidimensional RFM+D:**
+     - Se definió el vector de entrada para clustering de clientes combinando las métricas de recencia, frecuencia y gasto monetario con la tasa de retorno de producto: $[R, F, M, D]$, donde $D = \frac{\text{devoluciones (CU18)} + \text{cambios de talla (CU17)}}{\text{frecuencia de compra}}$.
+     - Normalización obligatoria mediante `StandardScaler` de Scikit-Learn antes de computar distancias euclidianas.
+  2. **Pipeline de Clustering $k$-Means e Inferencia de Perfiles:**
+     - Algoritmo: `KMeans(n_clusters=4, init='k-means++', n_init=10, random_state=42)`.
+     - Evaluación de calidad en tiempo real con Coeficiente Silhouette ($s \ge 0.50$) e Inercia intra-clúster.
+     - Asignación dinámica de perfiles de negocio a partir de los centroides desescalados:
+       - *Clientes VIP / Embajadores:* Máximo valor $M$ y alta frecuencia $F$.
+       - *Compradores de Temporada:* Frecuencia moderada y baja recencia en cambios de estación.
+       - *Cazadores de Ofertas:* Alta recencia $R$ y ticket promedio moderado/bajo.
+       - *Perfil de Alto Retorno:* Tasa $D > 30\%$, con acciones orientadas a probador virtual y políticas de retención.
+  3. **Resiliencia ante Datos Escasos (Cold Start con CU22):**
+     - Si el tenant cuenta con $< 10$ clientes con ventas reales, el servicio conmuta transparentemente a generar cohortes coherentes basadas en el dataset sintético exportado en CU22, garantizando que el clustering funcione desde el primer día de suscripción.
+  4. **Gobernanza de Planes y Persistencia:**
+     - Validación defensiva mediante `validate_ai_access` (HTTP 403 Forbidden para Plan Básico).
+     - Serialización `.joblib` en `backend/app/data/models/`, auditoría en `ml_models` y persistencia en `customer_segments`.
+* **Motivo:** Cumplimiento de los requisitos `RF-53` y `RF-54` de la 3ra Presentación y requerimiento del pliego de Sistemas 2 sobre analítica no supervisada.
+* **Impacto:**
+  - Archivos creados: [`customer_segmentation_schema.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p6_inteligencia_analitica/schemas/customer_segmentation_schema.py), [`customer_segmentation_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p6_inteligencia_analitica/services/customer_segmentation_service.py), [`customer_segmentation_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p6_inteligencia_analitica/routes/customer_segmentation_routes.py).
+  - Integración en [`router.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p6_inteligencia_analitica/router.py).
+  - Suite de pruebas de caja negra [`test_cu24_customer_segmentation.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/tests/test_cu24_customer_segmentation.py) con **5/5 pruebas PASSED (100%)**.

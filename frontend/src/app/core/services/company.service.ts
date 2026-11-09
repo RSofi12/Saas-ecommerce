@@ -9,6 +9,8 @@ import {
   PlanCreateDto,
   PlanUpdateDto,
   Subscription,
+  SubscriptionAssignDto,
+  SubscriptionUpdateDto,
 } from '../models/company.model';
 
 @Injectable({ providedIn: 'root' })
@@ -83,12 +85,14 @@ export class CompanyService {
     );
   }
 
-  assignSubscription(companyId: string, planId: string): Observable<Subscription> {
-    return this.api.post<ApiResponse<Subscription>>('/saas/subscriptions', {
-      company_id: companyId,
-      plan_id: planId,
-      status: 'ACTIVA',
-    }).pipe(
+  assignSubscription(dto: SubscriptionAssignDto): Observable<Subscription> {
+    return this.api.post<ApiResponse<Subscription>>('/saas/subscriptions', dto).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  updateSubscription(subscriptionId: string, dto: SubscriptionUpdateDto): Observable<Subscription> {
+    return this.api.put<ApiResponse<Subscription>>(`/saas/subscriptions/${subscriptionId}`, dto).pipe(
       map((res) => res.data),
     );
   }
