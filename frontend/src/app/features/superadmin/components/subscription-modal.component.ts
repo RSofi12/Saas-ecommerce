@@ -5,11 +5,12 @@ import { toast } from '@spartan-ng/brain/sonner';
 
 import { Company, Plan, Subscription, SubscriptionAssignDto, SubscriptionUpdateDto } from '../../../core/models/company.model';
 import { CompanyService } from '../../../core/services/company.service';
+import { PoliciesModalComponent } from '../../shared/components/policies-modal.component';
 
 @Component({
   selector: 'app-subscription-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PoliciesModalComponent],
   template: `
     @if (isOpen && company) {
       <div
@@ -277,6 +278,29 @@ import { CompanyService } from '../../../core/services/company.service';
               </div>
             }
 
+            <!-- CHECKBOX DE CONFIRMACIÓN DE TÉRMINOS SAAS -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-700">
+              <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  [checked]="acceptedSaasTerms()"
+                  (change)="acceptedSaasTerms.set($any($event.target).checked)"
+                />
+                <span class="leading-tight text-[11px] text-slate-600">
+                  Confirmar que la empresa acepta los
+                  <button
+                    type="button"
+                    (click)="isTermsModalOpen.set(true)"
+                    class="font-semibold text-slate-900 underline hover:text-primary transition-colors inline"
+                  >
+                    Términos del Servicio SaaS
+                  </button>,
+                  los límites de sucursales según el plan seleccionado y la política de aislamiento de datos.
+                </span>
+              </label>
+            </div>
+
           </div>
 
           <!-- FOOTER -->
@@ -291,7 +315,7 @@ import { CompanyService } from '../../../core/services/company.service';
             <button
               type="button"
               (click)="onSubmit()"
-              [disabled]="saving() || !selectedPlanId()"
+              [disabled]="saving() || !selectedPlanId() || !acceptedSaasTerms()"
               class="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5 cursor-pointer"
             >
               @if (saving()) {
@@ -308,6 +332,12 @@ import { CompanyService } from '../../../core/services/company.service';
 
         </div>
       </div>
+
+      <app-policies-modal
+        [isOpen]="isTermsModalOpen()"
+        defaultTab="saas"
+        (close)="isTermsModalOpen.set(false)"
+      />
     }
   `,
 })
@@ -326,6 +356,8 @@ export class SubscriptionModalComponent implements OnChanges {
   protected readonly loadingSubscription = signal<boolean>(false);
   protected readonly saving = signal<boolean>(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly acceptedSaasTerms = signal<boolean>(false);
+  protected readonly isTermsModalOpen = signal<boolean>(false);
 
   protected endDateInput: string = '';
   protected selectedStatus: string = 'ACTIVA';
@@ -343,6 +375,7 @@ export class SubscriptionModalComponent implements OnChanges {
     this.currentSubscription.set(null);
     this.endDateInput = '';
     this.selectedStatus = 'ACTIVA';
+    this.acceptedSaasTerms.set(false);
   }
 
   private loadData(): void {

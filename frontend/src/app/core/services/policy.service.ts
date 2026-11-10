@@ -1,0 +1,77 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, catchError, map, of } from 'rxjs';
+import { ApiResponse } from '../models/api.model';
+import { PlatformPoliciesData } from '../models/policy.model';
+
+const DEFAULT_POLICIES: PlatformPoliciesData = {
+  cambios_de_prenda: {
+    codigo: 'P-Ten-01',
+    titulo: 'Cambio de Prenda por Talla y Cobro de Diferencia (CU17)',
+    regla_precio_mayor:
+      'Al cambiar una prenda por otra talla o modelo de mayor precio (diferencia positiva), el cambio se consolida ÚNICA Y EXCLUSIVAMENTE cuando el cliente abona la diferencia de precio en caja. Si el cliente no abona dicha diferencia, la transacción queda cancelada en el acto, devolviendo la prenda original y manteniendo el inventario intacto.',
+    regla_precio_menor_o_igual:
+      'Si el cambio es por una prenda de igual valor comercial, se efectúa sin costo adicional. Si la nueva prenda es de menor precio, la diferencia a favor del cliente se emite en una Nota de Crédito Digital.',
+    inspeccion_fisica:
+      'La prenda debe contar con su etiqueta original cosida o colgante intacta, sin manchas, olores ni signos de lavado o desgaste (P-Ten-02). Prendas en liquidación final no admiten cambio.',
+    plazos: '15 días calendario tras la compra en Boutique Elegance, y hasta 30 días en Moda Urbana.',
+  },
+  devoluciones_y_reembolsos: {
+    codigo: 'P-Ten-03',
+    titulo: 'Devolución de Mercadería con Retención Operativa y Nota de Crédito (CU18)',
+    retencion_operativa:
+      'Toda devolución aplica una tasa de retención operativa entre el 20% y el 50% por reacondicionamiento, desinfección y costos administrativos (30% en Boutique Elegance, 20% en Moda Urbana).',
+    calculo_reembolso: 'Monto Reembolso Neto = Precio Pagado - (Precio Pagado * Tasa de Retención).',
+    modalidad_reembolso:
+      'El reembolso se emite preferentemente mediante Nota de Crédito Digital (cupón alfanumérico único NC-YYYYMMDD-XXXX) con vigencia de 90 días para reutilizar en el catálogo de la misma boutique, o en efectivo según disponibilidad de caja.',
+    plazos: '7 días calendario tras la compra en Boutique Elegance, y hasta 15 días en Moda Urbana.',
+  },
+  pagos_y_despacho: {
+    codigo: 'P-Ten-04 / P-Ten-05',
+    titulo: 'Despacho Condicionado a Pago Confirmado y Operaciones Desconectadas',
+    despacho_digital:
+      'El despacho logístico y preparación de pedidos online se ejecuta ÚNICAMENTE cuando la pasarela Stripe confirma el pago en estado exitoso (payment_status = "paid"). No se despacha mercadería con pagos pendientes.',
+    ventas_offline:
+      'Durante caídas de conectividad en caja POS, la única forma de pago autorizada es EFECTIVO (Contado). Se emite un UUIDv4 de contingencia y se almacena localmente con estado PENDIENTE_SYNC.',
+  },
+  reservas_de_stock: {
+    codigo: 'P-Ten-06',
+    titulo: 'Caducidad y Liberación Automática de Reservas (CU10 / CU12)',
+    tiempo_reserva:
+      'Toda reserva digital bloquea inventario por un período de 24 a 48 horas. Vencido este plazo sin consolidarse la compra en sucursal o pago online, el sistema libera las unidades automáticamente.',
+  },
+  terminos_saas_fashionstore: {
+    codigo: 'P-SaaS-01',
+    titulo: 'Términos del Servicio SaaS Multitenant de FashionStore (CU02 / CU04)',
+    cuotas_por_plan: {
+      plan_basico: 'Hasta 3 sucursales físicas activas. Sin acceso a IA Generativa ni modelos ML.',
+      plan_profesional:
+        'Hasta 10 sucursales físicas activas. Incluye reportes ejecutivos por voz (Gemini RAG) y modelos ML predictivos.',
+      plan_empresarial:
+        'Hasta 223 sucursales físicas activas. Incluye todas las capacidades de IA, soporte prioritario y mayor cuota transaccional.',
+    },
+    aislamiento_multitenant:
+      'Aislamiento lógico estricto mediante tenant_id en todas las entidades del modelo relacional. Ninguna empresa puede acceder ni modificar datos de otros tenants.',
+    respaldos:
+      'Básico: exportación manual semanal. Profesional: copias de seguridad automatizadas diarias en nube. Empresarial: replicación continua con recuperación ante desastres.',
+  },
+};
+
+@Injectable({
+  providedIn: 'root',
+})
+export class PolicyService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = '/api/saas/companies/policies';
+
+  getPolicies(): Observable<PlatformPoliciesData> {
+    return this.http.get<ApiResponse<PlatformPoliciesData>>(this.apiUrl).pipe(
+      map((res) => res.data ?? DEFAULT_POLICIES),
+      catchError(() => of(DEFAULT_POLICIES))
+    );
+  }
+
+  getDefaultPolicies(): PlatformPoliciesData {
+    return DEFAULT_POLICIES;
+  }
+}

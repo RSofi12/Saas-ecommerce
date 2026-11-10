@@ -121,6 +121,31 @@
             </div>
           </div>
 
+          <!-- CHECKBOX DE TÉRMINOS Y POLÍTICAS COMERCIALES -->
+          <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-3 text-xs text-slate-700">
+            <label class="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                formControlName="accept_terms"
+                class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+              />
+              <span class="leading-tight text-[11px] text-slate-600">
+                Acepto los
+                <button
+                  type="button"
+                  (click)="isPoliciesModalOpen.set(true)"
+                  class="font-semibold text-slate-900 underline hover:text-[#cf7255] transition-colors inline"
+                >
+                  términos de uso y políticas comerciales
+                </button>
+                de compra, cambios y devoluciones de la plataforma.
+              </span>
+            </label>
+            @if (form.controls.accept_terms.touched && form.controls.accept_terms.invalid) {
+              <p class="text-xs text-rose-500 font-medium mt-1">Debes aceptar los términos y políticas para registrarte.</p>
+            }
+          </div>
+
         </div>
 
         <!-- BOTÓN DE ENVÍO -->
@@ -194,3 +219,9 @@
   </aside>
 
 </div>
+
+<app-policies-modal
+  [isOpen]="isPoliciesModalOpen()"
+  defaultTab="tienda"
+  (close)="isPoliciesModalOpen.set(false)"
+/>

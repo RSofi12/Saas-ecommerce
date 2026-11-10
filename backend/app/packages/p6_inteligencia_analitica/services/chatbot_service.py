@@ -548,7 +548,11 @@ def _fallback(intent: ChatIntent, context: dict[str, Any]) -> str:
             for item in orders
         ) if orders else "No encontré pedidos asociados a tu cuenta."
     knowledge = context.get("knowledge", context.get("topics", {}))
-    return "Información disponible: " + " ".join(str(value) for value in knowledge.values())
+    def _flatten_item(val: Any) -> str:
+        if isinstance(val, dict):
+            return " ".join(_flatten_item(v) for v in val.values())
+        return str(val)
+    return "Información sobre políticas y términos: " + " ".join(_flatten_item(value) for value in knowledge.values())
 
 
 def _catalog_answer(context: dict[str, Any]) -> str:

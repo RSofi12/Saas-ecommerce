@@ -293,6 +293,13 @@ export const routes: Routes = [
             path: 'orders',
             loadComponent: () => import('./features/encargado/pages/orders-page.component').then((m) => m.EncargadoOrdersPageComponent),
           },
+          {
+            path: 'policies',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-policies-page.component').then(
+                (m) => m.AdminPoliciesPageComponent,
+              ),
+          },
         ],
       },
       {
@@ -325,6 +332,17 @@ export const routes: Routes = [
   {
     path: 'notifications',
     redirectTo: 'app/notifications',
+  },
+  {
+    path: 'politicas',
+    loadComponent: () =>
+      import('./features/admin/pages/admin-policies-page.component').then(
+        (m) => m.AdminPoliciesPageComponent,
+      ),
+  },
+  {
+    path: 'terms',
+    redirectTo: 'politicas',
   },
   {
     path: '',

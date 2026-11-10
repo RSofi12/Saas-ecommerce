@@ -11,11 +11,12 @@ import { getDefaultRouteForRole } from '../../../core/utils/role-route.util';
 import { HlmCardImports } from '../../../components/card/src';
 import { HlmInput } from '../../../components/input/src';
 import { HlmSelectImports } from '../../../components/select/src';
+import { PoliciesModalComponent } from '../components/policies-modal.component';
 
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, HlmInput, ...HlmCardImports, ...HlmSelectImports],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, HlmInput, PoliciesModalComponent, ...HlmCardImports, ...HlmSelectImports],
   templateUrl: './register-page.component.html',
 })
 export class RegisterPageComponent {
@@ -24,12 +25,14 @@ export class RegisterPageComponent {
   private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
+  protected readonly isPoliciesModalOpen = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     gender: ['masculino' as GeneroUsuario, [Validators.required]],
+    accept_terms: [false, [Validators.requiredTrue]],
   });
 
   protected readonly genderSelectLabel = (gender: GeneroUsuario | null | undefined): string => {
@@ -53,7 +56,7 @@ export class RegisterPageComponent {
 
     this.loading.set(true);
     try {
-      const payload = this.form.getRawValue();
+      const { accept_terms: _, ...payload } = this.form.getRawValue();
       const request = this.session.register({ ...payload, email: payload.email.trim().toLowerCase() });
       toast.promise(request, {
         loading: 'Creando cuenta...',

@@ -20,6 +20,7 @@ import { CartApiService } from '../../shared/services/cart-api.service';
 import { CatalogApiService } from '../../shared/services/catalog-api.service';
 import { Order } from '../../shared/models/order.model';
 import { CheckoutApiService, CheckoutRequestPayload } from '../../shared/services/checkout-api.service';
+import { PoliciesModalComponent } from '../../shared/components/policies-modal.component';
 import { environment } from '../../../../environments/environment';
 
 type StripeCheckout = {
@@ -33,7 +34,7 @@ type StripeCheckout = {
 @Component({
   selector: 'app-cart-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, HlmButton, HlmTable, ...HlmBadgeImports, ...HlmCardImports, ...HlmInputImports],
+  imports: [CommonModule, RouterLink, HlmButton, HlmTable, PoliciesModalComponent, ...HlmBadgeImports, ...HlmCardImports, ...HlmInputImports],
   templateUrl: './cart-page.component.html',
 })
 export class CartPageComponent {
@@ -62,6 +63,8 @@ export class CartPageComponent {
   protected readonly pickupBranchId = signal('');
   protected readonly checkingOut = signal(false);
   protected readonly couponCode = signal('');
+  protected readonly acceptedPolicies = signal(false);
+  protected readonly isPoliciesModalOpen = signal(false);
 
   constructor() {
     void this.loadCart();
@@ -170,6 +173,11 @@ export class CartPageComponent {
   protected async checkout(): Promise<void> {
     if (!this.cart()?.items?.length) {
       toast.warning('Tu carrito está vacío.');
+      return;
+    }
+
+    if (!this.acceptedPolicies()) {
+      toast.warning('Debes aceptar las políticas de compra, cambio y devolución antes de pagar.');
       return;
     }
 

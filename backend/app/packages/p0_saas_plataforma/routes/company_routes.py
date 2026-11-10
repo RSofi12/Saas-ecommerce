@@ -55,6 +55,24 @@ def get_all_companies(
     )
 
 
+@router.get("/policies", summary="Consultar políticas comerciales y términos de la plataforma SaaS")
+def get_saas_policies():
+    import json
+    from pathlib import Path
+    data_dir = Path(__file__).resolve().parents[3] / "core" / "data"
+    policies_file = data_dir / "policies.json"
+    if not policies_file.exists():
+        data_dir = Path(__file__).resolve().parents[2] / "core" / "data"
+        policies_file = data_dir / "policies.json"
+    with open(policies_file, encoding="utf-8") as f:
+        policies_data = json.load(f)
+    return response(
+        status_code=status.HTTP_200_OK,
+        message="Políticas comerciales y términos SaaS obtenidos correctamente",
+        data=policies_data,
+    )
+
+
 @router.get("/subdomain/{subdomain}", summary="Resolver empresa por subdominio")
 def get_by_subdomain(subdomain: str, db: Session = Depends(get_db)):
     company = get_company_by_subdomain(db, subdomain)

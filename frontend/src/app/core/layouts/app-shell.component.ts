@@ -250,6 +250,7 @@ export class AppShellComponent {
             items: [
               { label: 'Usuarios', route: '/app/admin/user', icon: 'lucideUsers' },
               { label: 'Sucursales', route: '/app/admin/branch', icon: 'lucideLayoutDashboard' },
+              { label: 'Políticas y Términos', route: '/app/admin/policies', icon: 'lucideClipboardList' },
             ],
           },
         ];

@@ -214,6 +214,29 @@
           </div>
         </div>
 
+        <!-- Checkbox de Consentimiento Obligatorio de Políticas (P-Ten-01, P-Ten-03, P-Ten-04) -->
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+          <label class="flex items-start gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+              [checked]="acceptedPolicies()"
+              (change)="acceptedPolicies.set($any($event.target).checked)"
+            />
+            <span class="leading-tight text-[11px] text-slate-600">
+              Al comprar, confirmo que he leído y acepto las
+              <button
+                type="button"
+                (click)="isPoliciesModalOpen.set(true)"
+                class="font-semibold text-slate-900 underline hover:text-primary transition-colors inline text-left"
+              >
+                políticas de cambio, devolución y despacho
+              </button>
+              de la empresa.
+            </span>
+          </label>
+        </div>
+
         <!-- Botón de Inicialización de Checkout -->
         @if (!stripeCheckout()) {
           <button
@@ -221,7 +244,7 @@
             type="button"
             class="w-full py-2.5 text-sm font-semibold shadow-sm"
             (click)="checkout()"
-            [disabled]="checkingOut() || !(cart()?.items?.length)"
+            [disabled]="checkingOut() || !(cart()?.items?.length) || !acceptedPolicies()"
           >
             {{ checkingOut() ? 'Iniciando proceso seguro...' : (checkoutMethod() === 'cash' ? 'Confirmar Pedido en Efectivo' : 'Pagar con Tarjeta (Stripe)') }}
           </button>
@@ -297,3 +320,9 @@
     </section>
   </aside>
 </section>
+
+<!-- Modal de Políticas de Compra, Cambio y Devolución -->
+<app-policies-modal
+  [isOpen]="isPoliciesModalOpen()"
+  (close)="isPoliciesModalOpen.set(false)"
+/>

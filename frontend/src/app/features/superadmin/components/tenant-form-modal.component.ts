@@ -5,11 +5,12 @@ import { toast } from '@spartan-ng/brain/sonner';
 
 import { CompanyService } from '../../../core/services/company.service';
 import { Company, CompanyCreateDto } from '../../../core/models/company.model';
+import { PoliciesModalComponent } from '../../shared/components/policies-modal.component';
 
 @Component({
   selector: 'app-tenant-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PoliciesModalComponent],
   template: `
     @if (isOpen) {
       <div 
@@ -223,6 +224,30 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
               </div>
             </div>
 
+            <!-- Checkbox de Consentimiento Obligatorio de Términos SaaS (P-SaaS-01, P-SaaS-03) -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-700">
+              <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  formControlName="accept_saas_terms"
+                  class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                />
+                <span class="leading-tight text-[11px] text-slate-600">
+                  He leído y acepto los
+                  <button 
+                    type="button" 
+                    (click)="isTermsModalOpen.set(true)"
+                    class="font-semibold text-slate-900 underline hover:text-primary transition-colors inline"
+                  >
+                    Términos del Servicio SaaS
+                  </button>, los límites de sucursales según el plan contratado y la política de aislamiento y seguridad de datos de FashionStore.
+                </span>
+              </label>
+              @if (f['accept_saas_terms'].touched && f['accept_saas_terms'].invalid) {
+                <p class="text-[11px] text-rose-500 mt-1.5 font-medium">Debes aceptar los Términos del Servicio SaaS para aprovisionar la empresa.</p>
+              }
+            </div>
+
             <!-- Footer con Acciones -->
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
               <button 
@@ -234,8 +259,8 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
               </button>
               <button 
                 type="submit" 
-                [disabled]="submitting()"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                [disabled]="submitting() || form.invalid"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 transition-colors cursor-pointer"
               >
                 @if (submitting()) {
                   <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -248,6 +273,12 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
           </form>
         </div>
       </div>
+
+      <app-policies-modal 
+        [isOpen]="isTermsModalOpen()" 
+        defaultTab="saas"
+        (close)="isTermsModalOpen.set(false)" 
+      />
     }
   `,
 })
@@ -260,6 +291,7 @@ export class TenantFormModalComponent {
   private readonly companyService = inject(CompanyService);
 
   protected readonly submitting = signal(false);
+  protected readonly isTermsModalOpen = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -272,6 +304,7 @@ export class TenantFormModalComponent {
     admin_name: ['', [Validators.required, Validators.minLength(2)]],
     admin_email: ['', [Validators.required, Validators.email]],
     admin_password: ['', [Validators.required, Validators.minLength(8)]],
+    accept_saas_terms: [false, [Validators.requiredTrue]],
   });
 
   get f() {

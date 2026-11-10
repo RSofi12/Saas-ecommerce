@@ -1,6 +1,23 @@
 # HANDOFF LATEST — FASHIONSTORE SAAS MULTITENANT
 
-## Estado de Relevo Operativo al 09/11/2026 (Auditoría y Correcciones en App Móvil Flutter)
+## Estado de Relevo Operativo al 10/11/2026 (Políticas Comerciales, Consentimiento en Checkout y RAG Chatbot)
+
+---
+
+### 1. Avances Consolidados en esta Sesión
+
+- **Gestión y Vistas de Políticas Comerciales y Términos SaaS (Fases 1 y 2):**
+  - **Base de Conocimiento RAG y Endpoint Público (`p0` y `p6`):**
+    - Se estructuró formalmente `policies.json` con todas las reglas inviolables: P-Ten-01 (diferencia de precio por talla), P-Ten-02 (inspección de etiqueta), P-Ten-03 (retención 20-50% y Nota de Crédito Digital), P-Ten-04 (despacho contra Stripe pagado), P-Ten-05 (contingencia offline solo efectivo) y P-SaaS-01 (cuotas 3/10/223 sucursales).
+    - Endpoint público `GET /api/saas/companies/policies` en `company_routes.py`.
+    - Fallback de chatbot optimizado para desplegar diccionarios estructurados.
+  - **Componente Reutilizable y Consentimiento en Checkout (Angular 21 PWA):**
+    - Modal `PoliciesModalComponent` interactivo con pestañas Tienda / SaaS.
+    - Página `/app/admin/policies` (`AdminPoliciesPageComponent`) para el Tenant Admin en menú lateral.
+    - Checkbox de consentimiento obligatorio en `/app/cliente/cart` que bloquea checkout hasta su aceptación.
+  - Bitácora en `docs/ai/sessions/2026-11-10-policies-terms-views-and-knowledge.md`.
+
+- **Sesión Anterior (09/11/2026):**
 
 ---
 
