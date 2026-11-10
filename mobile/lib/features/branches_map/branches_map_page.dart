@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' hide Path;
 
-import '../catalog/catalog_models.dart';
+import '../catalog/catalog_models.dart' show Branch;
 import 'branches_map_controller.dart';
 import 'routing_models.dart';
 

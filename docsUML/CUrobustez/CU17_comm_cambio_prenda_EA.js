@@ -4,7 +4,7 @@
 // FashionStore — Plataforma SaaS Multitenant (Sistemas 2)
 //
 // Componentes y Estereotipos Oficiales (Plantilla de Cátedra ICONIX):
-//   Actor: Cajero, Cliente
+//   Actor: Cajero (Actor Principal)
 //   Boundary: CajaPageComponent, GarmentExchangeModalComponent (Object, «boundary»)
 //   Control: GarmentExchangeRoutes, GarmentExchangeService (Object, «control»)
 //   Entity: GarmentExchange, Sale, SaleItem, Inventory (Object, «entity»)
@@ -12,7 +12,11 @@
 // Reglas Metodológicas Estrictas:
 //   - Todas las funciones se expresan con paréntesis vacíos () sin parámetros internos.
 //   - Cero bucles o validaciones sobre Fronteras (las validaciones residen en Controllers).
-//   - Conectores independientes para permitir ordenación y ajuste libre en EA.
+//   - Sin cruces entre actores (solo el actor principal Cajero interactúa con la terminal de venta).
+//   - Conectores de tipo 'Association' (sólidos, sin flecha rayada/discontinua de comunicación).
+//   - La entidad SaleItem está conectada formalmente para validar el ítem vendido original.
+//   - Elementos creados como 'Object' con dimensiones cuadradas (80x80 px) para iconos circulares BCE.
+//   - Numeración jerárquica por flujo (1:, 1.1:, 2:, 2.1:, etc.).
 // ============================================================================
 
 var Repo = (typeof Repository != "undefined") ? Repository : null;
@@ -20,7 +24,9 @@ if (Repo == null) {
     try {
         var eaApp = new ActiveXObject("EA.App");
         Repo = eaApp.Repository;
-    } catch (e) { }
+    } catch (e) {
+        // En entorno EA interno Repository ya está activo
+    }
 }
 
 function Log(msg) {
@@ -28,14 +34,20 @@ function Log(msg) {
 }
 
 function crearElementoConEsterotipo(pkg, name, tipo, estereotipo) {
-    for (var i = 0; i < pkg.Elements.Count; i++) {
+    for (var i = pkg.Elements.Count - 1; i >= 0; i--) {
         var el = pkg.Elements.GetAt(i);
-        if (el.Name == name && el.Type == tipo) {
-            if (estereotipo && el.Stereotype != estereotipo) {
-                el.Stereotype = estereotipo;
-                el.Update();
+        if (el.Name == name) {
+            if (el.Type == tipo) {
+                if (estereotipo && el.Stereotype != estereotipo) {
+                    el.Stereotype = estereotipo;
+                    el.Update();
+                }
+                return el;
+            } else {
+                pkg.Elements.Delete(i);
+                pkg.Elements.Refresh();
+                break;
             }
-            return el;
         }
     }
     var newEl = pkg.Elements.AddNew(name, tipo);
@@ -69,53 +81,36 @@ function crearDiagramaLimpio(pkg, name, tipo) {
     return newDiag;
 }
 
-function colocarElemento(diagram, element, left, right, top, bottom) {
-    var diagObj = diagram.DiagramObjects.AddNew("", "");
-    diagObj.ElementID = element.ElementID;
-    diagObj.left = left;
-    diagObj.right = right;
-    diagObj.top = top;
-    diagObj.bottom = bottom;
+function colocarElemento(diagram, elemento, left, right, top, bottom) {
+    var diagObj = diagram.DiagramObjects.AddNew("l=" + left + ";r=" + right + ";t=" + top + ";b=" + bottom + ";", "");
+    diagObj.ElementID = elemento.ElementID;
     diagObj.Update();
-    return diagObj;
 }
 
-function crearMensaje(sourceEl, targetEl, label) {
-    var connector = sourceEl.Connectors.AddNew("", "Communication");
-    connector.SupplierID = targetEl.ElementID;
-    connector.Direction = "Source -> Destination";
-    connector.Update();
-    sourceEl.Connectors.Refresh();
-
-    for (var i = 0; i < connector.Messages.Count; i++) {
-        var m = connector.Messages.GetAt(i);
-        if (m.Name == label) return connector;
-    }
-    var msg = connector.Messages.AddNew(label, "Message");
-    msg.Update();
-    connector.Messages.Refresh();
-    return connector;
+function crearMensaje(origen, destino, texto) {
+    var con = origen.Connectors.AddNew(texto, "Association");
+    con.SupplierID = destino.ElementID;
+    con.Name = texto;
+    con.Direction = "Source -> Destination";
+    con.Update();
+    return con;
 }
 
 function Main() {
     if (Repo == null) {
-        Log("ERROR: No se pudo conectar con Enterprise Architect.");
+        Log("Error: No se pudo conectar a Enterprise Architect.");
         return;
     }
+
+    Log("Generando Diagrama de Robustez / Comunicación CU17 en Enterprise Architect v15...");
 
     var pkg = Repo.GetTreeSelectedPackage();
     if (pkg == null) {
-        var models = Repo.Models;
-        pkg = (models.Count > 0) ? models.GetAt(0) : null;
-    }
-    if (pkg == null) {
-        Log("ERROR: No se encontró un paquete en EA.");
-        return;
+        pkg = Repo.Models.GetAt(0).Packages.GetAt(0);
     }
 
-    // 1. Elementos ICONIX
+    // 1. Crear Elementos con Estereotipos ICONIX (Tipo 'Object' para BCE canónico)
     var actorCajero       = crearElementoConEsterotipo(pkg, "Cajero", "Actor", "");
-    var actorCliente      = crearElementoConEsterotipo(pkg, "Cliente", "Actor", "");
 
     var uiCaja            = crearElementoConEsterotipo(pkg, "CajaPageComponent", "Object", "boundary");
     var uiModalCambio     = crearElementoConEsterotipo(pkg, "GarmentExchangeModalComponent", "Object", "boundary");
@@ -128,48 +123,67 @@ function Main() {
     var entSaleItem       = crearElementoConEsterotipo(pkg, "SaleItem", "Object", "entity");
     var entInventory      = crearElementoConEsterotipo(pkg, "Inventory", "Object", "entity");
 
-    // 2. Diagrama
-    var diagName = "CU17 - Comunicación Cambio de Prenda y Diferencia de Precio";
+    // 2. Crear Diagrama de Comunicación / Robustez
+    var diagName = "CU17 - Robustez Cambio de Prenda y Diferencia de Precio";
     var diagram = crearDiagramaLimpio(pkg, diagName, "Communication");
 
-    // 3. Posicionamiento
-    colocarElemento(diagram, actorCajero,     30,  120, -120, -200);
-    colocarElemento(diagram, actorCliente,    30,  120, -270, -350);
+    // 3. Posicionamiento horizontal equilibrado (cajas 80x80 px)
+    colocarElemento(diagram, actorCajero,       40,  120, -180, -260);
 
-    colocarElemento(diagram, uiCaja,         240,  360,  -60, -140);
-    colocarElemento(diagram, uiModalCambio,  240,  370, -200, -280);
+    colocarElemento(diagram, uiCaja,           180,  260, -120, -200);
+    colocarElemento(diagram, uiModalCambio,    180,  260, -240, -320);
 
-    colocarElemento(diagram, ctrlRoutes,     480,  600, -120, -200);
-    colocarElemento(diagram, ctrlService,    680,  800, -120, -200);
+    colocarElemento(diagram, ctrlRoutes,       340,  420, -180, -260);
+    colocarElemento(diagram, ctrlService,      500,  580, -180, -260);
 
-    colocarElemento(diagram, entExchange,    900,  990,  -30, -100);
-    colocarElemento(diagram, entSale,        900,  990, -110, -180);
-    colocarElemento(diagram, entSaleItem,    900,  990, -190, -260);
-    colocarElemento(diagram, entInventory,   900,  990, -270, -340);
+    colocarElemento(diagram, entExchange,      660,  740,  -80, -160);
+    colocarElemento(diagram, entSale,          660,  740, -170, -250);
+    colocarElemento(diagram, entSaleItem,      660,  740, -260, -340);
+    colocarElemento(diagram, entInventory,     660,  740, -350, -430);
 
-    // 4. Mensajes y Flujos
-    crearMensaje(actorCliente, actorCajero, "1: solicitarCambioPrendaPorTalla()");
-    crearMensaje(actorCajero, uiCaja, "2: abrirModalCambioPrenda()");
-    crearMensaje(uiCaja, uiModalCambio, "3: mostrarFormularioCambio()");
+    // 4. Mensajes con funciones reales vacías () y numeración jerárquica por flujo
+    // Flujo 1: Cotización de Cambio de Prenda y Cálculo de Diferencia (Delta)
+    crearMensaje(actorCajero, uiCaja, "1: abrirModalCambioPrenda()");
+    crearMensaje(uiCaja, uiModalCambio, "1.1: renderizarFormulario()");
+    crearMensaje(actorCajero, uiModalCambio, "1.2: cotizarDiferenciaPrecio()");
+    crearMensaje(uiModalCambio, ctrlRoutes, "1.3: quote_exchange_endpoint()");
+    crearMensaje(ctrlRoutes, ctrlService, "1.4: quote_garment_exchange()");
+    crearMensaje(ctrlService, entSale, "1.5: verificarVentaOriginal()");
+    crearMensaje(ctrlService, entSaleItem, "1.6: verificarItemOriginalYPrecio()");
+    crearMensaje(ctrlService, entInventory, "1.7: verificarDisponibilidadNuevaTalla()");
+    crearMensaje(ctrlService, ctrlService, "1.8: calcularDeltaPrecio()");
+    crearMensaje(ctrlService, ctrlRoutes, "1.9: responseQuote()");
+    crearMensaje(ctrlRoutes, uiModalCambio, "1.10: responseQuote()");
+    crearMensaje(uiModalCambio, actorCajero, "1.11: mostrarDiferenciaPorCobrar()");
 
-    crearMensaje(actorCajero, uiModalCambio, "4: cotizarDiferenciaPrecio()");
-    crearMensaje(uiModalCambio, ctrlRoutes, "5: quote_exchange_endpoint()");
-    crearMensaje(ctrlRoutes, ctrlService, "6: calculate_exchange_quote()");
-    crearMensaje(ctrlService, entSale, "7: verificarTicketOriginal()");
-    crearMensaje(ctrlService, entInventory, "8: verificarDisponibilidadNuevaTalla()");
+    // Flujo 2: Confirmación de Pago de Diferencia y Procesamiento de Cambio (Política 1)
+    crearMensaje(actorCajero, uiModalCambio, "2: confirmarAbonoDiferenciaYEstado()");
+    crearMensaje(uiModalCambio, ctrlRoutes, "2.1: process_exchange_endpoint()");
+    crearMensaje(ctrlRoutes, ctrlService, "2.2: process_garment_exchange()");
+    crearMensaje(ctrlService, ctrlService, "2.3: validarCondicionEtiquetaIntacta()");
+    crearMensaje(ctrlService, ctrlService, "2.4: validarPagoDiferenciaObligatorio()");
+    crearMensaje(ctrlService, entInventory, "2.5: reingresarPrendaOriginal()");
+    crearMensaje(ctrlService, entInventory, "2.6: descontarNuevaPrenda()");
+    crearMensaje(ctrlService, entExchange, "2.7: create()");
+    crearMensaje(ctrlService, entSale, "2.8: asociarCambioAVenta()");
+    crearMensaje(ctrlService, ctrlRoutes, "2.9: responseSuccess()");
+    crearMensaje(ctrlRoutes, uiModalCambio, "2.10: responseSuccess()");
+    crearMensaje(uiModalCambio, actorCajero, "2.11: emitirComprobanteCambio()");
 
-    crearMensaje(actorCliente, actorCajero, "9: abonarDiferenciaPrecio()");
-    crearMensaje(actorCajero, uiModalCambio, "10: confirmarAbonoDiferenciaYEstado()");
-    crearMensaje(uiModalCambio, ctrlRoutes, "11: process_exchange_endpoint()");
-    crearMensaje(ctrlRoutes, ctrlService, "12: process_garment_exchange()");
-
-    crearMensaje(ctrlService, entInventory, "13: reingresarPrendaViejaYDescontarNueva()");
-    crearMensaje(ctrlService, entExchange, "14: persistirRegistroCambioPrenda()");
-    crearMensaje(ctrlService, entSale, "15: asociarCambioAVenta()");
+    // Flujo 3: Flujo Alternativo A1 - Rechazo por No Pago de Diferencia (Política 1 Violada)
+    crearMensaje(actorCajero, uiModalCambio, "3: intentarCambioSinAbonarDiferencia()");
+    crearMensaje(uiModalCambio, ctrlRoutes, "3.1: process_exchange_endpoint()");
+    crearMensaje(ctrlRoutes, ctrlService, "3.2: process_garment_exchange()");
+    crearMensaje(ctrlService, ctrlService, "3.3: validarPagoDiferenciaObligatorio()");
+    crearMensaje(ctrlService, ctrlRoutes, "3.4: raise_http_exception()");
+    crearMensaje(uiModalCambio, actorCajero, "3.5: showErrorToast()");
 
     diagram.Update();
+    Repo.SaveDiagram(diagram.DiagramID);
     Repo.ReloadDiagram(diagram.DiagramID);
-    Log("Diagrama de Comunicación CU17 creado con éxito. ID: " + diagram.DiagramID);
+    try { Repo.OpenDiagram(diagram.DiagramID); } catch(ex) {}
+
+    Log("¡Diagrama de Robustez / Comunicación CU17 actualizado exitosamente en Enterprise Architect!");
 }
 
 Main();

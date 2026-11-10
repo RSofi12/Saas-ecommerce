@@ -1,21 +1,9 @@
 /* =================================================================================
  * PROYECTO: FashionStore — Plataforma E-Commerce SaaS Multitenant (Sistemas 2)
  * CASO DE USO: CU16 - Gestionar y Resolver Conflictos de Ventas Offline y Quiebres de Stock
- * DESCRIPCION: Concilia y resuelve los quiebres de inventario central ocurridos tras la
- *              sincronización de ventas de mostrador ejecutadas en contingencia desconectada.
- *              - Actores: Encargado (operador gerencial y decisor) y Cliente (interlocutor coordinado).
- *              - Fronteras: SaleConflictsPageComponent (bandeja de quiebres), ResolveConflictModalComponent (modal de 3 vías).
- *              - Controladores: SaleConflictRoutes (FastAPI REST API Controller) y SaleConflictService (Domain Service).
- *              - Entidades: Sale, SaleItem, Inventory, GarmentReturn.
- *              - 3 Vías Reglamentarias:
- *                  1. negative_stock: Prenda entregada físicamente; autoriza saldo temporal (-1) y solicita reposición.
- *                  2. substitute: Reasigna el ítem a una variante con stock disponible en la sucursal.
- *                  3. credit_note: Anulación contable formal y emisión de Nota de Crédito digital por el 100% pagado.
- *              - Justificación de auditoría obligatoria (min_length=5).
- *              - Bloqueo pesimista de inventario (with_for_update).
+ * ACTOR: Encargado (Actor Principal)
  * TIPO DE DIAGRAMA: Diagrama de Secuencia (Arquitectura BCE pura: Actor-Boundary-Control-Entity)
- * ENTORNO: Enterprise Architect 15.0+
- * LENGUAJE: JScript (Motor nativo WSH en Enterprise Architect)
+ * ENTORNO: Enterprise Architect 15.0+ (JScript WSH)
  * ================================================================================= */
 
 var DEFAULT_PACKAGE_NAME = "CUSecuencia";
@@ -36,195 +24,123 @@ function log(msg) {
 function getTargetPackage() {
     if (Repo == null) return null;
     var selectedPkg = Repo.GetTreeSelectedPackage();
-    if (selectedPkg != null) {
-        log("Usando paquete seleccionado en Project Browser: " + selectedPkg.Name);
-        return selectedPkg;
-    }
-
+    if (selectedPkg != null) return selectedPkg;
     var roots = Repo.Models;
     var root = (roots.Count > 0) ? roots.GetAt(0) : null;
     if (root == null) return null;
-
     for (var i = 0; i < root.Packages.Count; i++) {
-        var pkg = root.Packages.GetAt(i);
-        if (pkg.Name == DEFAULT_PACKAGE_NAME) return pkg;
+        var p = root.Packages.GetAt(i);
+        if (p.Name == DEFAULT_PACKAGE_NAME) return p;
     }
-
-    var newPkg = root.Packages.AddNew(DEFAULT_PACKAGE_NAME, "");
+    var newPkg = root.Packages.AddNew(DEFAULT_PACKAGE_NAME, "Package");
     newPkg.Update();
     root.Packages.Refresh();
     return newPkg;
 }
 
-function getOrCreateElement(pkg, name, type, stereotype) {
-    for (var i = 0; i < pkg.Elements.Count; i++) {
-        var el = pkg.Elements.GetAt(i);
-        if (el.Name == name && el.Type == type) {
-            if (stereotype && el.Stereotype != stereotype) {
-                el.Stereotype = stereotype;
-                el.Update();
-            }
-            return el;
-        }
-    }
-    var newEl = pkg.Elements.AddNew(name, type);
-    if (stereotype && stereotype.length > 0) {
-        newEl.Stereotype = stereotype;
-    }
-    newEl.Update();
-    pkg.Elements.Refresh();
-    return newEl;
-}
-
-function createCleanDiagram(pkg, name) {
+function recreateDiagram(pkg) {
     for (var i = pkg.Diagrams.Count - 1; i >= 0; i--) {
         var d = pkg.Diagrams.GetAt(i);
-        if (d.Name == name) {
-            for (var j = d.DiagramObjects.Count - 1; j >= 0; j--) {
-                d.DiagramObjects.Delete(j);
-            }
-            for (var k = d.DiagramLinks.Count - 1; k >= 0; k--) {
-                d.DiagramLinks.Delete(k);
-            }
-            d.DiagramObjects.Refresh();
-            d.DiagramLinks.Refresh();
-            d.Update();
-            return d;
+        if (d.Name == DIAGRAM_NAME) {
+            pkg.Diagrams.Delete(i);
+            pkg.Diagrams.Refresh();
+            break;
         }
     }
-    var newDiag = pkg.Diagrams.AddNew(name, "Sequence");
-    newDiag.Update();
+    var diagram = pkg.Diagrams.AddNew(DIAGRAM_NAME, "Sequence");
+    diagram.Update();
     pkg.Diagrams.Refresh();
-    return newDiag;
+    return diagram;
 }
 
-function placeLifeline(diagram, element, leftPos, topPos, width, height) {
-    var rightPos = leftPos + width;
-    var bottomPos = topPos - height;
-    var coords = "l=" + leftPos + ";r=" + rightPos + ";t=" + topPos + ";b=" + bottomPos + ";";
-    var diagObj = diagram.DiagramObjects.AddNew(coords, "");
-    diagObj.ElementID = element.ElementID;
-    diagObj.Update();
+function addActorParticipant(pkg, diagram, name, leftX, width) {
+    var el = pkg.Elements.AddNew(name, "Actor");
+    el.Update();
+    var rightX = leftX + width;
+    var dObj = diagram.DiagramObjects.AddNew("l=" + leftX + ";r=" + rightX + ";t=-20;b=-1800;", "");
+    dObj.ElementID = el.ElementID;
+    dObj.Update();
+    return el;
 }
 
-function addMessage(source, target, messageText, sequenceNo, isReturn) {
-    var con = source.Connectors.AddNew(messageText, "Sequence");
-    con.SupplierID = target.ElementID;
-    con.SequenceNo = sequenceNo;
-    if (isReturn) {
-        con.Stereotype = "return";
+function addParticipant(pkg, diagram, name, stereotype, leftX, width) {
+    var el = pkg.Elements.AddNew(name, "Sequence");
+    if (stereotype && stereotype.length > 0) el.Stereotype = stereotype;
+    el.Update();
+    var rightX = leftX + width;
+    var dObj = diagram.DiagramObjects.AddNew("l=" + leftX + ";r=" + rightX + ";t=-30;b=-1700;", "");
+    dObj.ElementID = el.ElementID;
+    dObj.Style = "usecustomart=0;HideIcon=1;";
+    dObj.Update();
+    return el;
+}
+
+function addMessage(src, dst, label, isReturn, sequenceNo) {
+    var con = src.Connectors.AddNew(label, "Sequence");
+    con.SupplierID = dst.ElementID;
+    if (isReturn) con.Stereotype = "return";
+    if (sequenceNo) {
+        try { con.SequenceNo = sequenceNo; } catch (e) { }
     }
     con.Update();
     return con;
 }
 
-function addFragment(pkg, diagram, name, left, top, right, bottom) {
-    var frag = pkg.Elements.AddNew(name, "InteractionFragment");
-    frag.Stereotype = "alt";
-    frag.Update();
-    pkg.Elements.Refresh();
-
-    var coords = "l=" + left + ";r=" + right + ";t=" + top + ";b=" + bottom + ";";
-    var diagObj = diagram.DiagramObjects.AddNew(coords, "");
-    diagObj.ElementID = frag.ElementID;
-    diagObj.Update();
-    return frag;
-}
-
 function Main() {
-    if (Repo == null) {
-        log("Error: No se pudo conectar a Enterprise Architect.");
-        return;
-    }
+    var pkg = getTargetPackage();
+    if (pkg == null) return;
+    var diag = recreateDiagram(pkg);
 
-    log("Iniciando generacion de Diagrama de Secuencia CU16...");
-    var targetPkg = getTargetPackage();
-    if (targetPkg == null) {
-        log("Error: Paquete destino no disponible.");
-        return;
-    }
+    var act = addActorParticipant(pkg, diag, "Encargado", 30, 90);
+    var bndBandeja = addParticipant(pkg, diag, "SaleConflictsPageComponent", "boundary", 150, 130);
+    var bndModal = addParticipant(pkg, diag, "ResolveConflictModalComponent", "boundary", 300, 130);
+    var ctrlRoutes = addParticipant(pkg, diag, "SaleConflictRoutes", "control", 450, 110);
+    var ctrlSvc = addParticipant(pkg, diag, "SaleConflictService", "control", 580, 110);
+    var entSale = addParticipant(pkg, diag, "Sale", "entity", 710, 80);
+    var entItem = addParticipant(pkg, diag, "SaleItem", "entity", 810, 80);
+    var entInv = addParticipant(pkg, diag, "Inventory", "entity", 910, 80);
+    var entReturn = addParticipant(pkg, diag, "GarmentReturn", "entity", 1010, 90);
 
-    // 1. Participantes BCE
-    var actEncargado = getOrCreateElement(targetPkg, "Encargado", "Actor", "Actor");
-    var actCliente   = getOrCreateElement(targetPkg, "Cliente", "Actor", "Actor");
-    var bdrBandeja   = getOrCreateElement(targetPkg, "SaleConflictsPageComponent", "Sequence", "Interface");
-    var bdrModal     = getOrCreateElement(targetPkg, "ResolveConflictModalComponent", "Sequence", "Interface");
-    var ctrlRoutes   = getOrCreateElement(targetPkg, "SaleConflictRoutes", "Sequence", "Controller");
-    var ctrlService  = getOrCreateElement(targetPkg, "SaleConflictService", "Sequence", "Controller");
-    var entSale      = getOrCreateElement(targetPkg, "Sale", "Sequence", "Entity");
-    var entItem      = getOrCreateElement(targetPkg, "SaleItem", "Sequence", "Entity");
-    var entInv       = getOrCreateElement(targetPkg, "Inventory", "Sequence", "Entity");
-    var entReturn    = getOrCreateElement(targetPkg, "GarmentReturn", "Sequence", "Entity");
-
-    // 2. Crear Diagrama
-    var diagram = createCleanDiagram(targetPkg, DIAGRAM_NAME);
-
-    // 3. Colocar Líneas de Vida
-    var top = -30;
-    var width = 110;
-    var height = 750;
-    var gap = 130;
-    var startLeft = 30;
-
-    var elements = [
-        actEncargado, actCliente, bdrBandeja, bdrModal,
-        ctrlRoutes, ctrlService, entSale, entItem, entInv, entReturn
-    ];
-
-    for (var i = 0; i < elements.length; i++) {
-        placeLifeline(diagram, elements[i], startLeft + (i * gap), top, width, height);
-    }
-
-    // 4. Mensajes Secuenciales
     var seq = 1;
 
-    // Fase 1: Consulta de Bandeja
-    addMessage(actEncargado, bdrBandeja, "1: accederBandejaConflictos()", seq++, false);
-    addMessage(bdrBandeja, ctrlRoutes, "2: GET /api/sales/conflicts(branch_id)", seq++, false);
-    addMessage(ctrlRoutes, ctrlService, "3: list_branch_sale_conflicts(db, branch_id, tenant_id)", seq++, false);
-    addMessage(ctrlService, entSale, "4: filter(cash_reference.like('CONFLICT:%'))", seq++, false);
-    addMessage(entSale, ctrlService, "5: return conflict_sales[]", seq++, true);
-    addMessage(ctrlService, entInv, "6: filter(variant_id, branch_id).first()", seq++, false);
-    addMessage(entInv, ctrlService, "7: return central_stock (0)", seq++, true);
-    addMessage(ctrlService, ctrlRoutes, "8: return List[SaleConflictRead]", seq++, true);
-    addMessage(ctrlRoutes, bdrBandeja, "9: 200 OK (conflictos, stock central)", seq++, true);
-    addMessage(bdrBandeja, actEncargado, "10: mostrarTicketsConQuiebreStock()", seq++, false);
+    // Secuencia 1: Consulta de Bandeja de Conflictos y Stock Central
+    addMessage(act, bndBandeja, "accederBandejaConflictos()", false, seq++);
+    addMessage(bndBandeja, ctrlRoutes, "list_conflicts_endpoint()", false, seq++);
+    addMessage(ctrlRoutes, ctrlSvc, "list_branch_sale_conflicts()", false, seq++);
+    addMessage(ctrlSvc, entSale, "obtenerVentasEnConflicto()", false, seq++);
+    addMessage(ctrlSvc, entInv, "verificarStockCentralActual()", false, seq++);
+    addMessage(ctrlSvc, ctrlRoutes, "response()", true, seq++);
+    addMessage(ctrlRoutes, bndBandeja, "response()", true, seq++);
+    addMessage(bndBandeja, act, "mostrarTicketsConQuiebreStock()", false, seq++);
 
-    // Fase 2: Coordinación con Cliente
-    addMessage(actEncargado, bdrModal, "11: openResolutionModal(conflict)", seq++, false);
-    addMessage(actEncargado, actCliente, "12: contactarYAcordarSolucion(quiebre_stock)", seq++, false);
-    addMessage(actCliente, actEncargado, "13: confirmarPreferencia(via_resolucion)", seq++, false);
-    addMessage(actEncargado, bdrModal, "14: submitResolution(via, nota_auditoria, new_variant_id)", seq++, false);
+    // Secuencia 2: Apertura y Envío de Resolución Gerencial
+    addMessage(act, bndModal, "abrirModalResolucion()", false, seq++);
+    addMessage(act, bndModal, "ingresarViaYJustificacion()", false, seq++);
+    addMessage(bndModal, ctrlRoutes, "resolve_conflict_endpoint()", false, seq++);
+    addMessage(ctrlRoutes, ctrlSvc, "resolve_sale_conflict()", false, seq++);
+    addMessage(ctrlSvc, ctrlSvc, "validarJustificacionAuditoria()", false, seq++);
+    addMessage(ctrlSvc, entInv, "_get_inventory_for_update()", false, seq++);
 
-    // Fase 3: Llamada a Controlador REST
-    addMessage(bdrModal, ctrlRoutes, "15: POST /api/sales/conflicts/{id}/resolve(payload)", seq++, false);
-    addMessage(ctrlRoutes, ctrlService, "16: resolve_sale_conflict(db, sale_id, payload, manager_id)", seq++, false);
+    // Secuencia 3: Bifurcación según Vía de Resolución
+    // Vía A: negative_stock
+    addMessage(ctrlSvc, entInv, "autorizarStockNegativo()", false, seq++);
+    addMessage(ctrlSvc, entSale, "marcarVentaCompletada()", false, seq++);
 
-    // Fase 4: Fragmento Alternativas de Resolución
-    addFragment(targetPkg, diagram, "alt [Vía 1: negative_stock / Vía 2: substitute / Vía 3: credit_note]", 500, -380, 1300, -680);
+    // Vía B: substitute
+    addMessage(ctrlSvc, entInv, "descontarStockVarianteSustituta()", false, seq++);
+    addMessage(ctrlSvc, entItem, "reasignarVarianteItem()", false, seq++);
 
-    // Vía 1: negative_stock
-    addMessage(ctrlService, entInv, "17a: with_for_update() -> inv.quantity -= quantity (-1)", seq++, false);
-    addMessage(ctrlService, entSale, "18a: status='completed', cash_reference='RESOLVED:NEGATIVE_STOCK'", seq++, false);
+    // Vía C: credit_note
+    addMessage(ctrlSvc, entReturn, "registrarDevolucion100PorCiento()", false, seq++);
+    addMessage(ctrlSvc, entSale, "anularVentaOffline()", false, seq++);
 
-    // Vía 2: substitute
-    addMessage(ctrlService, entInv, "17b: with_for_update(new_variant_id) -> inv.quantity -= 1", seq++, false);
-    addMessage(ctrlService, entItem, "18b: target_item.variant_id = new_variant_id", seq++, false);
-    addMessage(ctrlService, entSale, "19b: status='completed', cash_reference='RESOLVED:SUBSTITUTE'", seq++, false);
+    // Secuencia 4: Confirmación Final
+    addMessage(ctrlSvc, ctrlRoutes, "response()", true, seq++);
+    addMessage(ctrlRoutes, bndModal, "response()", true, seq++);
+    addMessage(bndModal, act, "notificarResolucionExitosa()", false, seq++);
 
-    // Vía 3: credit_note
-    addMessage(ctrlService, entReturn, "17c: GarmentReturn(retention=0.00, refund=100%, NC-YYYYMMDD-XXXX)", seq++, false);
-    addMessage(ctrlService, entSale, "18c: status='cancelled', cash_reference='RESOLVED:CREDIT_NOTE'", seq++, false);
-
-    // Retorno Final y Feedback
-    addMessage(ctrlService, ctrlRoutes, "20: return SaleConflictResolveResponse", seq++, true);
-    addMessage(ctrlRoutes, bdrModal, "21: 200 OK (resultado, codigo_nc, mensaje)", seq++, true);
-    addMessage(bdrModal, bdrBandeja, "22: toastFeedback() & closeModal() & refresh()", seq++, false);
-    addMessage(bdrBandeja, actEncargado, "23: presentarBandejaConciliada()", seq++, false);
-
-    diagram.Update();
-    Repo.ReloadDiagram(diagram.DiagramID);
-    log("Diagrama de Secuencia CU16 generado exitosamente. ID: " + diagram.DiagramID);
+    diag.Update();
+    log("Diagrama de Secuencia CU16 generado con éxito.");
 }
 
 Main();

@@ -1,17 +1,9 @@
 /* =================================================================================
  * PROYECTO: FashionStore — Plataforma E-Commerce SaaS Multitenant (Sistemas 2)
  * CASO DE USO: CU17 - Procesar Cambio de Prenda por Talla con Cobro de Diferencia y Estado
- * DESCRIPCION: Cambio físico de prenda por diferente talla o modelo en mostrador de tienda física.
- *              - Actores: Cliente (iniciador presencial) y Cajero (operador de caja).
- *              - Fronteras: CajaPageComponent y GarmentExchangeModalComponent.
- *              - Controladores: GarmentExchangeRoutes (FastAPI) y GarmentExchangeService (Dominio).
- *              - Entidades: GarmentExchange, Sale, SaleItem, Inventory.
- *              - Regla de Negocio Sagrada (Política 1): Si precio nueva > precio original,
- *                el cambio se consolida ÚNICAMENTE si el cliente abona la diferencia de precio.
- *                Prenda debe contar con etiqueta intacta (good_with_tags).
+ * ACTOR: Cajero (Actor Principal)
  * TIPO DE DIAGRAMA: Diagrama de Secuencia (Arquitectura BCE pura: Actor-Boundary-Control-Entity)
- * ENTORNO: Enterprise Architect 15.0+
- * LENGUAJE: JScript (Motor nativo WSH en Enterprise Architect)
+ * ENTORNO: Enterprise Architect 15.0+ (JScript WSH)
  * ================================================================================= */
 
 var DEFAULT_PACKAGE_NAME = "CUSecuencia";
@@ -32,170 +24,123 @@ function log(msg) {
 function getTargetPackage() {
     if (Repo == null) return null;
     var selectedPkg = Repo.GetTreeSelectedPackage();
-    if (selectedPkg != null) {
-        log("Usando paquete seleccionado en Project Browser: " + selectedPkg.Name);
-        return selectedPkg;
-    }
-
+    if (selectedPkg != null) return selectedPkg;
     var roots = Repo.Models;
     var root = (roots.Count > 0) ? roots.GetAt(0) : null;
     if (root == null) return null;
-
     for (var i = 0; i < root.Packages.Count; i++) {
-        var pkg = root.Packages.GetAt(i);
-        if (pkg.Name == DEFAULT_PACKAGE_NAME) return pkg;
+        var p = root.Packages.GetAt(i);
+        if (p.Name == DEFAULT_PACKAGE_NAME) return p;
     }
-
-    var newPkg = root.Packages.AddNew(DEFAULT_PACKAGE_NAME, "");
+    var newPkg = root.Packages.AddNew(DEFAULT_PACKAGE_NAME, "Package");
     newPkg.Update();
     root.Packages.Refresh();
     return newPkg;
 }
 
-function getOrCreateElement(pkg, name, type, stereotype) {
-    for (var i = 0; i < pkg.Elements.Count; i++) {
-        var el = pkg.Elements.GetAt(i);
-        if (el.Name == name && el.Type == type) {
-            if (stereotype && el.Stereotype != stereotype) {
-                el.Stereotype = stereotype;
-                el.Update();
-            }
-            return el;
-        }
-    }
-    var newEl = pkg.Elements.AddNew(name, type);
-    if (stereotype && stereotype.length > 0) {
-        newEl.Stereotype = stereotype;
-    }
-    newEl.Update();
-    pkg.Elements.Refresh();
-    return newEl;
-}
-
-function createCleanDiagram(pkg, name) {
+function recreateDiagram(pkg) {
     for (var i = pkg.Diagrams.Count - 1; i >= 0; i--) {
         var d = pkg.Diagrams.GetAt(i);
-        if (d.Name == name) {
-            for (var j = d.DiagramObjects.Count - 1; j >= 0; j--) {
-                d.DiagramObjects.Delete(j);
-            }
-            for (var k = d.DiagramLinks.Count - 1; k >= 0; k--) {
-                d.DiagramLinks.Delete(k);
-            }
-            d.DiagramObjects.Refresh();
-            d.DiagramLinks.Refresh();
-            d.Update();
-            return d;
+        if (d.Name == DIAGRAM_NAME) {
+            pkg.Diagrams.Delete(i);
+            pkg.Diagrams.Refresh();
+            break;
         }
     }
-    var newDiag = pkg.Diagrams.AddNew(name, "Sequence");
-    newDiag.Update();
+    var diagram = pkg.Diagrams.AddNew(DIAGRAM_NAME, "Sequence");
+    diagram.Update();
     pkg.Diagrams.Refresh();
-    return newDiag;
+    return diagram;
 }
 
-function addSequenceMessage(diagram, sourceEl, targetEl, name, seqNo, isReturn) {
-    var con = sourceEl.Connectors.AddNew("", "Sequence");
-    con.SupplierID = targetEl.ElementID;
-    con.SequenceNo = seqNo;
-    con.Update();
-    sourceEl.Connectors.Refresh();
+function addActorParticipant(pkg, diagram, name, leftX, width) {
+    var el = pkg.Elements.AddNew(name, "Actor");
+    el.Update();
+    var rightX = leftX + width;
+    var dObj = diagram.DiagramObjects.AddNew("l=" + leftX + ";r=" + rightX + ";t=-20;b=-1800;", "");
+    dObj.ElementID = el.ElementID;
+    dObj.Update();
+    return el;
+}
 
-    var msg = con.Messages.AddNew(name, "Message");
-    msg.SequenceNo = seqNo;
-    if (isReturn) {
-        msg.IsReturn = true;
+function addParticipant(pkg, diagram, name, stereotype, leftX, width) {
+    var el = pkg.Elements.AddNew(name, "Sequence");
+    if (stereotype && stereotype.length > 0) el.Stereotype = stereotype;
+    el.Update();
+    var rightX = leftX + width;
+    var dObj = diagram.DiagramObjects.AddNew("l=" + leftX + ";r=" + rightX + ";t=-30;b=-1700;", "");
+    dObj.ElementID = el.ElementID;
+    dObj.Style = "usecustomart=0;HideIcon=1;";
+    dObj.Update();
+    return el;
+}
+
+function addMessage(src, dst, label, isReturn, sequenceNo) {
+    var con = src.Connectors.AddNew(label, "Sequence");
+    con.SupplierID = dst.ElementID;
+    if (isReturn) con.Stereotype = "return";
+    if (sequenceNo) {
+        try { con.SequenceNo = sequenceNo; } catch (e) { }
     }
-    msg.Update();
-    con.Messages.Refresh();
+    con.Update();
     return con;
 }
 
-function layoutLifeline(diagram, element, left, width) {
-    var diagObj = diagram.DiagramObjects.AddNew("", "");
-    diagObj.ElementID = element.ElementID;
-    diagObj.left = left;
-    diagObj.right = left + width;
-    diagObj.top = -50;
-    diagObj.bottom = -800;
-    diagObj.Update();
-    return diagObj;
-}
-
 function Main() {
-    log("Iniciando generación de diagrama de secuencia CU17...");
-
     var pkg = getTargetPackage();
-    if (pkg == null) {
-        log("ERROR: No se encontró un paquete destino válido.");
-        return;
-    }
+    if (pkg == null) return;
+    var diag = recreateDiagram(pkg);
 
-    var actorCliente    = getOrCreateElement(pkg, "Cliente", "Actor", "");
-    var actorCajero     = getOrCreateElement(pkg, "Cajero", "Actor", "");
-    var uiCaja          = getOrCreateElement(pkg, "CajaPageComponent", "Sequence", "boundary");
-    var uiModalCambio   = getOrCreateElement(pkg, "GarmentExchangeModalComponent", "Sequence", "boundary");
-    var ctrlRoutes      = getOrCreateElement(pkg, "GarmentExchangeRoutes", "Sequence", "control");
-    var ctrlService     = getOrCreateElement(pkg, "GarmentExchangeService", "Sequence", "control");
-    var entExchange     = getOrCreateElement(pkg, "GarmentExchange", "Sequence", "entity");
-    var entSale         = getOrCreateElement(pkg, "Sale", "Sequence", "entity");
-    var entInventory    = getOrCreateElement(pkg, "Inventory", "Sequence", "entity");
-
-    var diagram = createCleanDiagram(pkg, DIAGRAM_NAME);
-
-    var startX = 40;
-    var stepX = 140;
-    var width = 90;
-
-    layoutLifeline(diagram, actorCliente,   startX + (stepX * 0), width);
-    layoutLifeline(diagram, actorCajero,    startX + (stepX * 1), width);
-    layoutLifeline(diagram, uiCaja,         startX + (stepX * 2), width);
-    layoutLifeline(diagram, uiModalCambio,  startX + (stepX * 3), width);
-    layoutLifeline(diagram, ctrlRoutes,     startX + (stepX * 4), width);
-    layoutLifeline(diagram, ctrlService,    startX + (stepX * 5), width);
-    layoutLifeline(diagram, entExchange,    startX + (stepX * 6), width);
-    layoutLifeline(diagram, entSale,        startX + (stepX * 7), width);
-    layoutLifeline(diagram, entInventory,   startX + (stepX * 8), width);
+    var act = addActorParticipant(pkg, diag, "Cajero", 30, 90);
+    var bndCaja = addParticipant(pkg, diag, "CajaPageComponent", "boundary", 150, 130);
+    var bndModal = addParticipant(pkg, diag, "GarmentExchangeModalComponent", "boundary", 300, 130);
+    var ctrlRoutes = addParticipant(pkg, diag, "GarmentExchangeRoutes", "control", 450, 110);
+    var ctrlSvc = addParticipant(pkg, diag, "GarmentExchangeService", "control", 580, 110);
+    var entExchange = addParticipant(pkg, diag, "GarmentExchange", "entity", 710, 80);
+    var entSale = addParticipant(pkg, diag, "Sale", "entity", 810, 80);
+    var entItem = addParticipant(pkg, diag, "SaleItem", "entity", 910, 80);
+    var entInv = addParticipant(pkg, diag, "Inventory", "entity", 1010, 80);
 
     var seq = 1;
 
-    addSequenceMessage(diagram, actorCliente, actorCajero, "presentarPrendaYComprobante()", seq++, false);
-    addSequenceMessage(diagram, actorCajero, uiCaja, "abrirModalCambio()", seq++, false);
-    addSequenceMessage(diagram, uiCaja, uiModalCambio, "renderizarFormularioCambio()", seq++, false);
+    // Secuencia 1: Cotización de Cambio de Prenda y Cálculo de Diferencia
+    addMessage(act, bndCaja, "abrirModalCambioPrenda()", false, seq++);
+    addMessage(bndCaja, bndModal, "renderizarFormulario()", false, seq++);
+    addMessage(act, bndModal, "cotizarDiferenciaPrecio()", false, seq++);
+    addMessage(bndModal, ctrlRoutes, "quote_exchange_endpoint()", false, seq++);
+    addMessage(ctrlRoutes, ctrlSvc, "quote_garment_exchange()", false, seq++);
+    addMessage(ctrlSvc, entSale, "verificarVentaOriginal()", false, seq++);
+    addMessage(ctrlSvc, entItem, "verificarItemOriginalYPrecio()", false, seq++);
+    addMessage(ctrlSvc, entInv, "verificarDisponibilidadNuevaTalla()", false, seq++);
+    addMessage(ctrlSvc, ctrlSvc, "calcularDeltaPrecio()", false, seq++);
+    addMessage(ctrlSvc, ctrlRoutes, "responseQuote()", true, seq++);
+    addMessage(ctrlRoutes, bndModal, "responseQuote()", true, seq++);
+    addMessage(bndModal, act, "mostrarDiferenciaPorCobrar()", false, seq++);
 
-    addSequenceMessage(diagram, actorCajero, uiModalCambio, "solicitarCotizacionDiferencia()", seq++, false);
-    addSequenceMessage(diagram, uiModalCambio, ctrlRoutes, "quote_exchange_endpoint()", seq++, false);
-    addSequenceMessage(diagram, ctrlRoutes, ctrlService, "calculate_exchange_quote()", seq++, false);
+    // Secuencia 2: Confirmación de Pago de Diferencia y Procesamiento (Política 1)
+    addMessage(act, bndModal, "confirmarAbonoDiferenciaYEstado()", false, seq++);
+    addMessage(bndModal, ctrlRoutes, "process_exchange_endpoint()", false, seq++);
+    addMessage(ctrlRoutes, ctrlSvc, "process_garment_exchange()", false, seq++);
+    addMessage(ctrlSvc, ctrlSvc, "validarCondicionEtiquetaIntacta()", false, seq++);
+    addMessage(ctrlSvc, ctrlSvc, "validarPagoDiferenciaObligatorio()", false, seq++);
+    addMessage(ctrlSvc, entInv, "reingresarPrendaOriginal()", false, seq++);
+    addMessage(ctrlSvc, entInv, "descontarNuevaPrenda()", false, seq++);
+    addMessage(ctrlSvc, entExchange, "create()", false, seq++);
+    addMessage(ctrlSvc, entSale, "asociarCambioAVenta()", false, seq++);
+    addMessage(ctrlSvc, ctrlRoutes, "responseSuccess()", true, seq++);
+    addMessage(ctrlRoutes, bndModal, "responseSuccess()", true, seq++);
+    addMessage(bndModal, act, "emitirComprobanteCambio()", false, seq++);
 
-    addSequenceMessage(diagram, ctrlService, entSale, "validarVentaOriginal()", seq++, false);
-    addSequenceMessage(diagram, entSale, ctrlService, "datosVentaValidados()", seq++, true);
+    // Secuencia 3: Flujo Alternativo A1 - Rechazo por No Pago de Diferencia
+    addMessage(act, bndModal, "intentarCambioSinAbonarDiferencia()", false, seq++);
+    addMessage(bndModal, ctrlRoutes, "process_exchange_endpoint()", false, seq++);
+    addMessage(ctrlRoutes, ctrlSvc, "process_garment_exchange()", false, seq++);
+    addMessage(ctrlSvc, ctrlSvc, "validarPagoDiferenciaObligatorio()", false, seq++);
+    addMessage(ctrlSvc, ctrlRoutes, "raise_http_exception()", true, seq++);
+    addMessage(bndModal, act, "showErrorToast()", false, seq++);
 
-    addSequenceMessage(diagram, ctrlService, entInventory, "verificarStockNuevaTalla()", seq++, false);
-    addSequenceMessage(diagram, entInventory, ctrlService, "stockDisponible()", seq++, true);
-
-    addSequenceMessage(diagram, ctrlService, ctrlRoutes, "ExchangeQuoteResponse(difference_amount)", seq++, true);
-    addSequenceMessage(diagram, ctrlRoutes, uiModalCambio, "mostrarDiferenciaPorCobrar()", seq++, true);
-
-    addSequenceMessage(diagram, actorCliente, actorCajero, "entregarDineroDiferencia()", seq++, false);
-    addSequenceMessage(diagram, actorCajero, uiModalCambio, "confirmarCobroYCondicionEtiqueta()", seq++, false);
-
-    addSequenceMessage(diagram, uiModalCambio, ctrlRoutes, "process_exchange_endpoint()", seq++, false);
-    addSequenceMessage(diagram, ctrlRoutes, ctrlService, "process_garment_exchange()", seq++, false);
-
-    addSequenceMessage(diagram, ctrlService, entInventory, "lockAndSwapInventory(+1/-1)", seq++, false);
-    addSequenceMessage(diagram, entInventory, ctrlService, "inventarioAjustado()", seq++, true);
-
-    addSequenceMessage(diagram, ctrlService, entExchange, "createExchangeRecord()", seq++, false);
-    addSequenceMessage(diagram, entExchange, ctrlService, "cambioPersistido()", seq++, true);
-
-    addSequenceMessage(diagram, ctrlService, ctrlRoutes, "GarmentExchangeResponse()", seq++, true);
-    addSequenceMessage(diagram, ctrlRoutes, uiModalCambio, "HTTP 201 Created", seq++, true);
-    addSequenceMessage(diagram, uiModalCambio, actorCajero, "imprimirTicketCambioYEntrega()", seq++, true);
-    addSequenceMessage(diagram, actorCajero, actorCliente, "entregarNuevaPrendaYComprobante()", seq++, true);
-
-    diagram.Update();
-    Repo.ReloadDiagram(diagram.DiagramID);
-    log("Diagrama de Secuencia CU17 generado con éxito. ID: " + diagram.DiagramID);
+    diag.Update();
+    log("Diagrama de Secuencia CU17 generado con éxito.");
 }
 
 Main();

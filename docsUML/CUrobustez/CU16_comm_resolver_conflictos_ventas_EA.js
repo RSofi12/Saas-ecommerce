@@ -4,15 +4,18 @@
 // FashionStore — Plataforma SaaS Multitenant (Sistemas 2)
 //
 // Componentes y Estereotipos Oficiales (Plantilla de Cátedra ICONIX):
-//   Actor: Encargado, Cliente
+//   Actor: Encargado (Actor Principal)
 //   Boundary: SaleConflictsPageComponent, ResolveConflictModalComponent (Object, «boundary»)
 //   Control: SaleConflictRoutes, SaleConflictService (Object, «control»)
-//   Entity: Sale, SaleItem, Inventory, GarmentReturn, Company, Branch (Object, «entity»)
+//   Entity: Sale, SaleItem, Inventory, GarmentReturn (Object, «entity»)
 //
 // Reglas Metodológicas Estrictas:
 //   - Todas las funciones se expresan con paréntesis vacíos () sin parámetros internos.
 //   - Cero bucles o validaciones sobre Fronteras (las validaciones residen en Controllers).
-//   - Conectores independientes para permitir ordenación y ajuste libre en EA.
+//   - Sin cruces entre actores (solo el actor principal Encargado interactúa con el software).
+//   - Conectores de tipo 'Association' (sólidos, sin flecha rayada/discontinua de comunicación).
+//   - Elementos creados como 'Object' con dimensiones cuadradas (80x80 px) para iconos circulares BCE.
+//   - Numeración jerárquica por flujo (1:, 1.1:, 2:, 2.1:, etc.).
 // ============================================================================
 
 var Repo = (typeof Repository != "undefined") ? Repository : null;
@@ -30,14 +33,20 @@ function Log(msg) {
 }
 
 function crearElementoConEsterotipo(pkg, name, tipo, estereotipo) {
-    for (var i = 0; i < pkg.Elements.Count; i++) {
+    for (var i = pkg.Elements.Count - 1; i >= 0; i--) {
         var el = pkg.Elements.GetAt(i);
-        if (el.Name == name && el.Type == tipo) {
-            if (estereotipo && el.Stereotype != estereotipo) {
-                el.Stereotype = estereotipo;
-                el.Update();
+        if (el.Name == name) {
+            if (el.Type == tipo) {
+                if (estereotipo && el.Stereotype != estereotipo) {
+                    el.Stereotype = estereotipo;
+                    el.Update();
+                }
+                return el;
+            } else {
+                pkg.Elements.Delete(i);
+                pkg.Elements.Refresh();
+                break;
             }
-            return el;
         }
     }
     var newEl = pkg.Elements.AddNew(name, tipo);
@@ -92,16 +101,15 @@ function Main() {
         return;
     }
 
-    Log("Generando Diagrama de Comunicación CU16 en Enterprise Architect v15...");
+    Log("Generando Diagrama de Robustez / Comunicación CU16 en Enterprise Architect v15...");
 
     var pkg = Repo.GetTreeSelectedPackage();
     if (pkg == null) {
         pkg = Repo.Models.GetAt(0).Packages.GetAt(0);
     }
 
-    // 1. Crear Elementos con Estereotipos ICONIX
+    // 1. Crear Elementos con Estereotipos ICONIX (Tipo 'Object' para BCE canónico)
     var actorEncargado   = crearElementoConEsterotipo(pkg, "Encargado", "Actor", "");
-    var actorCliente     = crearElementoConEsterotipo(pkg, "Cliente", "Actor", "");
 
     var uiBandeja        = crearElementoConEsterotipo(pkg, "SaleConflictsPageComponent", "Object", "boundary");
     var uiModalResolver  = crearElementoConEsterotipo(pkg, "ResolveConflictModalComponent", "Object", "boundary");
@@ -114,58 +122,67 @@ function Main() {
     var entInventory     = crearElementoConEsterotipo(pkg, "Inventory", "Object", "entity");
     var entGarmentReturn = crearElementoConEsterotipo(pkg, "GarmentReturn", "Object", "entity");
 
-    // 2. Crear Diagrama de Comunicación
-    var diagName = "CU16 - Comunicación Resolver Conflictos de Ventas Offline";
+    // 2. Crear Diagrama de Comunicación / Robustez
+    var diagName = "CU16 - Robustez Resolver Conflictos de Ventas Offline";
     var diagram = crearDiagramaLimpio(pkg, diagName, "Communication");
 
-    // 3. Posicionamiento horizontal y vertical
-    colocarElemento(diagram, actorEncargado,    30,  120, -120, -200);
-    colocarElemento(diagram, actorCliente,      30,  120, -270, -350);
+    // 3. Posicionamiento horizontal y equilibrado (cajas 80x80 px)
+    colocarElemento(diagram, actorEncargado,    40,  120, -180, -260);
 
-    colocarElemento(diagram, uiBandeja,        240,  360,  -60, -140);
-    colocarElemento(diagram, uiModalResolver,  240,  370, -200, -280);
+    colocarElemento(diagram, uiBandeja,        180,  260, -120, -200);
+    colocarElemento(diagram, uiModalResolver,  180,  260, -240, -320);
 
-    colocarElemento(diagram, ctrlRoutes,       480,  600, -120, -200);
-    colocarElemento(diagram, ctrlService,      680,  800, -120, -200);
+    colocarElemento(diagram, ctrlRoutes,       340,  420, -180, -260);
+    colocarElemento(diagram, ctrlService,      500,  580, -180, -260);
 
-    colocarElemento(diagram, entSale,          900,  990,  -30, -100);
-    colocarElemento(diagram, entSaleItem,      900,  990, -110, -180);
-    colocarElemento(diagram, entInventory,     900,  990, -190, -260);
-    colocarElemento(diagram, entGarmentReturn, 680,  800, -280, -350);
+    colocarElemento(diagram, entSale,          660,  740,  -80, -160);
+    colocarElemento(diagram, entSaleItem,      660,  740, -170, -250);
+    colocarElemento(diagram, entInventory,     660,  740, -260, -340);
+    colocarElemento(diagram, entGarmentReturn, 660,  740, -350, -430);
 
-    // 4. Mensajes con funciones reales sin parámetros ()
-    // Fase 1: Consulta de Bandeja de Quiebres
+    // 4. Mensajes con funciones reales vacías () y numeración jerárquica por flujo
+    // Flujo 1: Consulta de Bandeja de Quiebres y Stock Central
     crearMensaje(actorEncargado, uiBandeja, "1: accederBandejaConflictos()");
-    crearMensaje(uiBandeja, ctrlRoutes, "2: list_conflicts_endpoint()");
-    crearMensaje(ctrlRoutes, ctrlService, "3: list_branch_sale_conflicts()");
-    crearMensaje(ctrlService, entSale, "4: obtenerVentasEnConflicto()");
-    crearMensaje(ctrlService, entInventory, "5: verificarStockCentralActual()");
+    crearMensaje(uiBandeja, ctrlRoutes, "1.1: list_conflicts_endpoint()");
+    crearMensaje(ctrlRoutes, ctrlService, "1.2: list_branch_sale_conflicts()");
+    crearMensaje(ctrlService, entSale, "1.3: obtenerVentasEnConflicto()");
+    crearMensaje(ctrlService, entInventory, "1.4: verificarStockCentralActual()");
+    crearMensaje(ctrlService, ctrlRoutes, "1.5: response()");
+    crearMensaje(ctrlRoutes, uiBandeja, "1.6: response()");
+    crearMensaje(uiBandeja, actorEncargado, "1.7: mostrarTicketsConQuiebreStock()");
 
-    // Fase 2: Coordinación con Cliente y Selección de Vía
-    crearMensaje(actorEncargado, uiModalResolver, "6: abrirModalResolucion()");
-    crearMensaje(actorEncargado, actorCliente, "7: acordarModalidadConciliacion()");
-    crearMensaje(actorEncargado, uiModalResolver, "8: ingresarViaYJustificacion()");
+    // Flujo 2: Apertura y Envío de Resolución Gerencial
+    crearMensaje(actorEncargado, uiModalResolver, "2: abrirModalResolucion()");
+    crearMensaje(actorEncargado, uiModalResolver, "2.1: ingresarViaYJustificacion()");
+    crearMensaje(uiModalResolver, ctrlRoutes, "2.2: resolve_conflict_endpoint()");
+    crearMensaje(ctrlRoutes, ctrlService, "2.3: resolve_sale_conflict()");
+    crearMensaje(ctrlService, ctrlService, "2.4: validarJustificacionAuditoria()");
+    crearMensaje(ctrlService, entInventory, "2.5: _get_inventory_for_update()");
 
-    // Fase 3: Ejecución de Resolución Gerencial
-    crearMensaje(uiModalResolver, ctrlRoutes, "9: resolve_conflict_endpoint()");
-    crearMensaje(ctrlRoutes, ctrlService, "10: resolve_sale_conflict()");
+    // Flujo 3: Bifurcación en Controlador según la Vía Seleccionada
+    // Vía A: negative_stock (Prenda física ya entregada, registra temporal negativo)
+    crearMensaje(ctrlService, entInventory, "3.1a: autorizarStockNegativo()");
+    crearMensaje(ctrlService, entSale, "3.2a: marcarVentaCompletada()");
 
-    // Fase 4: Bifurcación en Controlador de Negocio según la Vía
-    // Vía 1: negative_stock
-    crearMensaje(ctrlService, entInventory, "11a: autorizarStockNegativo()");
-    crearMensaje(ctrlService, entSale, "12a: marcarVentaCompletada()");
+    // Vía B: substitute (Reasigna a variante existente en sucursal)
+    crearMensaje(ctrlService, entInventory, "3.1b: descontarStockVarianteSustituta()");
+    crearMensaje(ctrlService, entSaleItem, "3.2b: reasignarVarianteItem()");
 
-    // Vía 2: substitute
-    crearMensaje(ctrlService, entInventory, "11b: descontarStockVarianteSustituta()");
-    crearMensaje(ctrlService, entSaleItem, "12b: reasignarVarianteItem()");
+    // Vía C: credit_note (Anulación contable con Nota de Crédito por el 100%)
+    crearMensaje(ctrlService, entGarmentReturn, "3.1c: registrarDevolucion100PorCiento()");
+    crearMensaje(ctrlService, entSale, "3.2c: anularVentaOffline()");
 
-    // Vía 3: credit_note
-    crearMensaje(ctrlService, entGarmentReturn, "11c: registrarDevolucion100PorCiento()");
-    crearMensaje(ctrlService, entSale, "12c: anularVentaOffline()");
+    // Flujo 4: Confirmación Final al Encargado
+    crearMensaje(ctrlService, ctrlRoutes, "4: response()");
+    crearMensaje(ctrlRoutes, uiModalResolver, "4.1: response()");
+    crearMensaje(uiModalResolver, actorEncargado, "4.2: notificarResolucionExitosa()");
 
     diagram.Update();
+    Repo.SaveDiagram(diagram.DiagramID);
     Repo.ReloadDiagram(diagram.DiagramID);
-    Log("Diagrama de Comunicación CU16 creado con éxito. ID: " + diagram.DiagramID);
+    try { Repo.OpenDiagram(diagram.DiagramID); } catch(ex) {}
+
+    Log("¡Diagrama de Robustez / Comunicación CU16 actualizado exitosamente en Enterprise Architect!");
 }
 
 Main();

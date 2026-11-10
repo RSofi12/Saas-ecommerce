@@ -3,7 +3,7 @@ class AppConfig {
 
   static const backendUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'http://192.168.0.7:8000',
+    defaultValue: 'http://127.0.0.1:8000',
   );
 
   // The emulator default targets the local frontend; deployed/device builds

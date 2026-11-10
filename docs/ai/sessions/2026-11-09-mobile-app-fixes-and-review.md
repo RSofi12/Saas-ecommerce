@@ -34,6 +34,10 @@
 - [`mobile/lib/features/catalog/virtual_try_on_page.dart`](file:///c:/Users/PERSONAL/ecommerce-SI2/mobile/lib/features/catalog/virtual_try_on_page.dart):
   - Traducción al español neutro de todos los mensajes de error y advertencias de permisos de cámara.
 
+#### Features / Geolocalización (CU19):
+- [`mobile/lib/features/branches_map/branches_map_page.dart`](file:///c:/Users/PERSONAL/ecommerce-SI2/mobile/lib/features/branches_map/branches_map_page.dart):
+  - Corrección de colisión de tipos en imports: `latlong2 hide Path` y `catalog_models show Branch`, resolviendo ambigüedad entre `Size`/`Path` de UI frente a modelos de negocio.
+
 ---
 
 ### 3. Verificaciones Realizadas

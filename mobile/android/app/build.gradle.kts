@@ -1,8 +1,14 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Apply Google Services only when the Firebase config file exists, so debug
+// builds still install before google-services.json is added (push disabled).
+// The plugin version is declared with `apply false` in settings.gradle.kts.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 android {

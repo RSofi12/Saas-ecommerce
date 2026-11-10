@@ -1,20 +1,14 @@
-<mxGraphModel dx="2400" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1600" math="0" shadow="0">
+<?xml version='1.0' encoding='utf-8'?>
+<mxGraphModel dx="2400" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1700" math="0" shadow="0">
   <root>
     <mxCell id="0" />
     <mxCell id="1" parent="0" />
-
-    <!-- ========================================================================= -->
-    <!-- 1. CAPA DE SERVICIOS DE SOFTWARE / SOPORTE (PRESENTACIÓN / PWA / MOBILE)  -->
-    <!-- ========================================================================= -->
     <mxCell id="capaCSS" parent="1" style="shape=folder;fontStyle=1;tabWidth=450;tabHeight=35;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=15;fillColor=#f5f5f5;strokeColor=#36393d;" value="CAPA DE SERVICIOS DE SOFTWARE / SOPORTE" vertex="1">
       <mxGeometry height="390" width="1200" x="100" y="100" as="geometry" />
     </mxCell>
-
-    <!-- Sub-contenedor 1: Tienda Online & Portal Cliente PWA -->
     <mxCell id="portalClienteApp" parent="1" style="shape=folder;fontStyle=1;tabWidth=320;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=13;fillColor=#ffffff;strokeColor=#36393d;" value="Tienda Online &amp; Portal Cliente PWA" vertex="1">
       <mxGeometry height="300" width="550" x="130" y="160" as="geometry" />
     </mxCell>
-    
     <mxCell id="webClienteCatalogo" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;form&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;WebCatalogoPrendas&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="65" width="230" x="155" y="215" as="geometry" />
     </mxCell>
@@ -30,12 +24,9 @@
     <mxCell id="webClientePerfil" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;form&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;WebPerfilYMedidasCliente&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="55" width="495" x="155" y="385" as="geometry" />
     </mxCell>
-
-    <!-- Sub-contenedor 2: Dashboard SaaS & Terminal POS Sucursal -->
     <mxCell id="dashboardAdminApp" parent="1" style="shape=folder;fontStyle=1;tabWidth=360;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=13;fillColor=#ffffff;strokeColor=#36393d;" value="Dashboard SaaS &amp; Terminal POS Sucursal" vertex="1">
       <mxGeometry height="300" width="550" x="720" y="160" as="geometry" />
     </mxCell>
-    
     <mxCell id="webAdminTenancy" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;form&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;WebSaaSTenancyPlanes&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="65" width="230" x="745" y="215" as="geometry" />
     </mxCell>
@@ -51,186 +42,131 @@
     <mxCell id="webAdminAnalitica" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;form&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;WebAnaliticaVozIA&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="55" width="495" x="745" y="385" as="geometry" />
     </mxCell>
-
-    <!-- ========================================================================= -->
-    <!-- 2. CAPA ESPECÍFICA DE LA APLICACIÓN (CONTROLADORES / ROUTERS API)         -->
-    <!-- ========================================================================= -->
     <mxCell id="capaCEA" parent="1" style="shape=folder;fontStyle=1;tabWidth=420;tabHeight=35;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=15;fillColor=#f5f5f5;strokeColor=#36393d;" value="CAPA ESPECIFICA DE LA APLICACION" vertex="1">
       <mxGeometry height="270" width="1200" x="100" y="550" as="geometry" />
     </mxCell>
-
-    <!-- Fila 1 CEA (P0, P1, P2, P3) -->
     <mxCell id="ceaP0" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P0. Plataforma SaaS y Suscripciones&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="140" y="615" as="geometry" />
     </mxCell>
-
     <mxCell id="ceaP1" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P1. Gestión de Usuarios y Acceso&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="425" y="615" as="geometry" />
     </mxCell>
-
     <mxCell id="ceaP2" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P2. Gestión de Catálogo Textil&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="710" y="615" as="geometry" />
     </mxCell>
-
     <mxCell id="ceaP3" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P3. Inventario y Disponibilidad Offline&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="995" y="615" as="geometry" />
     </mxCell>
-
-    <!-- Fila 2 CEA (P4, P5, P6) -->
     <mxCell id="ceaP4" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P4. Compras Digitales y Reservas&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="355" x="140" y="715" as="geometry" />
     </mxCell>
-
     <mxCell id="ceaP5" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P5. Ventas POS y Sincronización&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="355" x="520" y="715" as="geometry" />
     </mxCell>
-
     <mxCell id="ceaP6" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;controller&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P6. Inteligencia Analítica y Geolocalización&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="355" x="900" y="715" as="geometry" />
     </mxCell>
-
-    <!-- ========================================================================= -->
-    <!-- 3. CAPA DE APLICACIÓN / DOMINIO (SERVICIOS Y LÓGICA DE NEGOCIO)           -->
-    <!-- ========================================================================= -->
     <mxCell id="capaCA" parent="1" style="shape=folder;fontStyle=1;tabWidth=420;tabHeight=35;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=15;fillColor=#f5f5f5;strokeColor=#36393d;" value="CAPA DE APLICACION / DOMINIO" vertex="1">
       <mxGeometry height="270" width="1200" x="100" y="880" as="geometry" />
     </mxCell>
-
-    <!-- Fila 1 CA (P0, P1, P2, P3) -->
     <mxCell id="caP0" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P0. Plataforma SaaS y Suscripciones&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="140" y="945" as="geometry" />
     </mxCell>
-
     <mxCell id="caP1" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P1. Gestión de Usuarios y Acceso&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="425" y="945" as="geometry" />
     </mxCell>
-
     <mxCell id="caP2" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P2. Gestión de Catálogo Textil&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="710" y="945" as="geometry" />
     </mxCell>
-
     <mxCell id="caP3" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P3. Inventario y Disponibilidad Offline&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="260" x="995" y="945" as="geometry" />
     </mxCell>
-
-    <!-- Fila 2 CA (P4, P5, P6) -->
     <mxCell id="caP4" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P4. Compras Digitales y Reservas&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="355" x="140" y="1045" as="geometry" />
     </mxCell>
-
     <mxCell id="caP5" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P5. Ventas POS y Sincronización&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="355" x="520" y="1045" as="geometry" />
     </mxCell>
-
     <mxCell id="caP6" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;service&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;P6. Inteligencia Analítica y Geolocalización&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="70" width="355" x="900" y="1045" as="geometry" />
     </mxCell>
-
-    <!-- Dependencias entre paquetes de Dominio en Capa de Aplicación -->
-    <!-- P0 -> P1 (Validación de límites de sucursales por plan de suscripción) -->
     <mxCell id="depP0P1" edge="1" parent="1" source="caP0" target="caP1" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P3 -> P2 (Inventario referencia productos y variantes de catálogo) -->
     <mxCell id="depP3P2" edge="1" parent="1" source="caP3" target="caP2" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P4 -> P2 (Compras y reservas requieren catálogo y precios por talla) -->
     <mxCell id="depP4P2" edge="1" parent="1" source="caP4" target="caP2" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P4 -> P3 (Reservas con temporizador retienen stock en sucursal) -->
     <mxCell id="depP4P3" edge="1" parent="1" source="caP4" target="caP3" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P5 -> P3 (Ventas POS descuentan stock y traspasos) -->
     <mxCell id="depP5P3" edge="1" parent="1" source="caP5" target="caP3" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P5 -> P2 (Cambios de prenda verifican diferencia de precio por talla) -->
     <mxCell id="depP5P2" edge="1" parent="1" source="caP5" target="caP2" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P6 -> P5 (Analítica e IA consulta ventas históricas y transacciones) -->
     <mxCell id="depP6P5" edge="1" parent="1" source="caP6" target="caP5" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- P6 -> P3 (Analítica predice demanda y rotación de stock) -->
     <mxCell id="depP6P3" edge="1" parent="1" source="caP6" target="caP3" style="endArrow=open;endSize=8;dashed=1;html=1;rounded=0;strokeColor=#36393d;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ========================================================================= -->
-    <!-- 4. CAPA DE INFRAESTRUCTURA (BASE DE DATOS Y ADAPTADORES CLOUD)            -->
-    <!-- ========================================================================= -->
     <mxCell id="capaCI" parent="1" style="shape=folder;fontStyle=1;tabWidth=320;tabHeight=35;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=15;fillColor=#f5f5f5;strokeColor=#36393d;" value="CAPA DE INFRAESTRUCTURA" vertex="1">
-      <mxGeometry height="200" width="1200" x="100" y="1210" as="geometry" />
+      <mxGeometry height="260" width="1200" x="100" y="1210" as="geometry" />
     </mxCell>
-
-    <!-- Sub-contenedor 1: Base de Datos Relacional PostgreSQL Multitenant -->
     <mxCell id="ciPostgres" parent="1" style="shape=folder;fontStyle=1;tabWidth=390;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=13;fillColor=#ffffff;strokeColor=#36393d;" value="PostgreSQL 15+ — Base de Datos Central Multitenant" vertex="1">
-      <mxGeometry height="130" width="550" x="130" y="1265" as="geometry" />
+      <mxGeometry height="190" width="550" x="130" y="1265" as="geometry" />
     </mxCell>
-    
     <mxCell id="ciDBEngine" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;database&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;PostgreSQL 15+ Engine&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="65" width="230" x="155" y="1315" as="geometry" />
     </mxCell>
     <mxCell id="ciDBSchema" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;schema&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Esquema BD (fashionstore_db)&lt;/b&gt;&lt;/div&gt;" vertex="1">
       <mxGeometry height="65" width="230" x="420" y="1315" as="geometry" />
     </mxCell>
-
-    <!-- Sub-contenedor 2: Adaptadores & Gateways Cloud Externos -->
     <mxCell id="ciGateways" parent="1" style="shape=folder;fontStyle=1;tabWidth=340;tabHeight=30;tabPosition=left;html=1;boundedLbl=1;labelInHeader=1;container=0;collapsible=0;whiteSpace=wrap;fontSize=13;fillColor=#ffffff;strokeColor=#36393d;" value="Adaptadores &amp; Gateways Cloud Externos" vertex="1">
-      <mxGeometry height="130" width="550" x="720" y="1265" as="geometry" />
+      <mxGeometry height="190" width="550" x="720" y="1265" as="geometry" />
     </mxCell>
-    
-    <mxCell id="ciDriverStripe" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;driver&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Stripe Gateway&lt;/b&gt;&lt;/div&gt;" vertex="1">
-      <mxGeometry height="65" width="120" x="735" y="1315" as="geometry" />
+    <mxCell id="ciDriverStripe" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;driver&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Stripe Gateway (Pagos)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry height="55" width="165" x="735" y="1310" as="geometry" />
     </mxCell>
-    <mxCell id="ciClientGemini" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;client&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Gemini 2.0 Client&lt;/b&gt;&lt;/div&gt;" vertex="1">
-      <mxGeometry height="65" width="120" x="865" y="1315" as="geometry" />
+    <mxCell id="ciClientGemini" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;client&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Gemini API (RAG Voz)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry height="55" width="170" x="910" y="1310" as="geometry" />
     </mxCell>
-    <mxCell id="ciAdapterLucy" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;adapter&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Lucy VTON Engine&lt;/b&gt;&lt;/div&gt;" vertex="1">
-      <mxGeometry height="65" width="125" x="995" y="1315" as="geometry" />
+    <mxCell id="ciAdapterLucy" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;adapter&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Lucy VTON (Probador AR)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry height="55" width="165" x="735" y="1380" as="geometry" />
     </mxCell>
-    <mxCell id="ciGatewayCloudinary" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;gateway&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Cloudinary CDN&lt;/b&gt;&lt;/div&gt;" vertex="1">
-      <mxGeometry height="65" width="125" x="1130" y="1315" as="geometry" />
+    <mxCell id="ciGatewayCloudinary" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;gateway&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Cloudinary CDN (Media)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry height="55" width="170" x="910" y="1380" as="geometry" />
     </mxCell>
-
-    <!-- ========================================================================= -->
-    <!-- 5. DEPENDENCIAS ENTRE CAPAS («use» / «access»)                            -->
-    <!-- ========================================================================= -->
-
-    <!-- C.S.S. -> C.E.A. -->
     <mxCell id="eCSS_CEA" edge="1" parent="1" source="capaCSS" target="capaCEA" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#36393d;strokeWidth=2;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="lblCSS_CEA" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;fillColor=#ffffff;strokeColor=#36393d;" value="«use»" vertex="1">
       <mxGeometry height="24" width="80" x="660" y="505" as="geometry" />
     </mxCell>
-
-    <!-- C.E.A. -> C.A. -->
     <mxCell id="eCEA_CA" edge="1" parent="1" source="capaCEA" target="capaCA" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#36393d;strokeWidth=2;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="lblCEA_CA" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;fillColor=#ffffff;strokeColor=#36393d;" value="«use»" vertex="1">
       <mxGeometry height="24" width="80" x="660" y="835" as="geometry" />
     </mxCell>
-
-    <!-- C.A. -> C.I. -->
     <mxCell id="eCA_CI" edge="1" parent="1" source="capaCA" target="capaCI" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#36393d;strokeWidth=2;">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="lblCA_CI" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;fillColor=#ffffff;strokeColor=#36393d;" value="«access»" vertex="1">
       <mxGeometry height="24" width="90" x="655" y="1165" as="geometry" />
     </mxCell>
-
+    <mxCell id="ciGatewayOSM" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;gateway&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;OpenStreetMap / ORS (Rutas GPS)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry x="1090" y="1310" width="165" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="ciGatewayFCM" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=11;" value="&lt;div&gt;&amp;laquo;gateway&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Firebase FCM (Push Notifications)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry x="1090" y="1380" width="165" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="ciOfflineStorage" parent="1" style="shape=folder;fontStyle=0;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=12;" value="&lt;div&gt;&amp;laquo;storage&amp;raquo;&lt;/div&gt;&lt;div&gt;&lt;b&gt;IndexedDB (PWA) / SQLite (Móvil)&lt;/b&gt;&lt;/div&gt;" vertex="1">
+      <mxGeometry x="155" y="1390" width="495" height="50" as="geometry" />
+    </mxCell>
   </root>
 </mxGraphModel>
