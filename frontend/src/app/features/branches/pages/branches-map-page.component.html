@@ -1,0 +1,83 @@
+<div class="min-h-screen bg-slate-50 flex flex-col">
+  <!-- Header Bar -->
+  <header class="bg-white border-b border-slate-200 px-6 py-4 shadow-xs sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a routerLink="/app/cliente/catalog" class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+          <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <span>🗺️ Sucursales y Boutiques</span>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              OpenStreetMap Libre
+            </span>
+          </h1>
+          <p class="text-xs text-slate-500">Localiza nuestras sedes físicas, consulta direcciones, horarios de atención y teléfonos de contacto.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+          📍 {{ branches().length }} Sedes Registradas
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <div class="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6 overflow-hidden">
+    <!-- Sidebar List -->
+    <div class="w-full lg:w-96 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[450px] lg:h-auto">
+      <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Directorio de Tiendas</h2>
+        <span class="text-xs text-slate-400">Clic para centrar</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto divide-y divide-slate-100 p-2 space-y-1">
+        @if (loading()) {
+          <div class="flex items-center justify-center p-8 text-sm text-slate-400">
+            Cargando sucursales...
+          </div>
+        } @else {
+          @for (b of branches(); track b.id) {
+            <button
+              type="button"
+              (click)="focusBranch(b)"
+              [class.bg-sky-50]="selectedBranch()?.id === b.id"
+              [class.border-sky-300]="selectedBranch()?.id === b.id"
+              class="w-full text-left p-3.5 rounded-xl border border-transparent hover:bg-slate-50 hover:border-slate-200 transition-all flex flex-col gap-1 cursor-pointer"
+            >
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm text-slate-900">{{ b.name }}</span>
+                @if (b.is_default) {
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">Central</span>
+                }
+              </div>
+              <div class="text-xs text-slate-500 flex items-center gap-1">
+                <span>📍</span>
+                <span class="truncate">{{ b.address || b.city }}</span>
+              </div>
+              <div class="text-[11px] text-slate-400 flex items-center gap-3 mt-1">
+                <span>🕒 {{ b.opening_hours || '09:00 - 20:00' }}</span>
+                <span>📞 {{ b.phone || 'N/A' }}</span>
+              </div>
+            </button>
+          } @empty {
+            <div class="p-6 text-center text-xs text-slate-400">
+              No hay sucursales disponibles en el catálogo.
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Map Viewport -->
+    <div class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+      <div #mapContainer class="w-full h-full min-h-[500px] z-10"></div>
+    </div>
+  </div>
+</div>
+
