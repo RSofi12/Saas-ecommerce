@@ -4,9 +4,9 @@
 
 ---
 
-## 🎯 Estado de Situación: 23 de 25 Casos de Uso Implementados (100% Verificados)
+## 🎯 Estado de Situación: 25 de 25 Casos de Uso Verificados (100% Pasando en Suite Automatizada)
 
-### Casos de Uso Listos y Funcionales (Presentación 1 y 2 al 100% + CU19, CU20, CU21, CU22 y CU23):
+### Casos de Uso Auditados y Verificados (25 PASSED en tests/web/test_cu_flow.py):
 - [x] **`CU01` – Registrar y Gestionar Empresas Contratantes (Tenants)** (`p0_saas_plataforma`)
 - [x] **`CU02` – Gestionar Planes de Suscripción (Básico a 3 suc., Pro a 10 suc., Empresarial) y Cuotas** (`p0_saas_plataforma`)
 - [x] **`CU03` – Iniciar Sesión Multitenant con JWT y Claims de Tenant** (`p1_gestion_usuarios_acceso`)
@@ -29,9 +29,9 @@
 - [x] **`CU20` – Generar Reportes Ejecutivos por Voz y Gemini RAG (Carril D: Generative AI)** (`p6_inteligencia_analitica` + Angular PWA)
 - [x] **`CU21` – Exportar Reportes Empresariales a Formatos PDF y Excel (Carril B: Reportes)** (`p6_inteligencia_analitica`)
 - [x] **`CU22` – Generar Dataset Sintético de Ventas y Estacionalidad Textil (Carril C: Machine Learning)** (`p6_inteligencia_analitica`)
-- [x] **`CU23` – Predecir Demanda de Ropa por Talla (ML Supervisado)** (`p6_inteligencia_analitica` + Angular PWA - 100% Fullstack)
-- [x] **`CU24` – Segmentar Clientes con K-Means (ML No Supervisado - RFM+D)** (`p6_inteligencia_analitica` - Backend 100% / Frontend en chat paralelo)
-- [x] **`CU25` – Visualizar Dashboard Ejecutivo con KPIs y Métricas ML** (`p6_inteligencia_analitica` - Backend 100% verificado)
+- [x] **`CU23` – Predecir Demanda de Ropa por Talla (ML Supervisado)** (`p6_inteligencia_analitica` + Angular PWA)
+- [x] **`CU24` – Segmentar Clientes con K-Means (ML No Supervisado - RFM+D)** (`p6_inteligencia_analitica`)
+- [x] **`CU25` – Visualizar Dashboard Ejecutivo con KPIs y Métricas ML** (`p6_inteligencia_analitica`)
 
 ---
 

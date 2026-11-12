@@ -1,0 +1,477 @@
+====================================================================================================
+           FASHIONSTORE SAAS — GUÍA Y FLUJO OFICIAL DE PRUEBAS EN VIVO (WEB PC Y PWA ESCRITORIO)
+                      Documento Oficial de Referencia: 2doParcial-Informe-grupo-46.docx
+====================================================================================================
+Metodología: ICONIX Process (UML 2.5+)
+Plataformas Comprendidas:
+  1. WEB PC (Navegador de Escritorio / Portal de Gobernanza SaaS, Gerencia Administrativa y Tienda Online)
+  2. APP ESCRITORIO WINDOWS (PWA Standalone / Punto de Venta POS de Mostrador, Outbox y Modo Desconectado)
+  (Nota: Los flujos de la aplicación móvil APK Flutter han sido excluidos en esta guía según requerimiento)
+
+Servidores Locales Requeridos:
+  - Backend FastAPI:  http://localhost:8000 (Swagger: http://localhost:8000/docs)
+  - Frontend Angular:  http://localhost:4200
+Base de Datos Central: Neon Serverless PostgreSQL (Aislamiento Multi-tenant por tenant_id)
+Contraseña Universal para TODAS las cuentas de prueba: Tiendafashion123!
+Fecha de Actualización: 10 de Noviembre de 2026
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+                     MATRIZ DE CREDENCIALES EXACTAS (WEB PC Y PWA ESCRITORIO)
+----------------------------------------------------------------------------------------------------
+| Rol en el Sistema   | Correo Electrónico             | Contraseña        | Plataforma / Módulo    |
+|---------------------|--------------------------------|-------------------|------------------------|
+| Superadministrador  | superadmin@fashionstore.com    | Tiendafashion123! | Web PC / SaaS Tenants  |
+| Admin Global Catálogo| admin.global@fashionstore.bo  | Tiendafashion123! | Web PC / 50 Prendas    |
+| Admin Empresa Tenant| admin@elegance.com             | Tiendafashion123! | Web PC / Sucursales ML |
+| Encargado Sucursal  | encargado.lp@fashionstore.bo   | Tiendafashion123! | Web PC & PWA Reservas  |
+| Cajera POS Central  | cajera.lp@fashionstore.bo      | Tiendafashion123! | PWA Escritorio / Caja  |
+| Cliente Comprador   | cliente01.demo@fashionstore.bo | Tiendafashion123! | Web PC / Tienda Online |
+----------------------------------------------------------------------------------------------------
+
+
+====================================================================================================
+                    BLOQUE 1: CASOS DE USO EN WEB PC (NAVEGADOR DE ESCRITORIO)
+====================================================================================================
+Acceso: http://localhost:4200
+Navegador Recomendado: Google Chrome, Microsoft Edge, Brave (Modo ventana normal o incógnito)
+
+----------------------------------------------------------------------------------------------------
+[CU01] REGISTRAR Y GESTIONAR EMPRESAS CONTRATANTES (TENANTS)
+----------------------------------------------------------------------------------------------------
+- Actor: Superadministrador SaaS
+- Credenciales: superadmin@fashionstore.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/superadmin/tenants
+- Pasos de prueba:
+  1. Inicia sesión como superadministrador en /login.
+  2. El sistema redirige al portal de gobernanza SaaS (/app/superadmin/tenants).
+  3. Observa las empresas ya registradas (Boutique Elegance, Moda Urbana, etc.).
+  4. Haz clic en el botón superior "+ Registrar Nueva Empresa".
+  5. Completa el formulario modal:
+     * Nombre Comercial: Boutique París S.R.L.
+     * Razón Social / NIT: 4050607080
+     * Subdominio: paris (slug único para aislamiento)
+     * Correo de contacto: contacto@paris.com
+     * Plan Inicial: Profesional
+  6. Presiona "Guardar Empresa".
+- Resultado esperado en pantalla:
+  * La empresa se persiste en la tabla `companies` con su propio `tenant_id` UUIDv4.
+  * Aparece en la grilla de inquilinos con estado "ACTIVO" y métricas de suscripción.
+- Política / Regla Validada:
+  * Aislamiento multitenant estricto por `tenant_id`.
+
+----------------------------------------------------------------------------------------------------
+[CU02] GESTIONAR PLANES DE SUSCRIPCIÓN (BÁSICO, PRO, EMPRESARIAL) Y CUOTAS
+----------------------------------------------------------------------------------------------------
+- Actor: Superadministrador SaaS
+- Credenciales: superadmin@fashionstore.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/superadmin/plans
+- Pasos de prueba:
+  1. Navega a la vista de "Planes de Suscripción".
+  2. Verifica las tarjetas de los planes comerciales:
+     * Plan Básico: Límite de 3 sucursales, sin acceso a IA ni modelos ML.
+     * Plan Profesional: Límite de 10 sucursales, con IA generativa (Gemini) y ML.
+     * Plan Empresarial: Hasta 223 sucursales, suite completa.
+  3. Haz clic en "Editar Plan" o asigna un plan a un tenant.
+  4. Prueba del Downgrade Guard: Intenta degradar a Plan Básico una empresa que ya cuenta con más de 3 sucursales activas.
+- Resultado esperado en pantalla:
+  * El sistema bloquea el cambio y emite una alerta impidiendo el exceso de cuota.
+- Política / Regla Validada:
+  * Política 4: Cumplimiento de límites de suscripción y Downgrade Guard defensivo.
+
+----------------------------------------------------------------------------------------------------
+[CU03] INICIAR SESIÓN MULTITENANT CON JWT Y CLAIMS DE TENANT
+----------------------------------------------------------------------------------------------------
+- Actor: Cualquier rol administrativo o cliente
+- Credenciales de prueba:
+  * admin@elegance.com (Administrador de Boutique Elegance)
+  * cliente01.demo@fashionstore.bo (Cliente particular)
+- URL de acceso: http://localhost:4200/login
+- Pasos de prueba:
+  1. Ingresa a /login.
+  2. Selecciona el perfil correspondiente o digita el correo y clave.
+  3. Pulsa "Iniciar Sesión".
+  4. Abre DevTools (F12) -> Application -> Local Storage (o pestaña Red/Headers).
+- Resultado esperado en pantalla:
+  * El JWT contiene los claims esenciales: `sub` (User ID), `rol`, `tenant_id` y `branch_id`.
+  * La interfaz carga únicamente el branding, sucursales y prendas del inquilino correspondiente.
+
+----------------------------------------------------------------------------------------------------
+[CU04] GESTIONAR SUCURSALES BAJO LÍMITES DEL PLAN
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa (Tenant Admin)
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/branches
+- Pasos de prueba:
+  1. Ingresa al módulo de "Sucursales".
+  2. Revisa el widget de cuota en vivo: "Sucursales activas: X de 10 permitidas por el Plan Profesional".
+  3. Haz clic en "+ Nueva Sucursal".
+  4. Llena los datos: Nombre "Sucursal Cine Center", Ciudad "Santa Cruz", Dirección y Coordenadas GPS.
+  5. Guarda la sucursal.
+- Resultado esperado en pantalla:
+  * La sucursal se persiste asociada al `tenant_id` de la empresa.
+  * El contador del widget incrementa automáticamente liberando o bloqueando el botón según la cuota.
+
+----------------------------------------------------------------------------------------------------
+[CU05] GESTIONAR PRENDAS Y VARIANTES DE PRECIO POR TALLA
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa / Encargado de Catálogo
+- Credenciales: admin.global@fashionstore.bo | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/products
+- Pasos de prueba:
+  1. Ingresa a la sección "Catálogo de Prendas".
+  2. Visualiza las 50 prendas registradas en el catálogo administrativo.
+  3. Selecciona una prenda o pulsa "+ Nueva Prenda".
+  4. En la matriz de variantes por talla y color, revisa o asigna precios diferenciados:
+     * Talla S: Bs 120.00
+     * Talla M: Bs 130.00
+     * Talla L: Bs 145.00
+  5. Guarda los cambios.
+- Resultado esperado en pantalla:
+  * Los precios diferenciados quedan registrados con precisión decimal exacta en `product_variants`.
+  * Esta matriz es la base que hace posible la **Política 1** de cobro de diferencia en cambios.
+
+----------------------------------------------------------------------------------------------------
+[CU06] CONSULTAR CATÁLOGO ONLINE CON BÚSQUEDA FACETADA
+----------------------------------------------------------------------------------------------------
+- Actor: Cliente Comprador / Visitante
+- Credenciales: No requiere autenticación (o usar cliente01.demo@fashionstore.bo)
+- URL de acceso: http://localhost:4200/shop
+- Pasos de prueba:
+  1. Ingresa a la tienda online pública en /shop.
+  2. Usa la barra de búsqueda para filtrar prendas por nombre (ej. "Vestido", "Camisa").
+  3. Aplica filtros facetados combinados en el panel lateral:
+     * Categoría: Vestidos o Camisas.
+     * Talla: M o L.
+     * Rango de Precios: Bs 50 - Bs 200.
+- Resultado esperado en pantalla:
+  * La grilla de productos se actualiza reactivamente mostrando prendas coincidentes, fotos y disponibilidad.
+
+----------------------------------------------------------------------------------------------------
+[CU09] COMPRAR PRENDAS CON STRIPE Y DESPACHO CONDICIONADO (POLÍTICA 3)
+----------------------------------------------------------------------------------------------------
+- Actor: Cliente Comprador y Administrador de Despacho
+- Credenciales Cliente: cliente01.demo@fashionstore.bo | Clave: Tiendafashion123!
+- Credenciales Admin: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/shop/cart y http://localhost:4200/app/admin/orders
+- Pasos de prueba:
+  1. Como cliente en /shop, añade 1 prenda al carrito y ve al Checkout (/shop/cart).
+  2. Elige "Envío a Domicilio" e ingresa la tarjeta de pruebas de Stripe:
+     * Número: 4242 4242 4242 4242
+     * Exp: 12/28 | CVC: 123 | CP: 00000
+  3. Pulsa "Pagar con Stripe". La orden se crea con estado `paid`.
+  4. Inicia sesión como Admin en otra pestaña e ingresa a /app/admin/orders.
+  5. PRUEBA DE LA REGLA: Si una orden tiene estado `payment_status = 'pending'`, el botón "Despachar" permanece deshabilitado.
+  6. Para la orden con estado `paid`, pulsa "Despachar Prenda".
+- Resultado esperado en pantalla:
+  * El despacho se aprueba, asignando el código formal de rastreo `DSP-YYYYMMDD-XXXX`.
+- Política Validada:
+  * Política 3: Prohibido despachar prendas sin confirmación de pago de Stripe (`status = paid`).
+
+----------------------------------------------------------------------------------------------------
+[CU10] CREAR RESERVA ONLINE DE PRENDAS CON VENCIMIENTO Y BLOQUEO ATÓMICO
+----------------------------------------------------------------------------------------------------
+- Actor: Cliente Comprador
+- Credenciales: cliente01.demo@fashionstore.bo | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/shop (Ficha de producto)
+- Pasos de prueba:
+  1. En el catálogo online, selecciona una prenda disponible.
+  2. En lugar de comprar, haz clic en el botón "Reservar para Prueba en Sucursal".
+  3. Selecciona la sucursal de retiro y la talla deseada.
+  4. Confirma la reserva.
+  5. Ve a "Mis Reservas" (/shop/my-reservations).
+- Resultado esperado en pantalla:
+  * Se genera el comprobante digital con código `RES-XXXXXXXX` y código QR interactivo.
+  * La prenda queda bloqueada en el inventario de la sucursal (`reserved_quantity + 1`) por 48 horas.
+  * El sweeper de fondo del backend liberará el stock si vence el plazo sin retiro.
+
+----------------------------------------------------------------------------------------------------
+[CU17] PROCESAR CAMBIO DE PRENDA POR TALLA CON COBRO DE DIFERENCIA (POLÍTICA 1)
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa / Vendedor de Mostrador
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/exchanges
+- Pasos de prueba:
+  1. Ingresa al módulo de "Cambios de Prenda".
+  2. Selecciona una venta existente donde se adquirió una prenda Talla M a Bs 50.00.
+  3. Selecciona la nueva prenda solicitada por el cliente: Talla L a Bs 70.00.
+  4. Revisa la liquidación automática en pantalla:
+     * Precio Prenda Original: Bs 50.00
+     * Precio Prenda Nueva:    Bs 70.00
+     * Diferencia a Pagar:    +Bs 20.00
+  5. PRUEBA DE LA POLÍTICA:
+     * Si el cliente NO abona los Bs 20.00, pulsa "Cancelar Operación": el cambio no se consolida y el stock no se altera.
+     * Si el cliente abona los Bs 20.00, ingresa el método de cobro y confirma el cambio.
+- Resultado esperado en pantalla:
+  * Se produce el swap atómico de inventario (Talla M regresa a disponible, Talla L egresa).
+  * Se emite el Comprobante de Cambio con el desglose del cobro de diferencia.
+- Política Validada:
+  * Política 1: El cambio por prenda de mayor precio exige obligatoriamente el pago de la diferencia.
+
+----------------------------------------------------------------------------------------------------
+[CU18] PROCESAR DEVOLUCIÓN DE PRENDA CON RETENCIÓN (20%-50%) Y NOTA DE CRÉDITO (POLÍTICA 2)
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa / Vendedor de Mostrador
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/returns
+- Pasos de prueba:
+  1. Ingresa a "Devoluciones de Prenda".
+  2. Selecciona una venta original de Bs 100.00.
+  3. Selecciona el porcentaje de retención por gastos operativos (entre 20% y 50%, ej. 30%).
+  4. Observa el desglose contable:
+     * Valor de la Prenda:         Bs 100.00
+     * Retención Operativa (30%):  -Bs 30.00 (ganancia para la empresa)
+     * Reembolso Neto al Cliente:   Bs 70.00
+  5. Selecciona la modalidad de reintegro: "Nota de Crédito Digital" o "Efectivo".
+  6. Confirma la devolución.
+- Resultado esperado en pantalla:
+  * La prenda reingresa al inventario disponible.
+  * Si se eligió nota de crédito, se emite el código `NC-YYYYMMDD-XXXX` por Bs 70.00 canjeable en el sistema.
+- Política Validada:
+  * Política 2: Retención obligatoria del 20% al 50% y reembolso neto del 50% al 80%.
+
+----------------------------------------------------------------------------------------------------
+[CU19] LOCALIZAR SUCURSALES EN MAPA WEB (OPENSTREETMAP)
+----------------------------------------------------------------------------------------------------
+- Actor: Cliente / Administrador
+- URL de acceso: http://localhost:4200/branches o dentro de la ficha de sucursales
+- Pasos de prueba:
+  1. Abre la vista de sucursales o mapa interactivo.
+  2. Verifica que se cargue el mapa base de OpenStreetMap con marcadores georreferenciados (Latitud/Longitud).
+  3. Haz clic en el marcador de una sucursal para ver dirección, horario y teléfono.
+- Resultado esperado en pantalla:
+  * Renderizado fluido de teselas cartográficas sin dependencia de APIs cerradas.
+
+----------------------------------------------------------------------------------------------------
+[CU20] CONSULTAR REPORTES EJECUTIVOS MEDIANTE VOZ E IA GENERATIVA (GEMINI RAG)
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa (Tenant Admin)
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/reports
+- Pasos de prueba:
+  1. Ingresa al módulo de "Reportes Inteligentes".
+  2. Concede permiso de micrófono en el navegador cuando se solicite.
+  3. Pulsa el botón de micrófono y di en voz alta:
+     "¿Cuáles son las prendas más vendidas del último mes agrupadas por sucursal?"
+     (O escribe la misma consulta en la caja de texto del asistente).
+  4. Presiona enviar.
+- Resultado esperado en pantalla:
+  * El asistente procesa la consulta contra el contexto RAG de la base de datos y genera:
+    1) Respuesta explicativa estructurada en lenguaje natural.
+    2) Tabla con datos reales consolidados de la base de datos.
+    3) Opción de reproducción por voz de la síntesis ejecutiva.
+
+----------------------------------------------------------------------------------------------------
+[CU21] EXPORTAR REPORTES EMPRESARIALES A PDF Y EXCEL (XLSX)
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/reports
+- Pasos de prueba:
+  1. En el módulo de reportes, selecciona un rango de fechas o tipo de informe (Ventas / Inventario).
+  2. Haz clic en el botón "Exportar a PDF".
+  3. Haz clic en el botón "Exportar a Excel (.xlsx)".
+- Resultado esperado en pantalla:
+  * Descarga instantánea del archivo PDF con formato membretado formal.
+  * Descarga instantánea de la hoja de cálculo XLSX con datos tabulares y fórmulas contables.
+
+----------------------------------------------------------------------------------------------------
+[CU22] GENERAR DATASET SINTÉTICO DE VENTAS Y ESTACIONALIDAD TEXTIL
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa / Científico de Datos
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/analytics (Pestaña Dataset Sintético)
+- Pasos de prueba:
+  1. En el módulo analítico, dirígete a la sección de generación de datos.
+  2. Define los parámetros: 1,000 registros, estacionalidad boliviana y picos de temporada.
+  3. Haz clic en "Generar Dataset Sintético".
+- Resultado esperado en pantalla:
+  * Generación en < 2 segundos mediante NumPy/Pandas en backend.
+  * Gráficas de distribución de tallas, patrones estacionales y volumen de transacciones simuladas.
+
+----------------------------------------------------------------------------------------------------
+[CU23] PREDECIR DEMANDA DE ROPA POR TALLA (ML SUPERVISADO)
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/analytics (Pestaña Demanda ML)
+- Pasos de prueba:
+  1. Abre la pestaña de Predicción de Demanda.
+  2. Selecciona un horizonte de pronóstico (ej. 4 semanas) y una categoría de prendas.
+  3. Revisa la gráfica predictiva: Demanda Histórica vs. Demanda Proyectada por Talla (S, M, L, XL).
+  4. Observa las alertas de reabastecimiento sugeridas para prendas con stock crítico proyectado.
+- Resultado esperado en pantalla:
+  * Modelo RandomForestRegressor en ejecución con métricas de evaluación ($R^2$, MAE).
+
+----------------------------------------------------------------------------------------------------
+[CU24] SEGMENTAR CLIENTES CON K-MEANS (ML NO SUPERVISADO)
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/analytics (Pestaña Segmentación)
+- Pasos de prueba:
+  1. Ingresa a la sección de Segmentación de Clientes.
+  2. Haz clic en "Entrenar / Ejecutar Clústeres K-Means".
+  3. Observa los 4 perfiles conductuales RFM+D identificados:
+     * Clúster 1: Clientes VIP / Embajadores (alta frecuencia y alto ticket).
+     * Clúster 2: Compradores de Temporada.
+     * Clúster 3: Cazadores de Ofertas.
+     * Clúster 4: Perfil de Alta Devolución / Rotación de Talla.
+- Resultado esperado en pantalla:
+  * Gráfico de dispersión bidimensional con los centroides de cada clúster y desglose porcentual.
+
+----------------------------------------------------------------------------------------------------
+[CU25] VISUALIZAR DASHBOARD EJECUTIVO CON KPIS Y MÉTRICAS ML
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa / Superadmin
+- Credenciales: admin@elegance.com | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/dashboard
+- Pasos de prueba:
+  1. Inicia sesión como administrador del tenant.
+  2. Conmuta entre las secciones del dashboard:
+     * Sección 1: Visión General (Ventas globales, ticket promedio, prendas más vendidas).
+     * Sección 2: Finanzas & Políticas (Recaudación neta por cambios de talla y retenciones 20%-50%).
+     * Sección 3: Métricas Offline (Tasa de éxito de sincronización y lotes conciliados).
+     * Sección 4: Inteligencia Predictiva (Proyecciones de demanda y clústeres de clientes).
+- Resultado esperado en pantalla:
+  * Dashboard consolidado reactivo con tarjetas métricas, gráficas de dona y resúmenes contables.
+
+
+====================================================================================================
+          BLOQUE 2: CASOS DE USO EN APP DE ESCRITORIO PWA (POS Y CONTINGENCIA OFFLINE)
+====================================================================================================
+Acceso: Abre http://localhost:4200 en Google Chrome o Microsoft Edge.
+Instalación Standalone: Haz clic en el ícono de instalar en la barra de URL o menú "Instalar FashionStore POS".
+La ventana se abrirá de manera independiente, sin barras del navegador.
+
+Rol Principal: Cajera de Mostrador / Encargado de Sucursal
+Credenciales Cajera:    cajera.lp@fashionstore.bo    | Clave: Tiendafashion123!
+Credenciales Encargado:  encargado.lp@fashionstore.bo | Clave: Tiendafashion123!
+Sucursal: Boutique Elegance - Sucursal Central
+
+----------------------------------------------------------------------------------------------------
+[CU07] SINCRONIZAR Y DESCARGAR CATÁLOGO A ALMACENAMIENTO LOCAL (INDEXEDDB)
+----------------------------------------------------------------------------------------------------
+- Pasos de prueba:
+  1. Inicia sesión en la PWA con la cuenta de cajera: cajera.lp@fashionstore.bo.
+  2. Ingresa a la pantalla de Caja POS: http://localhost:4200/app/cajero/caja.
+  3. Pulsa el botón "Sincronizar Catálogo" en la barra superior.
+  4. Observa el mensaje verde de confirmación: "Catálogo local sincronizado con éxito".
+  5. En DevTools (F12) -> Application -> Storage -> IndexedDB -> `fashionstore_local_db`:
+     Revisa los almacenes de datos locales con las prendas y precios cacheados.
+- Resultado esperado en pantalla:
+  * El catálogo completo y sus variantes por talla quedan disponibles localmente en la PC.
+
+----------------------------------------------------------------------------------------------------
+[CU08] Y [CU13] REGISTRAR VENTA POS DESCONECTADA EN EFECTIVO (CONTINGENCIA UUIDv4)
+----------------------------------------------------------------------------------------------------
+- Pasos de prueba:
+  1. SIMULA LA CAÍDA DE INTERNET:
+     * Opción recomendada: En DevTools (F12) -> pestaña Network -> cambia "No throttling" a "Offline".
+     * O desconecta el cable de red / Wi-Fi de la PC.
+  2. Observa el cambio inmediato en la PWA:
+     * Aparece el banner amarillo/ámbar: "MODO DESCONECTADO (OFFLINE-FIRST)".
+     * Los métodos electrónicos de pago (Stripe, Tarjeta) se bloquean automáticamente.
+  3. Selecciona prendas del catálogo local en la caja (ej. 1 Prenda a Bs 120.00).
+  4. Ingresa el monto en efectivo entregado por el cliente: Bs 150.00.
+  5. La calculadora calcula el cambio en vivo: Bs 30.00.
+  6. Haz clic en "Emitir Venta en Efectivo (Offline)".
+- Resultado esperado en pantalla:
+  * La venta se emite asignando un UUIDv4 de contingencia (`client_sale_id`).
+  * Se genera en pantalla el Ticket Térmico de Contingencia con código `TCK-OFF-XXXXXX`.
+  * La venta queda retenida en estado `PENDIENTE_SYNC`.
+- Política Validada:
+  * Política 5: En modo desconectado únicamente se admiten ventas al contado en efectivo.
+
+----------------------------------------------------------------------------------------------------
+[CU14] GESTIONAR BANDEJA LOCAL DE OPERACIONES PENDIENTES (OUTBOX PATTERN PWA)
+----------------------------------------------------------------------------------------------------
+- Pasos de prueba:
+  1. Manteniendo el modo desconectado, haz clic en la pestaña "Bandeja Outbox" en la caja.
+  2. Verifica las tarjetas informativas:
+     * Ventas en cola de contingencia: "1 operación pendiente".
+     * Efectivo recaudado en gaveta física: "Bs 120.00 en gaveta offline".
+     * Tabla con el listado de tickets, UUIDv4 y hora exacta de emisión en el mostrador.
+- Resultado esperado en pantalla:
+  * Las ventas permanecen resguardadas en IndexedDB, resistiendo reinicios o recargas de la aplicación.
+
+----------------------------------------------------------------------------------------------------
+[CU15] SINCRONIZAR LOTES DE VENTAS CON IDEMPOTENCIA CENTRAL (sync_operations)
+----------------------------------------------------------------------------------------------------
+- Pasos de prueba:
+  1. RESTABLECE LA CONEXIÓN A INTERNET:
+     * En DevTools (F12) -> pestaña Network -> vuelve a seleccionar "No throttling" (Online).
+  2. El banner del POS cambia a verde: "CONEXIÓN RESTABLECIDA".
+  3. En la pestaña Outbox, haz clic en el botón "Sincronizar Lote Pendiente".
+  4. El lote viaja a `/api/sales/offline/batch-sync` y se consolida en el servidor central Neon.
+  5. PRUEBA DE IDEMPOTENCIA: Haz clic inmediatamente una segunda vez en el botón de sincronización.
+- Resultado esperado en pantalla:
+  * El backend detecta el UUIDv4 duplicado contra `sync_operations` y responde HTTP 200 confirmando la operación SIN duplicar la venta ni descontar dos veces el inventario.
+  * La bandeja Outbox se vacía y marca "Todas las operaciones sincronizadas con éxito".
+
+----------------------------------------------------------------------------------------------------
+[CU11] REGISTRAR RESERVA DE PRENDAS OFFLINE EN MOSTRADOR
+----------------------------------------------------------------------------------------------------
+- Pasos de prueba:
+  1. Con la PWA en modo desconectado (Network -> Offline), abre la pestaña "Reservas de Mostrador".
+  2. Registra los datos de un cliente presencial y la prenda a apartar.
+  3. Pulsa "Apartar Prenda Localmente".
+- Resultado esperado en pantalla:
+  * La reserva se guarda en la cola local de IndexedDB con UUIDv4 propio y se sincroniza al restablecer internet.
+
+----------------------------------------------------------------------------------------------------
+[CU12] ATENDER Y RESOLVER CONFLICTOS DE RESERVAS EXPIRADAS
+----------------------------------------------------------------------------------------------------
+- Actor: Encargado de Sucursal
+- Credenciales: encargado.lp@fashionstore.bo | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/encargado/reservations
+- Pasos de prueba:
+  1. Inicia sesión como encargado de sucursal.
+  2. Ingresa a la bandeja de "Conflictos de Reservas y Diagnóstico de Percha".
+  3. Revisa las reservas vencidas que cumplieron sus 48 horas sin retiro.
+  4. Selecciona una reserva y elige una vía reglamentaria:
+     * Opción A: Reactivar por 24h adicionales si el cliente asiste y la prenda sigue en percha.
+     * Opción B: Liberar formalmente el stock al inventario general para venta al público.
+  5. Ingresa la nota de auditoría y confirma.
+- Resultado esperado en pantalla:
+  * El stock físico se reasigna de inmediato y la reserva se actualiza sin bloqueos en la base de datos.
+
+----------------------------------------------------------------------------------------------------
+[CU16] GESTIONAR Y RESOLVER CONFLICTOS DE VENTAS OFFLINE Y QUIEBRES DE STOCK
+----------------------------------------------------------------------------------------------------
+- Actor: Administrador de Empresa / Encargado de Sucursal
+- Credenciales: admin@elegance.com o encargado.lp@fashionstore.bo | Clave: Tiendafashion123!
+- URL de acceso: http://localhost:4200/app/admin/conflicts
+- Pasos de prueba:
+  1. Si ocurrió una sobreventa durante la desconexión (dos cajeros vendieron la última unidad física):
+  2. El encargado o administrador abre la "Bandeja de Conflictos de Stock".
+  3. Selecciona la venta en conflicto y resuelve mediante una de las vías oficiales:
+     * Vía 1: Sustitución acordada por otra prenda de igual valor.
+     * Vía 2: Emisión de Nota de Crédito por el 100% del importe pagado (código `NC-...`).
+     * Vía 3: Reembolso completo en efectivo.
+  4. Redacta la justificación obligatoria y confirma la resolución.
+- Resultado esperado en pantalla:
+  * El conflicto se cierra formalmente, normalizando el inventario contable y emitiendo el comprobante.
+
+
+====================================================================================================
+                         RESUMEN DE LAS 5 POLÍTICAS CLAVE VALIDADAS
+====================================================================================================
+1. POLÍTICA 1 (Cambio de Talla - CU17):
+   Si la nueva prenda tiene mayor precio, el cambio procede ÚNICAMENTE si el cliente abona la diferencia (Delta > 0).
+
+2. POLÍTICA 2 (Devoluciones - CU18):
+   Se retiene obligatoriamente entre el 20% y el 50% por costos operativos. Reembolso neto del 50% al 80%.
+
+3. POLÍTICA 3 (Despacho Digital - CU09):
+   Prohibido despachar prendas con pago pendiente. Solo se despacha cuando Stripe confirma estado 'paid'.
+
+4. POLÍTICA 4 (Cuotas SaaS - CU02 / CU04):
+   Plan Básico: hasta 3 sucursales, sin IA. Plan Profesional: hasta 10 sucursales, con IA y ML.
+
+5. POLÍTICA 5 (Ventas Offline - CU13 / CU15):
+   En contingencia solo se permite pago en efectivo. Toda venta lleva UUIDv4 con sincronización idempotente.
+====================================================================================================
+                                      FIN DEL DOCUMENTO
+====================================================================================================
+
