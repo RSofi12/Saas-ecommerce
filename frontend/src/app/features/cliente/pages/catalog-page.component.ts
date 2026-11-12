@@ -82,6 +82,8 @@ export class CatalogPageComponent {
     color_id: [''],
     season_id: [''],
     collection_id: [''],
+    min_price: [''],
+    max_price: [''],
   });
 
   protected readonly branchSelectLabel = (branchId: string | null | undefined): string => {
@@ -145,6 +147,8 @@ export class CatalogPageComponent {
           color_id: value.color_id || undefined,
           season_id: value.season_id || undefined,
           collection_id: value.collection_id || undefined,
+          min_price: value.min_price || undefined,
+          max_price: value.max_price || undefined,
         }),
       );
       this.products.set(response.data ?? []);
@@ -159,13 +163,22 @@ export class CatalogPageComponent {
     }
   }
 
-  protected async loadFromIndexedDb(filters: { q?: string; category_id?: string; size_id?: string; color_id?: string }): Promise<void> {
+  protected async loadFromIndexedDb(filters: {
+    q?: string;
+    category_id?: string;
+    size_id?: string;
+    color_id?: string;
+    min_price?: string;
+    max_price?: string;
+  }): Promise<void> {
     try {
       const offlineProducts = await this.idb.getOfflineProducts({
         q: filters.q || undefined,
         category_id: filters.category_id || undefined,
         size_id: filters.size_id || undefined,
         color_id: filters.color_id || undefined,
+        min_price: filters.min_price || undefined,
+        max_price: filters.max_price || undefined,
       });
       this.products.set(offlineProducts);
       this.isOfflineActive.set(true);
@@ -183,7 +196,7 @@ export class CatalogPageComponent {
       return;
     }
 
-    this.downloadingOffline.set(true);
+  this.downloadingOffline.set(true);
     try {
       const branchId = this.form.controls.branch_id.value || undefined;
       const resp = await firstValueFrom(this.api.getOfflineCatalogPack(branchId));
@@ -209,6 +222,8 @@ export class CatalogPageComponent {
       color_id: '',
       season_id: '',
       collection_id: '',
+      min_price: '',
+      max_price: '',
     });
     void this.search();
   }

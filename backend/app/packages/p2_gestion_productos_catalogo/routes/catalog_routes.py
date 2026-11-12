@@ -269,8 +269,22 @@ async def list_products(
     season_id: UUID | None = None,
     collection_id: UUID | None = None,
     tenant_id: UUID | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
 ):
-    rows = list_public_products(db, branch_id, category_id, size_id, color_id, season_id, collection_id, q, tenant_id=tenant_id)
+    rows = list_public_products(
+        db,
+        branch_id,
+        category_id,
+        size_id,
+        color_id,
+        season_id,
+        collection_id,
+        q,
+        tenant_id=tenant_id,
+        min_price=min_price,
+        max_price=max_price,
+    )
     return response(status_code=200, message="Productos obtenidos exitosamente", data=rows)
 
 

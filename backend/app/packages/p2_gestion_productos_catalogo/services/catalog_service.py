@@ -446,6 +446,8 @@ def list_public_products(
     collection_id=None,
     q=None,
     tenant_id=None,
+    min_price=None,
+    max_price=None,
 ):
     query = db.query(Product).options(selectinload(Product.variants))
     if tenant_id:
@@ -467,6 +469,10 @@ def list_public_products(
             variants = [variant for variant in variants if variant.size_id == size_id]
         if color_id:
             variants = [variant for variant in variants if variant.color_id == color_id]
+        if min_price is not None:
+            variants = [variant for variant in variants if Decimal(str(variant.price)) >= Decimal(str(min_price))]
+        if max_price is not None:
+            variants = [variant for variant in variants if Decimal(str(variant.price)) <= Decimal(str(max_price))]
         if not variants:
             continue
 

@@ -219,9 +219,54 @@
         }
       </hlm-select-content>
     </div>
-    <button hlmBtn class="md:col-span-6" type="submit" [disabled]="loading()">
-      {{ loading() ? 'Buscando...' : 'Buscar' }}
-    </button>
+
+    <!-- Filtro de Rango de Precios (CU06: Búsqueda Facetada) -->
+    <div hlmField class="md:col-span-2">
+      <div class="relative flex items-center">
+        <span class="absolute left-3 text-xs font-semibold text-slate-400 select-none">Bs</span>
+        <input
+          id="catalog-min-price"
+          hlmInput
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Precio mín."
+          formControlName="min_price"
+          class="pl-9 w-full"
+        />
+      </div>
+    </div>
+    <div hlmField class="md:col-span-2">
+      <div class="relative flex items-center">
+        <span class="absolute left-3 text-xs font-semibold text-slate-400 select-none">Bs</span>
+        <input
+          id="catalog-max-price"
+          hlmInput
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Precio máx."
+          formControlName="max_price"
+          class="pl-9 w-full"
+        />
+      </div>
+    </div>
+
+    <div class="md:col-span-6 flex items-center gap-2">
+      <button hlmBtn class="flex-1" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Buscando...' : 'Buscar' }}
+      </button>
+      <button
+        hlmBtn
+        variant="outline"
+        type="button"
+        class="border-slate-300 text-slate-600 hover:bg-slate-100"
+        (click)="resetFilters()"
+        title="Restablecer todos los filtros"
+      >
+        Limpiar
+      </button>
+    </div>
   </form>
 
   @if (recommendedProducts().length > 0) {
