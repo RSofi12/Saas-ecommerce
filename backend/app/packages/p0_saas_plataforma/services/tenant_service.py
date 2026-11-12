@@ -85,9 +85,11 @@ def create_tenant(db: Session, company_data: CompanyCreate) -> tuple[Company, Us
             )
 
         admin_user = User(
+            name=company_data.admin_name.strip() if company_data.admin_name else company_data.name,
             email=admin_email,
             hashed_password=hash_password(company_data.admin_password),
             rol=RolEnum.administrador,
+            gender=GenderEnum.femenino,
             tenant_id=company.id,
             is_active=True,
         )
@@ -96,8 +98,6 @@ def create_tenant(db: Session, company_data: CompanyCreate) -> tuple[Company, Us
 
         profile = UserBodyProfile(
             user_id=admin_user.id,
-            name=company_data.admin_name.strip() if company_data.admin_name else company_data.name,
-            gender=GenderEnum.femenino,
         )
         db.add(profile)
 

@@ -36,6 +36,7 @@ export interface Subscription {
   end_date?: string | null;
   status: 'ACTIVA' | 'VENCIDA' | 'CANCELADA' | string;
   plan?: Plan;
+  active_branches_count?: number;
 }
 
 export interface SubscriptionAssignDto {

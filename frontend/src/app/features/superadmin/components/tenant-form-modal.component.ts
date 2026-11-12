@@ -17,7 +17,7 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
         (click)="handleBackdropClick($event)"
       >
         <div 
-          class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-2xl border border-slate-200 text-slate-900"
+          class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-2xl border border-slate-200 text-slate-900"
           (click)="$event.stopPropagation()"
         >
           <!-- Header -->
@@ -132,7 +132,7 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
             <div class="space-y-3">
               <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">2. Plan de Suscripción Inicial</h3>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <!-- Plan Básico -->
                 <label 
                   class="relative flex flex-col p-4 rounded-xl border cursor-pointer transition-all"
@@ -173,6 +173,27 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
                     </li>
                   </ul>
                   <input type="radio" formControlName="plan_code" value="pro" class="sr-only" />
+                </label>
+
+                <!-- Plan Empresarial -->
+                <label 
+                  class="relative flex flex-col p-4 rounded-xl border cursor-pointer transition-all"
+                  [ngClass]="f['plan_code'].value === 'enterprise' ? 'border-slate-900 bg-slate-50/60 ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300'"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-sm text-slate-900">Plan Empresarial</span>
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">$199 / mes</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-2">Grandes retailers textiles, franquicias y multitienda.</p>
+                  <ul class="mt-3 space-y-1 text-xs text-slate-600">
+                    <li class="flex items-center gap-1.5 font-medium text-slate-700">
+                      <span class="text-emerald-600 font-bold">✓</span> Hasta 223 sucursales activas
+                    </li>
+                    <li class="flex items-center gap-1.5 font-medium text-amber-800">
+                      <span class="text-amber-600 font-bold">✓</span> Suite completa IA, ML y Soporte 24/7
+                    </li>
+                  </ul>
+                  <input type="radio" formControlName="plan_code" value="enterprise" class="sr-only" />
                 </label>
               </div>
             </div>
@@ -268,7 +289,7 @@ export class TenantFormModalComponent {
     subdomain: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
     email: ['', [Validators.email]],
     phone: [''],
-    plan_code: ['basic' as 'basic' | 'pro', [Validators.required]],
+    plan_code: ['basic' as 'basic' | 'pro' | 'enterprise', [Validators.required]],
     admin_name: ['', [Validators.required, Validators.minLength(2)]],
     admin_email: ['', [Validators.required, Validators.email]],
     admin_password: ['', [Validators.required, Validators.minLength(8)]],

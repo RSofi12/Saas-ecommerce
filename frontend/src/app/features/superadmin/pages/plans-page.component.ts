@@ -150,7 +150,7 @@ import { PlanFormModalComponent } from '../components/plan-form-modal.component'
                         {{ plan.code }}
                       </span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1 min-h-[36px] line-clamp-2">
+                    <p class="text-xs text-slate-500 mt-1.5 leading-relaxed min-h-[60px]">
                       {{ plan.description || 'Sin descripción comercial asignada.' }}
                     </p>
                   </div>

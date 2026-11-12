@@ -31,5 +31,6 @@ class SubscriptionRead(BaseModel):
     end_date: datetime | None = None
     status: str
     plan: PlanRead | None = None
+    active_branches_count: int | None = 0
 
     model_config = {"from_attributes": True}

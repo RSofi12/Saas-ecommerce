@@ -57,9 +57,23 @@ def list_plans(
         db.commit()
         plans = [basic, pro, enterprise]
     else:
-        # Aseguramos que el plan enterprise tenga hasta 223 sucursales si aún conservaba el default anterior
-        enterprise_plan = next((p for p in plans if p.code == "enterprise"), None)
-        if enterprise_plan and enterprise_plan.max_branches < 223:
+        # Aseguramos que el plan enterprise exista y tenga hasta 223 sucursales
+        enterprise_plan = next((p for p in plans if p.code in ["enterprise", "empresarial"]), None)
+        if not enterprise_plan:
+            enterprise_plan = Plan(
+                name="EMPRESARIAL",
+                code="enterprise",
+                description="Plan corporativo para grandes cadenas y franquicias. Incluye hasta 223 sucursales activas, analítica predictiva avanzada, Gemini IA y copias de seguridad continuas.",
+                max_branches=223,
+                has_ai_access=True,
+                price_monthly=199.00,
+                is_active=True,
+            )
+            db.add(enterprise_plan)
+            db.commit()
+            db.refresh(enterprise_plan)
+            plans.append(enterprise_plan)
+        elif enterprise_plan.max_branches < 223:
             enterprise_plan.max_branches = 223
             enterprise_plan.description = "Plan corporativo para grandes cadenas y franquicias. Incluye hasta 223 sucursales activas, analítica predictiva avanzada, Gemini IA y copias de seguridad continuas."
             db.commit()

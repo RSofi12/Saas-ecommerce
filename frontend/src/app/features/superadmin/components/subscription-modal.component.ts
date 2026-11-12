@@ -103,10 +103,13 @@ import { CompanyService } from '../../../core/services/company.service';
                   }
                 </div>
 
-                @if (currentSubscription()?.plan) {
-                  <div class="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs">
+                <div class="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs">
+                  <span class="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-700">
+                    Sedes Activas: <strong class="text-slate-900">{{ activeBranchesCount() }} sucursales</strong>
+                  </span>
+                  @if (currentSubscription()?.plan) {
                     <span class="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-700">
-                      Cuota: <strong>Máx. {{ currentSubscription()?.plan?.max_branches }} sucursales</strong>
+                      Cuota Actual: <strong>Máx. {{ currentSubscription()?.plan?.max_branches }} sedes</strong>
                     </span>
                     <span
                       class="px-2.5 py-1 rounded-md bg-white border border-slate-200 font-medium"
@@ -114,8 +117,8 @@ import { CompanyService } from '../../../core/services/company.service';
                     >
                       {{ currentSubscription()?.plan?.has_ai_access ? 'IA & Analítica Activa' : 'Sin IA' }}
                     </span>
-                  </div>
-                }
+                  }
+                </div>
               </div>
             </div>
 
@@ -205,24 +208,33 @@ import { CompanyService } from '../../../core/services/company.service';
               } @else {
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   @for (plan of plans(); track plan.id) {
+                    @let isDisabled = isPlanDisabled(plan);
                     <div
-                      (click)="selectedPlanId.set(plan.id)"
-                      class="relative rounded-xl border-2 p-3.5 cursor-pointer transition-all flex flex-col justify-between"
+                      (click)="selectPlan(plan)"
+                      class="relative rounded-xl border-2 p-3.5 transition-all flex flex-col justify-between"
                       [ngClass]="{
-                        'border-slate-900 bg-slate-50/70 shadow-xs': selectedPlanId() === plan.id,
-                        'border-slate-200 bg-white hover:border-slate-300': selectedPlanId() !== plan.id
+                        'border-slate-900 bg-slate-50/70 shadow-xs cursor-pointer': selectedPlanId() === plan.id && !isDisabled,
+                        'border-slate-200 bg-white hover:border-slate-300 cursor-pointer': selectedPlanId() !== plan.id && !isDisabled,
+                        'border-rose-300 bg-rose-50/40 opacity-80 cursor-pointer': isDisabled
                       }"
                     >
                       <div>
                         <div class="flex items-start justify-between">
-                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
-                            [ngClass]="{
-                              'bg-purple-100 text-purple-800': plan.code === 'enterprise',
-                              'bg-amber-100 text-amber-800': plan.code === 'pro',
-                              'bg-slate-200 text-slate-700': plan.code === 'basic'
-                            }">
-                            {{ plan.name }}
-                          </span>
+                          <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                              [ngClass]="{
+                                'bg-purple-100 text-purple-800': plan.code === 'enterprise',
+                                'bg-amber-100 text-amber-800': plan.code === 'pro',
+                                'bg-slate-200 text-slate-700': plan.code === 'basic'
+                              }">
+                              {{ plan.name }}
+                            </span>
+                            @if (isDisabled) {
+                              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                                Excede cuota
+                              </span>
+                            }
+                          </div>
 
                           <input
                             type="radio"
@@ -244,8 +256,8 @@ import { CompanyService } from '../../../core/services/company.service';
                       </div>
 
                       <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] space-y-1 text-slate-600">
-                        <div class="flex items-center gap-1">
-                          <span class="text-emerald-600 font-bold">✓</span>
+                        <div class="flex items-center gap-1" [ngClass]="isDisabled ? 'text-rose-600 font-medium' : ''">
+                          <span [class.font-bold]="true">{{ isDisabled ? '✕' : '✓' }}</span>
                           <span>Hasta <strong>{{ plan.max_branches }}</strong> sedes</span>
                         </div>
                         <div class="flex items-center gap-1">
@@ -291,7 +303,7 @@ import { CompanyService } from '../../../core/services/company.service';
             <button
               type="button"
               (click)="onSubmit()"
-              [disabled]="saving() || !selectedPlanId()"
+              [disabled]="isSubmitDisabled()"
               class="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5 cursor-pointer"
             >
               @if (saving()) {
@@ -322,6 +334,7 @@ export class SubscriptionModalComponent implements OnChanges {
   protected readonly plans = signal<Plan[]>([]);
   protected readonly currentSubscription = signal<Subscription | null>(null);
   protected readonly selectedPlanId = signal<string>('');
+  protected readonly activeBranchesCount = signal<number>(0);
   protected readonly loadingPlans = signal<boolean>(false);
   protected readonly loadingSubscription = signal<boolean>(false);
   protected readonly saving = signal<boolean>(false);
@@ -341,6 +354,7 @@ export class SubscriptionModalComponent implements OnChanges {
     this.selectedPlanId.set('');
     this.errorMessage.set(null);
     this.currentSubscription.set(null);
+    this.activeBranchesCount.set(0);
     this.endDateInput = '';
     this.selectedStatus = 'ACTIVA';
   }
@@ -364,6 +378,7 @@ export class SubscriptionModalComponent implements OnChanges {
     this.companyService.getCompanySubscription(this.company.id).subscribe({
       next: (sub) => {
         this.currentSubscription.set(sub);
+        this.activeBranchesCount.set(sub?.active_branches_count ?? 0);
         if (sub?.plan_id) {
           this.selectedPlanId.set(sub.plan_id);
         }
@@ -382,6 +397,30 @@ export class SubscriptionModalComponent implements OnChanges {
         this.loadingSubscription.set(false);
       },
     });
+  }
+
+  protected selectPlan(plan: Plan): void {
+    this.selectedPlanId.set(plan.id);
+    if (this.activeBranchesCount() > plan.max_branches) {
+      this.errorMessage.set(
+        `Restricción de Negocio (Downgrade Guard): La empresa tiene ${this.activeBranchesCount()} sucursales activas registradas. No se puede asignar el plan ${plan.name} porque solo permite un máximo de ${plan.max_branches} sedes. Para degradar de plan, primero pause o elimine sedes hasta ajustarse a la cuota.`
+      );
+    } else {
+      this.errorMessage.set(null);
+    }
+  }
+
+  protected isPlanDisabled(plan: Plan): boolean {
+    return this.activeBranchesCount() > plan.max_branches;
+  }
+
+  protected isSubmitDisabled(): boolean {
+    if (this.saving() || !this.selectedPlanId()) return true;
+    const chosenPlan = this.plans().find(p => p.id === this.selectedPlanId());
+    if (chosenPlan && this.activeBranchesCount() > chosenPlan.max_branches) {
+      return true;
+    }
+    return false;
   }
 
   protected simulateRenewalDays(days: number): void {
@@ -406,6 +445,16 @@ export class SubscriptionModalComponent implements OnChanges {
 
   protected onSubmit(): void {
     if (!this.company || !this.selectedPlanId()) return;
+
+    // Validación preventiva en cliente
+    const chosenPlan = this.plans().find(p => p.id === this.selectedPlanId());
+    if (chosenPlan && this.activeBranchesCount() > chosenPlan.max_branches) {
+      this.errorMessage.set(
+        `Restricción de Negocio (Downgrade Guard): No se puede asignar el plan ${chosenPlan.name}. La empresa cuenta con ${this.activeBranchesCount()} sucursales activas y el plan tiene un límite de ${chosenPlan.max_branches}.`
+      );
+      toast.error('Restricción de cuota de sucursales excedida');
+      return;
+    }
 
     this.saving.set(true);
     this.errorMessage.set(null);

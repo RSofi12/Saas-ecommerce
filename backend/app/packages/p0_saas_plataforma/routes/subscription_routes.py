@@ -34,17 +34,27 @@ def get_company_subscription(company_id: UUID, db: Session = Depends(get_db)):
         .order_by(Subscription.created_at.desc(), Subscription.start_date.desc())
         .first()
     )
+    # Calculamos el número de sucursales activas que posee la empresa actualmente
+    active_branches = (
+        db.query(Branch)
+        .filter(Branch.tenant_id == company_id, Branch.is_active.is_(True))
+        .count()
+    )
+
     if not sub:
         return response(
             status_code=status.HTTP_200_OK,
             message="La empresa no cuenta con una suscripción",
-            data=None,
+            data={"active_branches_count": active_branches},
         )
+
+    sub_data = SubscriptionRead.model_validate(sub).model_dump()
+    sub_data["active_branches_count"] = active_branches
 
     return response(
         status_code=status.HTTP_200_OK,
         message="Suscripción de la empresa obtenida exitosamente",
-        data=SubscriptionRead.model_validate(sub).model_dump(),
+        data=sub_data,
     )
 
 
