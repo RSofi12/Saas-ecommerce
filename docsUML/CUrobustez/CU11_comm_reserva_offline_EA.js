@@ -4,10 +4,10 @@
 // FashionStore — Plataforma SaaS Multitenant (Sistemas 2)
 //
 // Componentes y Estereotipos Oficiales (Plantilla de Cátedra ICONIX):
-//   Actor: Cliente / Cajero
-//   Boundary: ReservationCreateController (Object, «boundary»)
-//   Control: ReservationOfflineController, ReservationService (Object, «control»)
-//   Entity: LocalPendingReservation, LocalInventory, Reservation, ReservationItem, Inventory (Object, «entity»)
+//   Actor: Cliente
+//   Boundary: ReservationsPageComponent, MyReservationsPageComponent (Object, "boundary")
+//   Control: NetworkStatusService, IdbReservationsService, ReservationApiService, ReservationRoutes, ReservationService (Object, "control")
+//   Entity: PendingReservationItem, Reservation, ReservationItem, Inventory (Object, "entity")
 //
 // Reglas Metodológicas Estrictas:
 //   - Todas las funciones se expresan con paréntesis vacíos () sin parámetros internos.
@@ -99,14 +99,17 @@ function Main() {
         pkg = Repo.Models.GetAt(0).Packages.GetAt(0);
     }
 
-    // 1. Crear Elementos con Estereotipos ICONIX
+    // 1. Crear Elementos con Estereotipos ICONIX (nombres fieles al codigo real)
     var actorCliente  = crearElementoConEsterotipo(pkg, "Cliente", "Actor", "");
-    var uiReserva     = crearElementoConEsterotipo(pkg, "ReservationCreateController", "Object", "boundary");
-    var ctrlLocal     = crearElementoConEsterotipo(pkg, "ReservationOfflineController", "Object", "control");
+    var uiReserva     = crearElementoConEsterotipo(pkg, "ReservationsPageComponent", "Object", "boundary");
+    var uiMisReservas = crearElementoConEsterotipo(pkg, "MyReservationsPageComponent", "Object", "boundary");
+    var ctrlNet       = crearElementoConEsterotipo(pkg, "NetworkStatusService", "Object", "control");
+    var ctrlLocal     = crearElementoConEsterotipo(pkg, "IdbReservationsService", "Object", "control");
+    var ctrlApi       = crearElementoConEsterotipo(pkg, "ReservationApiService", "Object", "control");
+    var ctrlRoutes    = crearElementoConEsterotipo(pkg, "ReservationRoutes", "Object", "control");
     var ctrlBackend   = crearElementoConEsterotipo(pkg, "ReservationService", "Object", "control");
 
-    var entLocalRes   = crearElementoConEsterotipo(pkg, "LocalPendingReservation", "Object", "entity");
-    var entLocalStock = crearElementoConEsterotipo(pkg, "LocalInventory", "Object", "entity");
+    var entLocalRes   = crearElementoConEsterotipo(pkg, "PendingReservationItem", "Object", "entity");
     var entReserva    = crearElementoConEsterotipo(pkg, "Reservation", "Object", "entity");
     var entItem       = crearElementoConEsterotipo(pkg, "ReservationItem", "Object", "entity");
     var entInventory  = crearElementoConEsterotipo(pkg, "Inventory", "Object", "entity");
@@ -115,39 +118,53 @@ function Main() {
     var diagName = "CU11 - Comunicación Registrar Reserva Offline";
     var diagram = crearDiagramaLimpio(pkg, diagName, "Communication");
 
-    // 3. Distribución espacial compacta
-    colocarElemento(diagram, actorCliente,    40,  120, -180, -260);
-    colocarElemento(diagram, uiReserva,      200,  280, -180, -260);
-    colocarElemento(diagram, ctrlLocal,      400,  480, -180, -260);
-    colocarElemento(diagram, entLocalStock,  400,  480,  -60, -140);
-    colocarElemento(diagram, entLocalRes,    400,  480, -320, -400);
+    // 3. Distribucion espacial compacta
+    colocarElemento(diagram, actorCliente,    40,  160, -180, -260);
+    colocarElemento(diagram, uiReserva,      240,  440,  -60, -140);
+    colocarElemento(diagram, uiMisReservas,  240,  440, -340, -420);
+    colocarElemento(diagram, ctrlNet,        520,  720,  -60, -140);
+    colocarElemento(diagram, ctrlLocal,      520,  720, -340, -420);
+    colocarElemento(diagram, entLocalRes,    800, 1000, -340, -420);
+    colocarElemento(diagram, ctrlApi,       1080, 1280, -340, -420);
+    colocarElemento(diagram, ctrlRoutes,    1360, 1560, -340, -420);
+    colocarElemento(diagram, ctrlBackend,   1640, 1840, -340, -420);
+    colocarElemento(diagram, entInventory,  1920, 2120,  -60, -140);
+    colocarElemento(diagram, entReserva,    1920, 2120, -340, -420);
+    colocarElemento(diagram, entItem,       1920, 2120, -600, -680);
 
-    colocarElemento(diagram, ctrlBackend,    620,  700, -180, -260);
-    colocarElemento(diagram, entInventory,   800,  880,  -60, -140);
-    colocarElemento(diagram, entReserva,     800,  880, -180, -260);
-    colocarElemento(diagram, entItem,        800,  880, -300, -380);
+    // 4. Mensajes: numeracion jerarquica IDENTICA al diagrama de Secuencia
 
-    // 4. Mensajes individuales limpios (Sin bucles en Frontera y sin parámetros)
-    // Flujo 1: Registro offline
+    // Fase 1: Registro offline en ReservationsPageComponent
     crearMensaje(actorCliente, uiReserva, "1: prepararReserva()");
-    crearMensaje(uiReserva, ctrlLocal, "1.1: saveOfflineReservation()");
-    crearMensaje(ctrlLocal, ctrlLocal, "1.2: verificarConexion()");
-    crearMensaje(ctrlLocal, ctrlLocal, "1.3: validarStockLocal()");
-    crearMensaje(ctrlLocal, entLocalStock, "1.4: decrementLocalStock()");
-    crearMensaje(ctrlLocal, entLocalRes, "1.5: insertPendingReservation()");
-    crearMensaje(ctrlLocal, uiReserva, "1.6: confirmarGuardadoLocal()");
-    crearMensaje(uiReserva, actorCliente, "1.7: renderizarTicketContingencia()");
+    crearMensaje(uiReserva, ctrlNet, "1.1: effectiveOnline()");
+    crearMensaje(ctrlNet, uiReserva, "1.2: connectivityState()");
+    crearMensaje(uiReserva, ctrlLocal, "1.3: savePending()");
+    crearMensaje(ctrlLocal, entLocalRes, "1.4: create()");
+    crearMensaje(entLocalRes, ctrlLocal, "1.5: pendingRecord()");
+    crearMensaje(ctrlLocal, uiReserva, "1.6: savedOffline()");
+    crearMensaje(uiReserva, actorCliente, "1.7: renderizarModalConfirmacion()");
 
-    // Flujo 2: Reconexión y sincronización
-    crearMensaje(uiReserva, ctrlLocal, "2: detectarReconexionInternet()");
-    crearMensaje(ctrlLocal, ctrlBackend, "2.1: syncAllPending()");
-    crearMensaje(ctrlBackend, entReserva, "2.2: create_reservation()");
-    crearMensaje(ctrlBackend, entItem, "2.3: add()");
-    crearMensaje(ctrlBackend, entInventory, "2.4: with_for_update()");
-    crearMensaje(ctrlBackend, ctrlLocal, "2.5: confirmarSincronizacion()");
-    crearMensaje(ctrlLocal, entLocalRes, "2.6: markAsSynced()");
-    crearMensaje(ctrlLocal, uiReserva, "2.7: notificarSincronizacionExitosa()");
-    crearMensaje(uiReserva, actorCliente, "2.8: renderizarEstadoActualizado()");
+    // Fase 2: Reconexion y sincronizacion desde MyReservationsPageComponent
+    crearMensaje(actorCliente, uiMisReservas, "2: sincronizarPendientes()");
+    crearMensaje(uiMisReservas, ctrlLocal, "2.1: getPending()");
+    crearMensaje(ctrlLocal, uiMisReservas, "2.2: pendingList()");
+    crearMensaje(uiMisReservas, ctrlApi, "2.3: createReservation()");
+    crearMensaje(ctrlApi, ctrlRoutes, "2.4: POST /reservations/");
+    crearMensaje(ctrlRoutes, ctrlBackend, "2.5: create_reservation()");
+    crearMensaje(ctrlBackend, ctrlBackend, "2.6: validateIdempotency()");
+    crearMensaje(ctrlBackend, entInventory, "2.7: with_for_update()");
+    crearMensaje(entInventory, ctrlBackend, "2.8: lockResult()");
+    crearMensaje(ctrlBackend, entReserva, "2.9: create()");
+    crearMensaje(entReserva, ctrlBackend, "2.10: reservationRecord()");
+    crearMensaje(ctrlBackend, entItem, "2.11: add()");
+    crearMensaje(entItem, ctrlBackend, "2.12: itemRecord()");
+    crearMensaje(ctrlBackend, ctrlApi, "2.13: HTTP 201 Created");
+    crearMensaje(ctrlApi, uiMisReservas, "2.14: createdReservation()");
+    crearMensaje(uiMisReservas, ctrlLocal, "2.15: removePending()");
+    crearMensaje(ctrlLocal, entLocalRes, "2.16: delete()");
+    crearMensaje(entLocalRes, ctrlLocal, "2.17: deleted()");
+    crearMensaje(ctrlLocal, uiMisReservas, "2.18: pendingCleared()");
+    crearMensaje(uiMisReservas, actorCliente, "2.19: renderizarResumenSincronizacion()");
 
     diagram.Update();
     Repo.SaveDiagram(diagram.DiagramID);

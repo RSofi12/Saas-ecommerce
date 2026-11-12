@@ -8,10 +8,14 @@ Este documento centraliza la especificación técnica, el mapeo de componentes B
 ---
 
 ## Índice de Casos de Uso Documentados
-1. [CU19: Localizar Sucursales y Trazar Rutas (OpenStreetMap / ORS en Flutter)](#cu19-localizar-sucursales-y-trazar-rutas-openstreetmap--ors)
-2. [CU20: Generar Reportes Ejecutivos por Voz y Lenguaje Natural (Gemini RAG)](#cu20-generar-reportes-ejecutivos-por-voz-y-lenguaje-natural-gemini-rag)
-3. [CU21: Exportar Reportes Empresariales a Formatos PDF y Excel](#cu21-exportar-reportes-empresariales-a-formatos-pdf-y-excel)
-4. [CU23: Predecir Demanda de Ropa por Talla (ML Supervisado - RandomForest)](#cu23-predecir-demanda-de-ropa-por-talla-ml-supervisado---randomforest)
+1. [CU01: Registrar y Gestionar Empresas Tenants (SaaS Multitenant)](#cu01-registrar-y-gestionar-empresas-tenants)
+2. [CU02: Gestionar Planes de Suscripción y Cuotas Comerciales](#cu02-gestionar-planes-de-suscripción-y-cuotas-comerciales)
+3. [CU03: Iniciar Sesión Multitenant con JWT y Claims](#cu03-iniciar-sesión-multitenant-con-jwt-y-claims)
+4. [CU04: Gestionar Sucursales y Validar Límites de Plan](#cu04-gestionar-sucursales-y-validar-límites-de-plan)
+5. [CU19: Localizar Sucursales y Trazar Rutas (OpenStreetMap / ORS en Flutter)](#cu19-localizar-sucursales-y-trazar-rutas-openstreetmap--ors)
+6. [CU20: Generar Reportes Ejecutivos por Voz y Lenguaje Natural (Gemini RAG)](#cu20-generar-reportes-ejecutivos-por-voz-y-lenguaje-natural-gemini-rag)
+7. [CU21: Exportar Reportes Empresariales a Formatos PDF y Excel](#cu21-exportar-reportes-empresariales-a-formatos-pdf-y-excel)
+8. [CU23: Predecir Demanda de Ropa por Talla (ML Supervisado - RandomForest)](#cu23-predecir-demanda-de-ropa-por-talla-ml-supervisado---randomforest)
 
 ---
 
@@ -444,3 +448,640 @@ sequenceDiagram
     end
 ```
 
+
+
+---
+
+## CU01: Registrar y Gestionar Empresas Tenants
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU01_secuencia_gestionar_tenants_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU01_secuencia_gestionar_tenants_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU01_comm_gestionar_tenants_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU01_comm_gestionar_tenants_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p0_saas_plataforma`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Superadmin` | Usuario Global / `PlatformAdmin` | Interacción en consola SaaS | Gestiona empresas suscriptoras del SaaS multitenant. |
+| **Boundary** | `:TenantsPageComponent` | [`tenants.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/tenants/tenants.page.component.ts) | `loadCompanies()`, `openModal()`, `refresh()` | Vista administrativa de grilla y operaciones de tenants. |
+| **Boundary** | `:TenantFormModalComponent`| [`tenant-form-modal.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/tenants/tenant-form-modal.component.ts) | `renderizarFormulario()`, `submit()` | Modal interactivo para carga de datos de nueva empresa y plan. |
+| **Boundary** | `:CompanyService` | [`company.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/company.service.ts) | `listCompanies()`, `registerCompany()` | Cliente HTTP frontend para interacción con endpoints de compañías. |
+| **Controller** | `:CompanyRoutes` | [`company_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/routes/company_routes.py) | `get_all_companies()`, `register_company()` | Endpoints REST en FastAPI con validación de roles superadmin. |
+| **Controller** | `:TenantService` | [`tenant_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/services/tenant_service.py) | `list_companies()`, `create_tenant()` | Servicio de orquestación SaaS: valida slug/NIT y aprovisiona recursos iniciales. |
+| **Entity** | `:Company` | [`company.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/company.py) | `query()`, `create()` | Modelo persistente de empresa multitenant en PostgreSQL. |
+| **Entity** | `:Plan` | [`plan.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/plan.py) | `query()` | Modelo de planes comerciales y cuotas autorizadas. |
+| **Entity** | `:Subscription` | [`subscription.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/subscription.py) | `create()` | Registro de vinculación empresa-plan y vigencia. |
+| **Entity** | `:User` | [`user.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/models/user.py) | `create()` | Usuario administrador primario aprovisionado para el tenant. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as :Superadmin
+    participant UI_Grid as :TenantsPageComponent
+    participant UI_Modal as :TenantFormModalComponent
+    participant UI_Srv as :CompanyService
+    participant Ctrl_Routes as :CompanyRoutes
+    participant Ctrl_Svc as :TenantService
+    participant Ent_Comp as :Company
+    participant Ent_Plan as :Plan
+    participant Ent_Sub as :Subscription
+    participant Ent_User as :User
+
+    %% FASE 1: Consulta Inicial y Listado de Empresas
+    Admin->>UI_Grid: accederGestionTenants()
+    UI_Grid->>UI_Srv: listCompanies()
+    UI_Srv->>Ctrl_Routes: get_all_companies()
+    Ctrl_Routes->>Ctrl_Svc: list_companies()
+    Ctrl_Svc->>Ent_Comp: query()
+    Ctrl_Svc-->>Ctrl_Routes: response()
+    Ctrl_Routes-->>UI_Srv: response()
+    UI_Srv-->>UI_Grid: setCompanies()
+    UI_Grid-->>Admin: renderizarGrillaTenants()
+
+    %% FASE 2: Formulario y Registro de Nueva Empresa
+    Admin->>UI_Grid: abrirModalNuevoTenant()
+    UI_Grid->>UI_Modal: renderizarFormulario()
+    Admin->>UI_Modal: ingresarDatosEmpresaYPlan()
+    UI_Modal->>UI_Srv: registerCompany()
+    UI_Srv->>Ctrl_Routes: register_company()
+    Ctrl_Routes->>Ctrl_Svc: create_tenant()
+    Ctrl_Svc->>Ent_Comp: query()
+
+    alt Slug y NIT únicos: Registro Exitoso
+        Ctrl_Svc->>Ent_Comp: create()
+        Ctrl_Svc->>Ent_Plan: query()
+        Ctrl_Svc->>Ent_Sub: create()
+        Ctrl_Svc->>Ent_User: create()
+        Ctrl_Svc-->>Ctrl_Routes: response()
+        Ctrl_Routes-->>UI_Srv: 201 Created
+        UI_Srv-->>UI_Modal: response()
+        UI_Modal->>UI_Grid: refrescarLista()
+        UI_Grid-->>Admin: mostrarToastExito()
+    else Subdominio o NIT ya registrado
+        Ctrl_Svc-->>Ctrl_Routes: raise_http_exception()
+        Ctrl_Routes-->>UI_Srv: 400 Bad Request
+        UI_Srv-->>UI_Modal: showError()
+        UI_Modal-->>Admin: mostrarErrorDuplicado()
+    end
+```
+
+---
+
+## CU02: Gestionar Planes de Suscripción y Cuotas Comerciales
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU02_secuencia_gestionar_planes_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU02_secuencia_gestionar_planes_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU02_comm_gestionar_planes_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU02_comm_gestionar_planes_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p0_saas_plataforma`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Superadmin` | Usuario Global / `PlatformAdmin` | Consola de administración SaaS | Gestiona cuotas y asignación de planes a empresas. |
+| **Boundary** | `:TenantsPageComponent` | [`tenants.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/tenants/tenants.page.component.ts) | `openSubscriptionModal()`, `onSubscriptionUpdated()` | Origen del evento de cambio de plan y recepción de feedback. |
+| **Boundary** | `:SubscriptionModalComponent` | [`subscription-modal.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/tenants/subscription-modal.component.ts) | `loadData()`, `onSubmit()`, `renderizarModalConPlanes()` | Diálogo modal para selección y asignación del nuevo plan. |
+| **Boundary** | `:CompanyService` | [`company.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/company.service.ts) | `getPlans()`, `getCompanySubscription()`, `assignSubscription()` | Cliente HTTP que centraliza las peticiones de suscripciones y planes. |
+| **Controller** | `:PlanRoutes` | [`plan_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/routes/plan_routes.py) | `list_plans()` | Endpoint REST para consulta del catálogo maestro de planes. |
+| **Controller** | `:SubscriptionRoutes` | [`subscription_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/routes/subscription_routes.py) | `get_company_subscription()`, `assign_subscription()` | Endpoints REST para consulta y modificación de suscripción activa. |
+| **Controller** | `:QuotaService` | [`quota_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/services/quota_service.py) | `get_active_subscription()`, `validate_branch_quota()` | Controlador de reglas de negocio: valida Downgrade Guard contra sucursales activas. |
+| **Entity** | `:Plan` | [`plan.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/plan.py) | `query()` | Modelo de planes con campos `max_branches`, `has_ai_access`, etc. |
+| **Entity** | `:Subscription` | [`subscription.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/subscription.py) | `query()`, `update()`, `create()` | Registro histórico y activo de la suscripción del tenant. |
+| **Entity** | `:Branch` | [`branch.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/models/branch.py) | `query()` | Conteo de sucursales activas del tenant para el Downgrade Guard. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as :Superadmin
+    participant UI_Grid as :TenantsPageComponent
+    participant UI_Modal as :SubscriptionModalComponent
+    participant UI_Srv as :CompanyService
+    participant Ctrl_PlanR as :PlanRoutes
+    participant Ctrl_SubR as :SubscriptionRoutes
+    participant Ctrl_Quota as :QuotaService
+    participant Ent_Plan as :Plan
+    participant Ent_Sub as :Subscription
+    participant Ent_Branch as :Branch
+
+    %% FASE 1: Consulta de Planes y Suscripción Activa
+    Admin->>UI_Grid: openSubscriptionModal()
+    UI_Grid->>UI_Modal: loadData()
+    UI_Modal->>UI_Srv: getPlans()
+    UI_Srv->>Ctrl_PlanR: list_plans()
+    Ctrl_PlanR->>Ent_Plan: query()
+    Ctrl_PlanR-->>UI_Srv: response()
+    UI_Modal->>UI_Srv: getCompanySubscription()
+    UI_Srv->>Ctrl_SubR: get_company_subscription()
+    Ctrl_SubR->>Ctrl_Quota: get_active_subscription()
+    Ctrl_Quota->>Ent_Sub: query()
+    Ctrl_SubR-->>UI_Srv: response()
+    UI_Srv-->>UI_Modal: setPlansAndCurrentSubscription()
+    UI_Modal-->>Admin: renderizarModalConPlanes()
+
+    %% FASE 2: Selección y Asignación de Plan
+    Admin->>UI_Modal: onSubmit()
+    UI_Modal->>UI_Srv: assignSubscription()
+    UI_Srv->>Ctrl_SubR: assign_subscription()
+    Ctrl_SubR->>Ctrl_Quota: validate_branch_quota()
+    Ctrl_Quota->>Ent_Branch: query()
+    Ctrl_Quota->>Ent_Plan: query()
+
+    alt Sucursales activas <= max_branches: Asignación Aprobada
+        Ctrl_SubR->>Ent_Sub: update()
+        Ctrl_SubR->>Ent_Sub: create()
+        Ctrl_SubR->>Ctrl_SubR: sync_tenant_limits()
+        Ctrl_SubR-->>UI_Srv: response()
+        UI_Srv-->>UI_Modal: 200 OK
+        UI_Modal->>UI_Grid: onSubscriptionUpdated()
+        UI_Grid-->>Admin: mostrarToastExito()
+    else Sucursales activas > max_branches (Rechazo Downgrade)
+        Ctrl_Quota-->>Ctrl_SubR: raise_quota_exceeded()
+        Ctrl_SubR-->>UI_Srv: 400 Bad Request
+        UI_Srv-->>UI_Modal: showError()
+        UI_Modal-->>Admin: showErrorToast()
+    end
+```
+
+---
+
+## CU03: Iniciar Sesión Multitenant con JWT y Claims
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU03_secuencia_iniciar_sesion_multitenant_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU03_secuencia_iniciar_sesion_multitenant_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU03_comm_iniciar_sesion_multitenant_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU03_comm_iniciar_sesion_multitenant_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p1_gestion_usuarios_acceso`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Usuario` | Empleado / Administrador / Superadmin | Formulario de autenticación web | Proporciona credenciales y accede a la sesión del tenant. |
+| **Boundary** | `:LoginPageComponent` | [`login.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/auth/login.page.component.ts) | `selectActor()`, `normalizeEmailInput()`, `submitLogin()` | Pantalla de inicio de sesión con selección de roles demo y validación de formulario. |
+| **Boundary** | `:SessionService` | [`session.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/session.service.ts) | `login()`, `setSession()`, `navigateByUrl()` | Gestor de estado de sesión, almacenamiento de token en localStorage y redirección. |
+| **Boundary** | `:AuthApiService` | [`auth-api.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/auth-api.service.ts) | `login()` | Cliente HTTP para interactuar con el router de autenticación del backend. |
+| **Controller** | `:AuthRoutes` | [`auth_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/routes/auth_routes.py) | `login_route()` | Endpoint POST `/auth/login`: orquesta verificación y generación de token. |
+| **Controller** | `:AuthSecurity` | [`security.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/auth/security.py) | `verify_password()`, `create_access_token()` | Hashing criptográfico con bcrypt y firma de tokens JWT con claims de tenant. |
+| **Entity** | `:User` | [`user.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/models/user.py) | `query()` | Modelo de usuario con credenciales, rol y estado activo. |
+| **Entity** | `:Company` | [`company.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/company.py) | `query()` | Validación de estado de la empresa asociada (activa vs suspendida). |
+| **Entity** | `:JwtToken` | Estructura JWT Payload | `create()` | Token criptográfico portador con claims `tenant_id`, `sub`, `role`, `branch_id`. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as :Usuario
+    participant UI_Login as :LoginPageComponent
+    participant UI_Session as :SessionService
+    participant UI_Api as :AuthApiService
+    participant Ctrl_Routes as :AuthRoutes
+    participant Ctrl_Sec as :AuthSecurity
+    participant Ent_User as :User
+    participant Ent_Comp as :Company
+    participant Ent_Jwt as :JwtToken
+
+    %% FASE 1: Selección y Envío de Credenciales
+    User->>UI_Login: selectActor()
+    UI_Login->>UI_Login: normalizeEmailInput()
+    User->>UI_Login: submitLogin()
+    UI_Login->>UI_Session: login()
+    UI_Session->>UI_Api: login()
+    UI_Api->>Ctrl_Routes: login_route()
+    Ctrl_Routes->>Ent_User: query()
+    Ctrl_Routes->>Ctrl_Sec: verify_password()
+
+    alt Credenciales válidas y Empresa activa: Login Exitoso
+        Ctrl_Routes->>Ent_Comp: query()
+        Ctrl_Routes->>Ctrl_Sec: create_access_token()
+        Ctrl_Sec->>Ent_Jwt: create()
+        Ctrl_Routes-->>UI_Api: response()
+        UI_Api-->>UI_Session: token_payload
+        UI_Session->>UI_Session: setSession()
+        UI_Session->>UI_Login: navigateByUrl()
+    else Credenciales inválidas (401 Unauthorized)
+        Ctrl_Routes-->>UI_Api: raise_http_exception()
+        UI_Api-->>UI_Login: error_401
+        UI_Login-->>User: showErrorToast()
+    else Empresa suspendida por mora (403 Forbidden)
+        Ctrl_Routes-->>UI_Api: raise_http_exception()
+        UI_Api-->>UI_Login: error_403
+        UI_Login-->>User: showErrorToast()
+    end
+```
+
+---
+
+## CU04: Gestionar Sucursales y Validar Límites de Plan
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU04_secuencia_gestionar_sucursales_limites_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU04_secuencia_gestionar_sucursales_limites_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU04_comm_gestionar_sucursales_limites_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU04_comm_gestionar_sucursales_limites_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p1_gestion_usuarios_acceso`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `AdministradorTenant` | Usuario Tenant / `Admin` | Interfaz de sucursales | Gestiona puntos de venta y valida cuotas asignadas a su empresa. |
+| **Boundary** | `:AdminBranchPageComponent` | [`admin-branch.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/admin/branches/admin-branch.page.component.ts) | `loadData()`, `submitNuevaSucursal()`, `renderizarPanelSucursales()` | Vista de configuración de sucursales, horarios, coordenadas y medidor de cuota. |
+| **Boundary** | `:AdminBranchService` | [`admin-branch.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/admin-branch.service.ts) | `getBranchQuota()`, `listBranches()`, `createBranch()` | Servicio de cliente HTTP para consultar cupo y crear sucursales. |
+| **Controller** | `:BranchRoutes` | [`branch_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/routes/branch_routes.py) | `get_branch_quota_route()`, `list_branches_route()`, `create_branch_route()` | Endpoints REST en FastAPI con aislamiento tenant estricto. |
+| **Controller** | `:BranchService` | [`branch_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/services/branch_service.py) | `get_branch_quota()`, `get_branches()`, `create_branch()`, `validate_branch_quota()` | Controlador de dominio: consulta plan y valida que sucursales activas < `max_branches`. |
+| **Entity** | `:Subscription` | [`subscription.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/subscription.py) | `query()` | Consulta de suscripción activa para determinar el plan contratado. |
+| **Entity** | `:Plan` | [`plan.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p0_saas_plataforma/models/plan.py) | `query()` | Consulta de la cuota máxima permitida (`max_branches` = 2 Básico, 10 Profesional). |
+| **Entity** | `:Branch` | [`branch.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/models/branch.py) | `query()`, `create()` | Persistencia y conteo de sucursales activas asociadas al tenant. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as :AdministradorTenant
+    participant UI_Page as :AdminBranchPageComponent
+    participant UI_Srv as :AdminBranchService
+    participant Ctrl_Routes as :BranchRoutes
+    participant Ctrl_Svc as :BranchService
+    participant Ent_Sub as :Subscription
+    participant Ent_Plan as :Plan
+    participant Ent_Branch as :Branch
+
+    %% FASE 1: Consulta de Cuota y Sucursales Existentes
+    Admin->>UI_Page: loadData()
+    UI_Page->>UI_Srv: getBranchQuota()
+    UI_Srv->>Ctrl_Routes: get_branch_quota_route()
+    Ctrl_Routes->>Ctrl_Svc: get_branch_quota()
+    Ctrl_Svc->>Ent_Sub: query()
+    Ctrl_Svc->>Ent_Plan: query()
+    Ctrl_Svc->>Ent_Branch: query()
+    Ctrl_Routes-->>UI_Srv: response()
+    UI_Page->>UI_Srv: listBranches()
+    UI_Srv->>Ctrl_Routes: list_branches_route()
+    Ctrl_Routes->>Ctrl_Svc: get_branches()
+    Ctrl_Svc->>Ent_Branch: query()
+    Ctrl_Routes-->>UI_Srv: response()
+    UI_Srv-->>UI_Page: setQuotaAndBranches()
+    UI_Page-->>Admin: renderizarPanelSucursales()
+
+    %% FASE 2: Formulario de Sucursal y Validación de Cuota
+    Admin->>UI_Page: submitNuevaSucursal()
+    UI_Page->>UI_Srv: createBranch()
+    UI_Srv->>Ctrl_Routes: create_branch_route()
+    Ctrl_Routes->>Ctrl_Svc: create_branch()
+    Ctrl_Svc->>Ctrl_Svc: validate_branch_quota()
+    Ctrl_Svc->>Ent_Branch: query()
+    Ctrl_Svc->>Ent_Plan: query()
+
+    alt Sucursales activas < max_branches: Cupo disponible
+        Ctrl_Svc->>Ent_Branch: create()
+        Ctrl_Routes-->>UI_Srv: response()
+        UI_Srv-->>UI_Page: 201 Created
+        UI_Page->>UI_Page: loadData()
+        UI_Page-->>Admin: mostrarToastExito()
+    else Sucursales activas >= max_branches (Cuota copada 400)
+        Ctrl_Svc-->>Ctrl_Routes: raise_quota_exceeded()
+        Ctrl_Routes-->>UI_Srv: 400 Bad Request
+        UI_Srv-->>UI_Page: showError()
+        UI_Page-->>Admin: showErrorToast()
+    end
+```
+
+
+---
+
+## CU05: Gestionar Prendas y Variantes de Precio por Talla
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU05_secuencia_gestionar_prendas_variantes_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU05_secuencia_gestionar_prendas_variantes_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU05_comm_gestionar_prendas_variantes_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU05_comm_gestionar_prendas_variantes_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p2_gestion_productos_catalogo`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `AdministradorTenant` | Administrador de Tienda | Interacción en catálogo administrativo | Registra prendas y define precios diferenciados según talla. |
+| **Boundary** | `:AdminCatalogPageComponent` | [`admin-catalog.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/admin/catalog/admin-catalog.page.component.ts) | `loadData()`, `submitNuevaPrenda()`, `renderizarGrillaCatalogo()` | Formulario maestro de prendas y variantes con validación reactiva. |
+| **Boundary** | `:CatalogApiService` | [`catalog-api.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/catalog-api.service.ts) | `listAdminProducts()`, `createProduct()` | Cliente HTTP que despacha las operaciones hacia el backend. |
+| **Controller** | `:CatalogRoutes` | [`catalog_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/routes/catalog_routes.py) | `list_admin_products_route()`, `create_product_route()` | Endpoints REST en FastAPI con inyección de tenant_id. |
+| **Controller** | `:CatalogService` | [`catalog_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/services/catalog_service.py) | `list_admin_products()`, `create_product()`, `validate_variant_payload()`, `validate_discount()` | Reglas de dominio: validación de SKU único por talla y cálculo de precios. |
+| **Entity** | `:Product` | [`product.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/product.py) | `query()`, `create()` | Entidad prenda principal en PostgreSQL. |
+| **Entity** | `:ProductVariant` | [`product_variant.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/product_variant.py) | `create()` | Entidad variante de talla/color con precio específico. |
+| **Entity** | `:Category` | [`category.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/category.py) | `query()` | Categoría a la que pertenece la prenda. |
+| **Entity** | `:Size` | [`size.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/size.py) | `query()` | Catálogo maestro de tallas (S, M, L, XL). |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as :AdministradorTenant
+    participant UI_Page as :AdminCatalogPageComponent
+    participant UI_Api as :CatalogApiService
+    participant Ctrl_Routes as :CatalogRoutes
+    participant Ctrl_Svc as :CatalogService
+    participant Ent_Prod as :Product
+    participant Ent_Var as :ProductVariant
+    participant Ent_Cat as :Category
+    participant Ent_Size as :Size
+
+    %% FASE 1: Consulta Catálogo Administrativo
+    Admin->>UI_Page: loadData()
+    UI_Page->>UI_Api: listAdminProducts()
+    UI_Api->>Ctrl_Routes: list_admin_products_route()
+    Ctrl_Routes->>Ctrl_Svc: list_admin_products()
+    Ctrl_Svc->>Ent_Prod: query()
+    Ctrl_Routes->>Ent_Cat: query()
+    Ctrl_Routes->>Ent_Size: query()
+    Ctrl_Routes-->>UI_Api: response()
+    UI_Api-->>UI_Page: setProducts()
+    UI_Page-->>Admin: renderizarGrillaCatalogo()
+
+    %% FASE 2: Creación de Prenda y Precios por Talla
+    Admin->>UI_Page: submitNuevaPrenda()
+    UI_Page->>UI_Api: createProduct()
+    UI_Api->>Ctrl_Routes: create_product_route()
+    Ctrl_Routes->>Ctrl_Svc: create_product()
+    Ctrl_Svc->>Ctrl_Svc: validate_variant_payload()
+    Ctrl_Svc->>Ctrl_Svc: validate_discount()
+
+    alt SKU válido y sin duplicado: Creación Exitosa
+        Ctrl_Svc->>Ent_Prod: create()
+        Ctrl_Svc->>Ent_Var: create()
+        Ctrl_Routes-->>UI_Api: response()
+        UI_Api-->>UI_Page: 201 Created
+        UI_Page->>UI_Page: loadData()
+        UI_Page-->>Admin: mostrarToastExito()
+    else SKU duplicado o descuento inválido (400)
+        Ctrl_Svc-->>Ctrl_Routes: raise_http_exception()
+        Ctrl_Routes-->>UI_Api: 400 Bad Request
+        UI_Api-->>UI_Page: showError()
+        UI_Page-->>Admin: showErrorToast()
+    end
+```
+
+---
+
+## CU06: Consultar Catálogo Online con Búsqueda Facetada
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU06_secuencia_consultar_catalogo_facetado_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU06_secuencia_consultar_catalogo_facetado_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU06_comm_consultar_catalogo_facetado_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU06_comm_consultar_catalogo_facetado_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p2_gestion_productos_catalogo`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Cliente` | Usuario Comprador | Navegación y filtrado en tienda | Explora el catálogo con filtros facetados por talla, precio y categoría. |
+| **Boundary** | `:CatalogPageComponent` | [`catalog.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/catalog/catalog.page.component.ts) | `navegarCatalogo()`, `search()`, `aplicarFiltrosFacetados()`, `renderizarGrillaPrendas()` | Pantalla de catálogo online con panel lateral de filtros facetados. |
+| **Boundary** | `:CatalogApiService` | [`catalog-api.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/catalog-api.service.ts) | `listCategories()`, `listProducts()` | Cliente HTTP que invoca las rutas públicas del catálogo. |
+| **Controller** | `:CatalogRoutes` | [`catalog_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/routes/catalog_routes.py) | `list_categories_route()`, `list_products_route()` | Endpoints GET `/categories` y GET `/products`. |
+| **Controller** | `:CatalogService` | [`catalog_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/services/catalog_service.py) | `list_public_products()`, `build_facet_query()` | Orquestador de consultas dinámicas combinando categorías, tallas y rangos. |
+| **Entity** | `:Product` | [`product.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/product.py) | `query()` | Modelo de producto base activo. |
+| **Entity** | `:ProductVariant` | [`product_variant.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/product_variant.py) | `query()` | Variantes filtradas por talla y precio. |
+| **Entity** | `:Category` | [`category.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/category.py) | `query()` | Categorías disponibles para las facetas. |
+| **Entity** | `:Size` | [`size.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/size.py) | `query()` | Tallas disponibles para las facetas. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as :Cliente
+    participant UI_Page as :CatalogPageComponent
+    participant UI_Api as :CatalogApiService
+    participant Ctrl_Routes as :CatalogRoutes
+    participant Ctrl_Svc as :CatalogService
+    participant Ent_Prod as :Product
+    participant Ent_Var as :ProductVariant
+    participant Ent_Cat as :Category
+    participant Ent_Size as :Size
+
+    %% FASE 1: Consulta Inicial y Carga de Filtros
+    User->>UI_Page: navegarCatalogo()
+    UI_Page->>UI_Api: listCategories()
+    UI_Api->>Ctrl_Routes: list_categories_route()
+    Ctrl_Routes->>Ent_Cat: query()
+    Ctrl_Routes->>Ent_Size: query()
+    Ctrl_Routes-->>UI_Api: response()
+    UI_Api-->>UI_Page: setCategoriesAndSizes()
+    UI_Page-->>User: renderizarFiltros()
+
+    %% FASE 2: Búsqueda Facetada Combinada
+    User->>UI_Page: aplicarFiltrosFacetados()
+    UI_Page->>UI_Page: search()
+    UI_Page->>UI_Api: listProducts()
+    UI_Api->>Ctrl_Routes: list_products_route()
+    Ctrl_Routes->>Ctrl_Svc: list_public_products()
+    Ctrl_Svc->>Ctrl_Svc: build_facet_query()
+    Ctrl_Svc->>Ent_Prod: query()
+    Ctrl_Svc->>Ent_Var: query()
+
+    alt Resultados encontrados: Renderizar Grilla
+        Ctrl_Svc-->>Ctrl_Routes: response()
+        Ctrl_Routes-->>UI_Api: 200 OK (products)
+        UI_Api-->>UI_Page: setProducts()
+        UI_Page-->>User: renderizarGrillaPrendas()
+    else Sin coincidencias (empty 200)
+        Ctrl_Svc-->>Ctrl_Routes: responseEmpty()
+        Ctrl_Routes-->>UI_Api: 200 OK (empty)
+        UI_Api-->>UI_Page: setProductsEmpty()
+        UI_Page-->>User: mostrarEmptyState()
+    end
+```
+
+---
+
+## CU07: Sincronizar y Descargar Catálogo a Almacenamiento Local (PWA / SQLite)
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU07_secuencia_sincronizar_catalogo_offline_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU07_secuencia_sincronizar_catalogo_offline_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU07_comm_sincronizar_catalogo_offline_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU07_comm_sincronizar_catalogo_offline_EA.js)
+- **Alcance Arquitectónico:** Frontend PWA Angular (`frontend/`) + Backend FastAPI (`p2_gestion_productos_catalogo`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Cajero` | Personal POS | Acción manual o automática en PWA | Descarga y actualiza el catálogo offline en IndexedDB. |
+| **Boundary** | `:CatalogPageComponent` | [`catalog.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/catalog/catalog.page.component.ts) | `solicitarSincronizacionOffline()`, `downloadOfflineCatalog()`, `mostrarToastSincronizado()` | Botón y barra de progreso de sincronización offline en POS. |
+| **Boundary** | `:CatalogApiService` | [`catalog-api.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/catalog-api.service.ts) | `getOfflineCatalogPack()` | Cliente HTTP que descarga el payload estructurado del catálogo. |
+| **Boundary** | `:IdbCatalogService` | [`idb-catalog.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/offline/idb-catalog.service.ts) | `saveOfflinePack()`, `rollbackTransaction()` | Servicio Angular encargado de las transacciones con IndexedDB. |
+| **Controller** | `:CatalogRoutes` | [`catalog_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/routes/catalog_routes.py) | `get_offline_catalog_pack_route()` | Endpoint que empaqueta prendas, variantes e imágenes para caché offline. |
+| **Controller** | `:CatalogService` | [`catalog_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/services/catalog_service.py) | `list_public_products()` | Consulta masiva optimizada para sincronización offline. |
+| **Entity** | `:Product` | [`product.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/product.py) | `query()` | Modelos de prendas activas en PostgreSQL. |
+| **Entity** | `:ProductVariant` | [`product_variant.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p2_gestion_productos_catalogo/models/product_variant.py) | `query()` | Variantes asociadas a las prendas. |
+| **Entity** | `:IdbCatalogStore` | ObjectStore IndexedDB (`catalog_products`) | `clearAndPutProducts()`, `putSyncMeta()` | Almacenamiento no relacional local en el navegador del cliente. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cashier as :Cajero
+    participant UI_Page as :CatalogPageComponent
+    participant UI_Api as :CatalogApiService
+    participant UI_Idb as :IdbCatalogService
+    participant Ctrl_Routes as :CatalogRoutes
+    participant Ctrl_Svc as :CatalogService
+    participant Ent_Prod as :Product
+    participant Ent_Var as :ProductVariant
+    participant Ent_Idb as :IdbCatalogStore
+
+    %% FASE 1: Solicitud y Descarga de Catálogo Offline
+    Cashier->>UI_Page: solicitarSincronizacionOffline()
+    UI_Page->>UI_Page: downloadOfflineCatalog()
+    UI_Page->>UI_Api: getOfflineCatalogPack()
+    UI_Api->>Ctrl_Routes: get_offline_catalog_pack_route()
+    Ctrl_Routes->>Ctrl_Svc: list_public_products()
+    Ctrl_Svc->>Ent_Prod: query()
+    Ctrl_Svc->>Ent_Var: query()
+
+    alt Red disponible: Sincronización Exitosa
+        Ctrl_Svc-->>Ctrl_Routes: response()
+        Ctrl_Routes-->>UI_Api: 200 OK (catalog_pack)
+        UI_Api-->>UI_Page: response()
+        UI_Page->>UI_Idb: saveOfflinePack()
+        UI_Idb->>Ent_Idb: clearAndPutProducts()
+        UI_Idb->>Ent_Idb: putSyncMeta()
+        UI_Idb-->>UI_Page: ok
+        UI_Page-->>Cashier: mostrarToastSincronizado()
+    else Falla de red (NetworkError)
+        UI_Api-->>UI_Page: network_error()
+        UI_Page->>UI_Idb: rollbackTransaction()
+        UI_Page-->>Cashier: showErrorToast()
+    end
+```
+
+---
+
+## CU08: Consultar Catálogo Offline en Modo Desconectado
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU08_secuencia_consultar_catalogo_offline_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU08_secuencia_consultar_catalogo_offline_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU08_comm_consultar_catalogo_offline_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU08_comm_consultar_catalogo_offline_EA.js)
+- **Alcance Arquitectónico:** Frontend PWA Angular (`frontend/`) con persistencia local IndexedDB.
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Cajero` | Personal POS | Búsqueda en contingencia sin red | Consulta precios y prendas estando desconectado de Internet. |
+| **Boundary** | `:CatalogPageComponent` | [`catalog.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/catalog/catalog.page.component.ts) | `navegarCatalogo()`, `search()`, `renderizarCatalogoOffline()` | Renderiza la interfaz de catálogo con indicador visual "Modo Offline". |
+| **Controller** | `:NetworkStatusService` | [`network-status.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/network-status.service.ts) | `effectiveOnline()` | Detecta el estado de conectividad (`navigator.onLine` y ping de socket). |
+| **Controller** | `:IdbCatalogService` | [`idb-catalog.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/offline/idb-catalog.service.ts) | `loadFromIndexedDb()`, `filterInMemory()` | Realiza el filtrado y paginación en memoria sobre el almacén local. |
+| **Entity** | `:IdbProductStore` | ObjectStore IndexedDB (`catalog_products`) | `getAll()` | Registros de prendas almacenados localmente en el dispositivo. |
+| **Entity** | `:IdbMetaStore` | ObjectStore IndexedDB (`sync_meta`) | `getSyncMeta()` | Metadatos de la última versión del catálogo descargada. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cashier as :Cajero
+    participant UI_Page as :CatalogPageComponent
+    participant Ctrl_Net as :NetworkStatusService
+    participant Ctrl_Idb as :IdbCatalogService
+    participant Ent_Prod as :IdbProductStore
+    participant Ent_Meta as :IdbMetaStore
+
+    %% FASE 1: Detección Offline y Consulta a IndexedDB
+    Cashier->>UI_Page: navegarCatalogo()
+    UI_Page->>UI_Page: search()
+    UI_Page->>Ctrl_Net: effectiveOnline()
+    Ctrl_Net-->>UI_Page: returnFalse()
+    UI_Page->>Ctrl_Idb: loadFromIndexedDb()
+    Ctrl_Idb->>Ctrl_Idb: filterInMemory()
+    Ctrl_Idb->>Ent_Prod: getAll()
+    Ctrl_Idb->>Ent_Meta: getSyncMeta()
+
+    alt Almacén local con datos: Renderizado Offline
+        Ctrl_Idb-->>UI_Page: setProducts()
+        UI_Page-->>Cashier: renderizarCatalogoOffline()
+    else Almacén local vacío
+        Ctrl_Idb-->>UI_Page: returnEmpty()
+        UI_Page-->>Cashier: mostrarAlertaSinDatosOffline()
+    end
+```
+
+---
+
+## CU10: Crear Reserva Online de Prendas con Vencimiento y Bloqueo
+
+### 1. Ficha Técnica y Scripts Enterprise Architect
+- **Script Secuencia (JScript):** [`docsUML/CUSecuencia/CU10_secuencia_crear_reserva_online_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUSecuencia/CU10_secuencia_crear_reserva_online_EA.js)
+- **Script Robustez / Comunicación (JScript):** [`docsUML/CUrobustez/CU10_comm_crear_reserva_online_EA.js`](file:///c:/Users/PERSONAL/ecommerce-SI2/docsUML/CUrobustez/CU10_comm_crear_reserva_online_EA.js)
+- **Alcance Arquitectónico:** Frontend Angular (`frontend/`) + Backend FastAPI (`p4_gestion_compras_reservas`).
+
+### 2. Tabla Comparativa: Componentes ICONIX vs Flujo del Código Fuente
+
+| Rol BCE | Componente en Diagrama UML | Elemento en Código Fuente | Métodos / Operaciones Invocadas | Responsabilidad en el Flujo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Actor** | `Cliente` | Usuario Comprador | Interfaz de reservas online | Reserva prendas para probador físico en sucursal con vigencia de 24h-48h. |
+| **Boundary** | `:ReservationsPageComponent` | [`reservations.page.component.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/features/reservations/reservations.page.component.ts) | `navegarReservas()`, `solicitarReservaPrenda()`, `mostrarComprobanteReserva()` | Vista de reservas activas y formulario de apartado con selector de sucursal. |
+| **Boundary** | `:ReservationApiService` | [`reservation-api.service.ts`](file:///c:/Users/PERSONAL/ecommerce-SI2/frontend/src/app/core/services/reservation-api.service.ts) | `listMyReservations()`, `createReservation()` | Cliente HTTP para interactuar con los endpoints de reservas. |
+| **Controller** | `:ReservationRoutes` | [`reservation_routes.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p4_gestion_compras_reservas/routes/reservation_routes.py) | `list_reservations_route()`, `create_reservation_route()` | Endpoints GET `/reservations/me` y POST `/reservations/`. |
+| **Controller** | `:ReservationService` | [`reservation_service.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p4_gestion_compras_reservas/services/reservation_service.py) | `create_reservation()`, `expire_due_reservations()`, `validarRangoFechaVisita()`, `validarStockDisponible()` | Lógica central: limpia vencidas, valida fecha (<=7 días), bloquea stock en percha. |
+| **Entity** | `:Reservation` | [`reservation.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p4_gestion_compras_reservas/models/reservation.py) | `query()`, `create()` | Cabecera de la reserva con código, `expires_at` y estado `pending`. |
+| **Entity** | `:ReservationItem` | [`reservation_item.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p4_gestion_compras_reservas/models/reservation_item.py) | `create()` | Detalle de variantes y cantidades reservadas. |
+| **Entity** | `:Inventory` | [`inventory.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p3_gestion_inventario_disponibilidad/models/inventory.py) | `_get_inventory_for_update()`, `incrementarReservedQuantity()` | Incremento transaccional de `reserved_quantity` con bloqueo FOR UPDATE. |
+| **Entity** | `:Branch` | [`branch.py`](file:///c:/Users/PERSONAL/ecommerce-SI2/backend/app/packages/p1_gestion_usuarios_acceso/models/branch.py) | `query()` | Validación de sucursal de destino activa. |
+
+### 3. Previsualización del Diagrama de Secuencia (Mermaid UML)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as :Cliente
+    participant UI_Page as :ReservationsPageComponent
+    participant UI_Api as :ReservationApiService
+    participant Ctrl_Routes as :ReservationRoutes
+    participant Ctrl_Svc as :ReservationService
+    participant Ent_Res as :Reservation
+    participant Ent_Item as :ReservationItem
+    participant Ent_Inv as :Inventory
+    participant Ent_Branch as :Branch
+
+    %% FASE 1: Consulta de Reservas Propias y Barrido de Vencidas
+    User->>UI_Page: navegarReservas()
+    UI_Page->>UI_Api: listMyReservations()
+    UI_Api->>Ctrl_Routes: list_reservations_route()
+    Ctrl_Routes->>Ctrl_Svc: list_reservations_for_user()
+    Ctrl_Svc->>Ctrl_Svc: expire_due_reservations()
+    Ctrl_Svc->>Ent_Res: query()
+    Ctrl_Svc-->>Ctrl_Routes: response()
+    Ctrl_Routes-->>UI_Api: response()
+    UI_Api-->>UI_Page: setReservations()
+    UI_Page-->>User: renderizarListaReservas()
+
+    %% FASE 2: Creación de Reserva y Bloqueo de Stock
+    User->>UI_Page: solicitarReservaPrenda()
+    UI_Page->>UI_Api: createReservation()
+    UI_Api->>Ctrl_Routes: create_reservation_route()
+    Ctrl_Routes->>Ctrl_Svc: create_reservation()
+    Ctrl_Svc->>Ctrl_Svc: expire_due_reservations()
+    Ctrl_Svc->>Ctrl_Svc: validarRangoFechaVisita()
+    Ctrl_Svc->>Ent_Branch: query()
+    Ctrl_Svc->>Ent_Inv: _get_inventory_for_update()
+    Ctrl_Svc->>Ctrl_Svc: validarStockDisponible()
+
+    alt Stock disponible y fecha válida: Reserva Creada
+        Ctrl_Svc->>Ent_Res: create()
+        Ctrl_Svc->>Ent_Item: create()
+        Ctrl_Svc->>Ent_Inv: incrementarReservedQuantity()
+        Ctrl_Svc-->>Ctrl_Routes: response()
+        Ctrl_Routes-->>UI_Api: 201 Created (reservation)
+        UI_Api-->>UI_Page: response()
+        UI_Page-->>User: mostrarComprobanteReserva()
+    else Stock insuficiente o fecha fuera de rango (400)
+        Ctrl_Svc-->>Ctrl_Routes: raise_http_exception()
+        Ctrl_Routes-->>UI_Api: 400 Bad Request
+        UI_Api-->>UI_Page: showError()
+        UI_Page-->>User: showErrorToast()
+    end
+```

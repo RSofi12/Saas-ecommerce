@@ -80,21 +80,13 @@ function colocarElemento(diagram, element, left, right, top, bottom) {
     return diagObj;
 }
 
-function crearMensaje(sourceEl, targetEl, label) {
-    var connector = sourceEl.Connectors.AddNew("", "Communication");
-    connector.SupplierID = targetEl.ElementID;
-    connector.Direction = "Source -> Destination";
-    connector.Update();
-    sourceEl.Connectors.Refresh();
-
-    for (var i = 0; i < connector.Messages.Count; i++) {
-        var m = connector.Messages.GetAt(i);
-        if (m.Name == label) return connector;
-    }
-    var msg = connector.Messages.AddNew(label, "Message");
-    msg.Update();
-    connector.Messages.Refresh();
-    return connector;
+function crearMensaje(origen, destino, texto) {
+    var con = origen.Connectors.AddNew(texto, "Association");
+    con.SupplierID = destino.ElementID;
+    con.Name = texto;
+    con.Direction = "Source -> Destination";
+    con.Update();
+    return con;
 }
 
 function Main() {
@@ -147,20 +139,23 @@ function Main() {
     colocarElemento(diagram, entSaleItem,  900,  990, -190, -260);
     colocarElemento(diagram, entInventory, 900,  990, -270, -340);
 
-    // 4. Mensajes y Flujos
+    // 4. Mensajes y Flujos (numeración jerárquica por fases)
+    // FASE 1: Detección de reconexión y lectura de la Outbox local
     crearMensaje(actorCajero, uiCaja, "1: iniciarSincronizacionLote()");
-    crearMensaje(actorSync, uiIdb, "2: detectarConectividadOnline()");
-    crearMensaje(uiCaja, uiIdb, "3: leerVentasPendientesIndexedDB()");
-    crearMensaje(uiCaja, ctrlRoutes, "4: batch_sync_sales_endpoint()");
+    crearMensaje(actorSync, uiIdb, "1.1: detectarConectividadOnline()");
+    crearMensaje(uiCaja, uiIdb, "1.2: leerVentasPendientesIndexedDB()");
 
-    crearMensaje(ctrlRoutes, ctrlService, "5: sync_offline_sales_batch()");
-    crearMensaje(ctrlService, entSyncOp, "6: verificarIdempotenciaOperacion()");
-    crearMensaje(ctrlService, entSale, "7: validarVentaExistenteUUID()");
+    // FASE 2: Sincronización por lote con idempotencia central
+    crearMensaje(uiCaja, ctrlRoutes, "2: batch_sync_sales_endpoint()");
+    crearMensaje(ctrlRoutes, ctrlService, "2.1: sync_offline_sales_batch()");
 
-    crearMensaje(ctrlService, entInventory, "8: verificarStockCentralYDescontar()");
-    crearMensaje(ctrlService, entSale, "9: consolidarVentaSincronizada()");
-    crearMensaje(ctrlService, entSaleItem, "10: registrarItemsVentaCentral()");
-    crearMensaje(ctrlService, entSyncOp, "11: persistirRegistroSync()");
+    crearMensaje(ctrlService, entSyncOp, "2.2: verificarIdempotenciaOperacion()");
+    crearMensaje(ctrlService, entSale, "2.3: validarVentaExistenteUUID()");
+
+    crearMensaje(ctrlService, entInventory, "2.4: verificarStockCentralYDescontar()");
+    crearMensaje(ctrlService, entSale, "2.5: consolidarVentaSincronizada()");
+    crearMensaje(ctrlService, entSaleItem, "2.6: registrarItemsVentaCentral()");
+    crearMensaje(ctrlService, entSyncOp, "2.7: persistirRegistroSync()");
 
     diagram.Update();
     Repo.ReloadDiagram(diagram.DiagramID);

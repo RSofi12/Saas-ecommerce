@@ -4,9 +4,10 @@
  * DESCRIPCION: Venta de mostrador POS cuando la sucursal pierde la conexion a Internet.
  *              Fase 1: Enforzamiento estricto de la Politica de Negocio 5 (cobro forzado en efectivo,
  *              bloqueo preventivo de metodos electronicos, calculo de cambio en tiempo real).
- *              Fase 2: Persistencia transaccional local en IndexedDB (PWA) o SQLite (Flutter),
- *              rebaja en inventario local en cache y emision de comprobante termico TCK-OFF-XXXXXX
- *              con hash de contingencia UUIDv4.
+ *              Fase 2: Persistencia local en localStorage (clave fashionstore_pending_pos_sales)
+ *              y emision de comprobante termico TCK-OFF-XXXXXX con hash de contingencia UUIDv4.
+ *              No hay descuento de inventario local: el stock solo se descuenta en el backend
+ *              durante la sincronizacion (2.6 a 2.11).
  *              Fase 3: Reconexion a red y sincronizacion automatica con backend FastAPI, verificando
  *              idempotencia por client_sale_id para evitar doble descuento central de inventario.
  * ACTOR: Cajero
@@ -20,7 +21,7 @@
  * - Sin cruces horizontales entre entidades (comunicacion exclusiva Controller -> Entity).
  * - Retornos unicamente hacia el Controller o la Interface.
  * - Fragmentos combinados:
- *     * opt [Modo Desconectado / Politica 5 Efectivo]: cobro exclusivo en efectivo y ticket local (1.2 a 1.11).
+ *     * opt [Modo Desconectado / Politica 5 Efectivo]: cobro exclusivo en efectivo y ticket local (1.1 a 1.9).
  *     * opt [Reconexion a Internet Detectada]: outbox sync reactiva con backend (2 a 2.16).
  *     * loop [Por cada item de la venta]: insercion central en SaleItem (2.10 a 2.11).
  * ================================================================================= */
@@ -213,8 +214,8 @@ function main() {
      * Actor -> Boundaries -> Controller Local -> Entities Locales 
      *       -> Controller Backend -> Entities Centrales
      * Cajero -> :CajaPageComponent, :TicketContingenciaModal
-     *        -> :IdbSalesController
-     *        -> :LocalInventory, :LocalPendingSale
+     *        -> :IdbSalesService
+     *        -> :PendingOfflineSale
      *        -> :SalesService
      *        -> :Inventory, :Sale, :SaleItem
      * ------------------------------------------------------------------------- */
@@ -222,16 +223,15 @@ function main() {
     var uiCaja              = addParticipant(pkg, diagram, ":CajaPageComponent",        "Interface", 180, 200);
     var uiModalTicket       = addParticipant(pkg, diagram, ":TicketContingenciaModal", "Interface", 420, 190);
 
-    var ctrlLocal           = addParticipant(pkg, diagram, ":IdbSalesController",       "Controller", 650, 190);
+    var ctrlLocal           = addParticipant(pkg, diagram, ":IdbSalesService",       "Controller", 650, 190);
 
-    var entLocalInventory   = addEntityParticipant(pkg, diagram, ":LocalInventory",   880, 150);
-    var entLocalSale        = addEntityParticipant(pkg, diagram, ":LocalPendingSale", 1070, 170);
+    var entLocalSale        = addEntityParticipant(pkg, diagram, ":PendingOfflineSale", 880, 170);
 
-    var ctrlBackend         = addParticipant(pkg, diagram, ":SalesService", "Controller", 1280, 160);
+    var ctrlBackend         = addParticipant(pkg, diagram, ":SalesService", "Controller", 1090, 160);
 
-    var entCentralInventory = addEntityParticipant(pkg, diagram, ":Inventory", 1480, 130);
-    var entCentralSale      = addEntityParticipant(pkg, diagram, ":Sale",      1650, 120);
-    var entCentralItem      = addEntityParticipant(pkg, diagram, ":SaleItem",  1810, 120);
+    var entCentralInventory = addEntityParticipant(pkg, diagram, ":Inventory", 1290, 130);
+    var entCentralSale      = addEntityParticipant(pkg, diagram, ":Sale",      1460, 120);
+    var entCentralItem      = addEntityParticipant(pkg, diagram, ":SaleItem",  1620, 120);
 
     var step = 1;
 
@@ -239,53 +239,47 @@ function main() {
      * 2. FASE 1: REGISTRO DE VENTA OFFLINE Y POLITICA 5 (SOLO EFECTIVO)
      * ------------------------------------------------------------------------- */
     addMessage(actorCajero, uiCaja,
-        "1: ingresarPrendasYCobro(items, efectivo)", false, step++);
+        "1: submitSale()", false, step++);
 
-    // Autollamada en Interface: verificacion de red y enforzamiento de Politica 5
+    // Autollamada en Interface: verificacion de red efectiva
     addMessage(uiCaja, uiCaja,
-        "1.1: verificarConexion() [isOnline=false]", false, step++);
+        "1.1: isOfflineEffective()", false, step++);
+
+    addMessage(uiCaja, uiCaja,
+        "1.2: generarUUIDv4Contingencia()", false, step++);
 
     /* FRAGMENTO OPT: Modo Desconectado / Politica 5 Efectivo
-     * Abarca: 1.2 a 1.11 (cobro forzado en efectivo, calculo de cambio, guardado local y ticket) */
-    addCombinedFragment(pkg, diagram, "opt", "[Modo Desconectado / Politica 5 Efectivo]", 160, 1240, -180, -780);
-
-    addMessage(uiCaja, uiCaja,
-        "1.2: forzarMetodoEfectivo() [bloquearTarjetas]", false, step++);
-
-    addMessage(uiCaja, uiCaja,
-        "1.3: calcularCambioDevolver(recibido - total)", false, step++);
+     * Abarca: 1.3 a 1.9 (guardado local, cobro forzado en efectivo, ticket de contingencia) */
+    addCombinedFragment(pkg, diagram, "opt", "[Modo Desconectado / Politica 5 Efectivo]", 160, 1070, -180, -780);
 
     addMessage(uiCaja, ctrlLocal,
-        "1.4: saveOfflineSale(payload)", false, step++);
+        "1.3: savePending()", false, step++);
 
-    // Autollamada en Controller Local: validacion de existencias locales
+    // Autollamada en Controller Local: Politica 5 y calculo de cambio
     addMessage(ctrlLocal, ctrlLocal,
-        "1.5: validarStockLocal()", false, step++);
+        "1.4: forzarPoliticaEfectivo()", false, step++);
 
-    addMessage(ctrlLocal, entLocalInventory,
-        "1.6: decrementLocalStock(variant_id, qty)", false, step++);
-
-    addMessage(entLocalInventory, ctrlLocal,
-        "1.7: return()", true, step++);
+    addMessage(ctrlLocal, ctrlLocal,
+        "1.5: calcularCambioDevolver()", false, step++);
 
     addMessage(ctrlLocal, entLocalSale,
-        "1.8: insertPendingSale(PENDIENTE_SYNC, uuid_v4)", false, step++);
+        "1.6: create()", false, step++);
 
     addMessage(entLocalSale, ctrlLocal,
-        "1.9: return()", true, step++);
+        "1.7: pendingRecord()", true, step++);
 
     addMessage(ctrlLocal, uiModalTicket,
-        "1.10: abrirTicketContingencia(TCK-OFF-XXXX)", true, step++);
+        "1.8: emitirTicketContingencia()", false, step++);
 
     addMessage(uiModalTicket, actorCajero,
-        "1.11: renderizarTicketContingencia()", true, step++);
+        "1.9: renderizarTicketContingencia()", false, step++);
 
     /* -------------------------------------------------------------------------
      * 3. FASE 2: RECONEXION A INTERNET Y SINCRONIZACION IDEMPOTENTE
      * ------------------------------------------------------------------------- */
     /* FRAGMENTO OPT: Reconexion a Internet Detectada
      * Abarca: 2 a 2.16 (lectura de Outbox, validacion de idempotencia UUIDv4 en backend y confirmacion) */
-    addCombinedFragment(pkg, diagram, "opt", "[Reconexion a Internet Detectada]", 160, 1940, -820, -1820);
+    addCombinedFragment(pkg, diagram, "opt", "[Reconexion a Internet Detectada]", 160, 1760, -820, -1820);
 
     addMessage(uiCaja, ctrlLocal,
         "2: detectarReconexionInternet()", false, step++);
@@ -295,54 +289,54 @@ function main() {
         "2.1: syncPendingSales()", false, step++);
 
     addMessage(ctrlLocal, entLocalSale,
-        "2.2: listPendingSales()", false, step++);
+        "2.2: getPending()", false, step++);
 
     addMessage(entLocalSale, ctrlLocal,
-        "2.3: return()", true, step++);
+        "2.3: pendingList()", true, step++);
 
     addMessage(ctrlLocal, ctrlBackend,
-        "2.4: POST /sales/ (client_sale_id)", false, step++);
+        "2.4: POST /sales/offline/batch-sync", false, step++);
 
     // Autollamada en Backend Controller: idempotencia por client_sale_id
     addMessage(ctrlBackend, ctrlBackend,
-        "2.5: validateIdempotency(client_sale_id)", false, step++);
+        "2.5: validateIdempotency()", false, step++);
 
     addMessage(ctrlBackend, entCentralInventory,
-        "2.6: with_for_update(quantity -= qty)", false, step++);
+        "2.6: with_for_update()", false, step++);
 
     addMessage(entCentralInventory, ctrlBackend,
-        "2.7: return()", true, step++);
+        "2.7: lockResult()", true, step++);
 
     addMessage(ctrlBackend, entCentralSale,
-        "2.8: create(Sale)", false, step++);
+        "2.8: create()", false, step++);
 
     addMessage(entCentralSale, ctrlBackend,
-        "2.9: return()", true, step++);
+        "2.9: saleRecord()", true, step++);
 
     /* FRAGMENTO LOOP: Por cada item de la venta
      * Abarca: 2.10 a 2.11 (creacion central de items en base de datos) */
-    addCombinedFragment(pkg, diagram, "loop", "[Por cada item de la venta]", 1260, 1930, -1350, -1510);
+    addCombinedFragment(pkg, diagram, "loop", "[Por cada item de la venta]", 1070, 1760, -1350, -1510);
 
     addMessage(ctrlBackend, entCentralItem,
-        "2.10: create(SaleItem)", false, step++);
+        "2.10: create()", false, step++);
 
     addMessage(entCentralItem, ctrlBackend,
-        "2.11: return()", true, step++);
+        "2.11: itemRecord()", true, step++);
 
     addMessage(ctrlBackend, ctrlLocal,
-        "2.12: HTTP 201 Created (CONFIRMADO_SERVER)", true, step++);
+        "2.12: HTTP 201 Created", true, step++);
 
     addMessage(ctrlLocal, entLocalSale,
-        "2.13: markAsSynced(client_sale_id)", false, step++);
+        "2.13: markAsSynced()", false, step++);
 
     addMessage(entLocalSale, ctrlLocal,
-        "2.14: return()", true, step++);
+        "2.14: syncedFlag()", true, step++);
 
     addMessage(ctrlLocal, uiCaja,
-        "2.15: notificarSincronizacionExitosa()", true, step++);
+        "2.15: notificarSincronizacionExitosa()", false, step++);
 
     addMessage(uiCaja, actorCajero,
-        "2.16: renderizarEstadoSincronizado()", true, step++);
+        "2.16: renderizarEstadoSincronizado()", false, step++);
 
     /* Guardar y abrir diagrama de forma segura */
     stretchActorLifeline(diagram, actorCajero, -2400);

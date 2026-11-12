@@ -137,7 +137,7 @@ function Main() {
 
     // 4. Mensajes con funciones reales sin parámetros ()
     // Fase 1: Solicitud inicial y apertura
-    crearMensaje(actorCliente, actorCajero, "1: solicitarDevolucionPrenda()");
+    crearMensaje(actorCliente, uiCaja, "1: solicitarDevolucionPrenda()");
     crearMensaje(actorCajero, uiCaja, "2: abrirModalDevolucion()");
     crearMensaje(uiCaja, uiModalDev, "2.1: renderizarFormulario()");
 
@@ -152,9 +152,9 @@ function Main() {
     crearMensaje(ctrlRoutes, uiModalDev, "3.7: return()");
     crearMensaje(uiModalDev, actorCajero, "3.8: mostrarDesgloseRetencion()");
 
-    // Fase 3: Acuerdo presencial con el Cliente
-    crearMensaje(actorCajero, actorCliente, "3.9: informarRetencionYConsultarModalidad()");
-    crearMensaje(actorCliente, actorCajero, "4: aceptarRetencionYElegirModalidad()");
+    // Fase 3: Acuerdo presencial con el Cliente (la Frontera expone las modalidades)
+    crearMensaje(uiModalDev, actorCajero, "3.9: mostrarOpcionesModalidad()");
+    crearMensaje(actorCajero, uiModalDev, "4: seleccionarModalidadReembolso()");
 
     // Fase 4: Confirmación y Procesamiento Transaccional
     crearMensaje(actorCajero, uiModalDev, "5: confirmarDevolucion()");
@@ -169,7 +169,7 @@ function Main() {
     crearMensaje(ctrlRoutes, uiModalDev, "5.9: return()");
     crearMensaje(uiModalDev, uiModalNC, "5.10: abrirComprobanteNotaCredito()");
     crearMensaje(uiModalNC, actorCajero, "5.11: renderizarComprobanteNC()");
-    crearMensaje(actorCajero, actorCliente, "5.12: entregarComprobanteReembolso()");
+    crearMensaje(uiModalNC, actorCliente, "5.12: entregarComprobanteReembolso()");
 
     diagram.Update();
     Repo.SaveDiagram(diagram.DiagramID);

@@ -4,7 +4,7 @@
 // FashionStore — Plataforma SaaS Multitenant (Sistemas 2)
 //
 // Componentes y Estereotipos Oficiales (Plantilla de Cátedra ICONIX):
-//   Actor: Cajero / Encargado
+//   Actor: Cajero
 //   Boundary: CajaPageComponent, TicketContingenciaModal (Object, «boundary»)
 //   Control: IdbSalesService, SalesApiService, SalesService (Object, «control»)
 //   Entity: LocalPendingSale, Sale (Object, «entity»)
@@ -101,7 +101,7 @@ function Main() {
     }
 
     // 1. Crear Elementos con Estereotipos ICONIX (Arquitectura BCE pura)
-    var actorCajero       = crearElementoConEsterotipo(pkg, "Cajero / Encargado", "Actor", "");
+    var actorCajero       = crearElementoConEsterotipo(pkg, "Cajero", "Actor", "");
     var uiCaja            = crearElementoConEsterotipo(pkg, "CajaPageComponent", "Object", "boundary");
     var uiModalTicket     = crearElementoConEsterotipo(pkg, "TicketContingenciaModal", "Object", "boundary");
 
@@ -117,7 +117,7 @@ function Main() {
     var diagram = crearDiagramaLimpio(pkg, diagName, "Communication");
 
     // 3. Distribución Espacial Topológica Limpia (Actor -> Boundaries -> Controllers -> Entities)
-    // Actor Cajero / Encargado
+    // Actor Cajero
     colocarElemento(diagram, actorCajero,        40,  130,  -190, -270);
 
     // Boundary Principal (Caja)
@@ -164,7 +164,7 @@ function Main() {
     crearMensaje(ctrlSalesBackend, ctrlSalesApi, "3.4: HTTP 200 OK (status_map)");
     crearMensaje(ctrlSalesApi, uiCaja, "3.5: return status_map");
     crearMensaje(uiCaja, ctrlIdbSales, "3.6: markAsSynced()");
-    crearMensaje(ctrlIdbSales, entLocalSale, "3.7: put(synced=true)");
+    crearMensaje(ctrlIdbSales, entLocalSale, "3.7: put()");
     crearMensaje(uiCaja, actorCajero, "3.8: renderizarEstadoConciliado()");
 
     // FASE 4: Sincronización Unitaria desde Bandeja Outbox
@@ -175,7 +175,7 @@ function Main() {
     crearMensaje(ctrlSalesBackend, ctrlSalesApi, "4.4: HTTP 201 Created");
     crearMensaje(ctrlSalesApi, uiCaja, "4.5: return Sale");
     crearMensaje(uiCaja, ctrlIdbSales, "4.6: markAsSynced()");
-    crearMensaje(ctrlIdbSales, entLocalSale, "4.7: put(synced=true)");
+    crearMensaje(ctrlIdbSales, entLocalSale, "4.7: put()");
     crearMensaje(uiCaja, actorCajero, "4.8: notificarSincronizacionExitosa()");
 
     // FASE 5: Purga de Comprobantes Consolidados

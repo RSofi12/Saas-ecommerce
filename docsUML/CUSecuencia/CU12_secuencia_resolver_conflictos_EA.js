@@ -3,7 +3,7 @@
  * CASO DE USO: CU12 - Atender y Resolver Conflictos de Reservas Expiradas (Enfoque A)
  * DESCRIPCION: Resolucion en mostrador cuando un cliente asiste tras la caducidad del apartado.
  *              Fase 1: El Encargado ingresa al panel y dispara el barrido de auditoria de vencidas.
- *              El ExpirationSweeper libera el stock bloqueado de las prendas vencidas para devolverlo
+ *              El ExpirationService libera el stock bloqueado de las prendas vencidas para devolverlo
  *              a disponibilidad de tienda.
  *              Fase 2: El Encargado consulta la bandeja de conflictos y evalua el stock fisico real
  *              remanente en percha (quantity - reserved_quantity) calculado por el backend.
@@ -216,15 +216,15 @@ function main() {
      * 1. PARTICIPANTES BCE (DISTRIBUCION HORIZONTAL)
      * Actor -> Boundaries -> Controllers -> Entities
      * Encargado -> :ReservationsPageComponent, :ResolveConflictModal
-     *           -> :ExpirationSweeper, :ResolveReservationController
+     *           -> :ExpirationService, :ReservationService
      *           -> :Reservation, :ReservationItem, :Inventory
      * ------------------------------------------------------------------------- */
     var actorEncargado  = addActorParticipant(pkg, diagram, "Encargado", 40, 90);
     var uiPanel         = addParticipant(pkg, diagram, ":ReservationsPageComponent", "Interface", 180, 200);
     var uiModal         = addParticipant(pkg, diagram, ":ResolveConflictModal",      "Interface", 430, 190);
 
-    var ctrlSweeper     = addParticipant(pkg, diagram, ":ExpirationSweeper",             "Controller", 670, 180);
-    var ctrlResolve     = addParticipant(pkg, diagram, ":ResolveReservationController", "Controller", 900, 220);
+    var ctrlSweeper     = addParticipant(pkg, diagram, ":ExpirationService",  "Controller", 670, 180);
+    var ctrlResolve     = addParticipant(pkg, diagram, ":ReservationService", "Controller", 900, 220);
 
     var entReserva      = addEntityParticipant(pkg, diagram, ":Reservation",     1170, 130);
     var entItem         = addEntityParticipant(pkg, diagram, ":ReservationItem", 1350, 140);
@@ -246,19 +246,19 @@ function main() {
         "1.1: POST /reservations/sweeper", false, step++);
 
     addMessage(ctrlSweeper, entReserva,
-        "1.2: identificarVencidas(expires_at <= today)", false, step++);
+        "1.2: identificarVencidas()", false, step++);
 
     addMessage(entReserva, ctrlSweeper,
         "1.3: return()", true, step++);
 
     addMessage(ctrlSweeper, entInventory,
-        "1.4: decrementarReservedQuantity(item.quantity)", false, step++);
+        "1.4: decrementarReservedQuantity()", false, step++);
 
     addMessage(entInventory, ctrlSweeper,
         "1.5: return()", true, step++);
 
     addMessage(ctrlSweeper, entReserva,
-        "1.6: update(status='expired')", false, step++);
+        "1.6: update()", false, step++);
 
     addMessage(entReserva, ctrlSweeper,
         "1.7: return()", true, step++);
@@ -270,22 +270,22 @@ function main() {
      * 3. FASE 2: CONSULTA DE BANDEJA DE CONFLICTOS Y DIAGNOSTICO DE PERCHA
      * ------------------------------------------------------------------------- */
     addMessage(uiPanel, ctrlResolve,
-        "2: listBranchConflicts(branch_id)", false, step++);
+        "2: listBranchConflicts()", false, step++);
 
     addMessage(ctrlResolve, entReserva,
-        "2.1: filter(branch_id, status='expired')", false, step++);
+        "2.1: filter()", false, step++);
 
     addMessage(entReserva, ctrlResolve,
         "2.2: return()", true, step++);
 
     addMessage(ctrlResolve, entInventory,
-        "2.3: calcularDisponibilidadPercha(quantity - reserved)", false, step++);
+        "2.3: calcularDisponibilidadPercha()", false, step++);
 
     addMessage(entInventory, ctrlResolve,
         "2.4: return()", true, step++);
 
     addMessage(ctrlResolve, uiPanel,
-        "2.5: return(conflictosConStock)", true, step++);
+        "2.5: return()", true, step++);
 
     addMessage(uiPanel, actorEncargado,
         "2.6: renderizarDiagnosticoPercha()", true, step++);
@@ -294,20 +294,20 @@ function main() {
      * 4. FASE 3: APERTURA DE MODAL Y SELECCION DE ESTRATEGIA
      * ------------------------------------------------------------------------- */
     addMessage(actorEncargado, uiPanel,
-        "3: abrirReservaVencida(res_id)", false, step++);
+        "3: abrirReservaVencida()", false, step++);
 
     addMessage(uiPanel, uiModal,
-        "3.1: open(can_reactivate)", false, step++);
+        "3.1: open()", false, step++);
 
     addMessage(actorEncargado, uiModal,
-        "3.2: seleccionarVia(reactivar|sustituir|anular, notas)", false, step++);
+        "3.2: seleccionarVia()", false, step++);
 
     addMessage(uiModal, ctrlResolve,
-        "3.3: POST /resolve-conflict (payload)", false, step++);
+        "3.3: POST /resolve-conflict", false, step++);
 
     // Autollamada en Controller: validacion de justificacion obligatoria (min. 5 chars)
     addMessage(ctrlResolve, ctrlResolve,
-        "3.4: validarJustificacion() [notas >= 5 chars]", false, step++);
+        "3.4: validarJustificacion()", false, step++);
 
     /* -------------------------------------------------------------------------
      * 5. FASE 4: DECISION Y EJECUCION TRANSACCIONAL (FRAGMENTOS ALT)
@@ -317,13 +317,13 @@ function main() {
     addCombinedFragment(pkg, diagram, "alt", "[Estrategia 1: Reactivacion con Re-bloqueo]", 880, 1700, -1350, -1580);
 
     addMessage(ctrlResolve, entInventory,
-        "3.5: with_for_update(reserved_quantity += qty)", false, step++);
+        "3.5: with_for_update()", false, step++);
 
     addMessage(entInventory, ctrlResolve,
         "3.6: return()", true, step++);
 
     addMessage(ctrlResolve, entReserva,
-        "3.7: reactivarReserva(expires_at, resolution_note)", false, step++);
+        "3.7: reactivarReserva()", false, step++);
 
     addMessage(entReserva, ctrlResolve,
         "3.8: return()", true, step++);
@@ -333,13 +333,13 @@ function main() {
     addCombinedFragment(pkg, diagram, "alt", "[Estrategia 2: Sustitucion por Variante]", 880, 1700, -1600, -1830);
 
     addMessage(ctrlResolve, entItem,
-        "3.9: reasignarVarianteSustituta(new_variant_id)", false, step++);
+        "3.9: reasignarVarianteSustituta()", false, step++);
 
     addMessage(entItem, ctrlResolve,
         "3.10: return()", true, step++);
 
     addMessage(ctrlResolve, entInventory,
-        "3.11: with_for_update(reserved_quantity += new_qty)", false, step++);
+        "3.11: with_for_update()", false, step++);
 
     addMessage(entInventory, ctrlResolve,
         "3.12: return()", true, step++);
@@ -349,7 +349,7 @@ function main() {
     addCombinedFragment(pkg, diagram, "alt", "[Estrategia 3: Cierre Definitivo / Anulacion]", 880, 1700, -1850, -2020);
 
     addMessage(ctrlResolve, entReserva,
-        "3.13: anularReservaConAuditoria(resolution_note)", false, step++);
+        "3.13: anularReservaConAuditoria()", false, step++);
 
     addMessage(entReserva, ctrlResolve,
         "3.14: return()", true, step++);

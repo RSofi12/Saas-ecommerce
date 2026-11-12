@@ -2,25 +2,23 @@
  * PROYECTO: FashionStore — Plataforma E-Commerce SaaS Multitenant (Sistemas 2)
  * CASO DE USO: CU11 - Registrar Reserva de Prendas Offline en Modo Desconectado
  * DESCRIPCION: Proceso de reserva de prendas cuando la tienda o el cliente carece de conexion.
- *              Fase 1: Persistencia local en IndexedDB (PWA) o SQLite (Flutter) con generacion 
- *              de UUIDv4 de contingencia (client_reservation_id), decremento preventivo de stock 
- *              local y emision de comprobante RES-OFF-XXXX.
- *              Fase 2: Reconexion a Internet y sincronizacion automatica con backend FastAPI, 
- *              garantizando idempotencia transaccional y bloqueo central con with_for_update.
+ *              Fase 1: Persistencia local en localStorage (PWA) o SQLite (Flutter) con generacion
+ *              de UUIDv4 de contingencia (client_reservation_id) y emision de comprobante offline.
+ *              Fase 2: Reconexion a Internet y sincronizacion manual desde MyReservationsPageComponent
+ *              hacia el backend FastAPI, garantizando idempotencia transaccional y bloqueo central
+ *              con with_for_update.
  * ACTOR: Cliente
  * TIPO DE DIAGRAMA: Diagrama de Secuencia (Arquitectura BCE pura: Actor-Boundary-Control-Entity)
  * ENTORNO: Enterprise Architect 15.0+
  * LENGUAJE: JScript (Motor nativo WSH en Enterprise Architect)
  *
  * NORMAS Y PAUTAS APLICADAS:
- * - Participantes rectangulares Sequence con estereotipos <<Actor>>, <<Interface>>, <<Controller>>, <<Entity>>.
- * - Numeracion secuencial estricta (con.SequenceNo = sequenceNo) para garantizar orden vertical perfecto.
- * - Sin cruces horizontales entre entidades (comunicacion exclusiva Controller -> Entity).
- * - Retornos unicamente hacia el Controller o la Interface.
+ * - Participantes rectangulares Sequence con estereotipos <<Actor>>, <<Boundary>>, <<Controller>>, <<Entity>>.
+ * - Numeracion jerarquica IDENTICA al diagrama de Robustez del CU11.
  * - Fragmentos combinados:
- *     * opt [Modo Desconectado / Sin Conexion]: abarca verificacion y persistencia local (1.2 a 1.9).
- *     * opt [Reconexion a Internet Detectada]: abarca sync reactiva con backend (2 a 2.16).
- *     * loop [Por cada item reservado]: insercion central en ReservationItem (2.10 a 2.11).
+ *     * opt [Modo Desconectado / Sin Conexion]: persistencia local (1.1 a 1.6).
+ *     * opt [Reconexion a Internet Detectada]: sincronizacion con backend (2.1 a 2.19).
+ *     * loop [Por cada item reservado]: insercion central en ReservationItem (2.11 a 2.12).
  * ================================================================================= */
 
 var DEFAULT_PACKAGE_NAME = "CUSecuencia";
@@ -207,132 +205,78 @@ function main() {
     var diagram = recreateDiagram(pkg);
 
     /* -------------------------------------------------------------------------
-     * 1. PARTICIPANTES BCE (DISTRIBUCION HORIZONTAL)
-     * Actor -> :ReservationCreateComponent (Boundary) -> :IdbReservationsController (Control Local)
-     * -> :LocalPendingReservation, :LocalInventory (Entities Locales)
-     * -> :ReservationService (Control Backend)
-     * -> :Reservation, :ReservationItem, :Inventory (Entities Centrales)
+     * 1. PARTICIPANTES BCE - identicos al diagrama de Robustez del CU11
+     * Cliente -> :ReservationsPageComponent -> :NetworkStatusService / :IdbReservationsService
+     *        -> :PendingReservationItem -> :ReservationApiService -> :ReservationRoutes
+     *        -> :ReservationService -> :Reservation, :ReservationItem, :Inventory
      * ------------------------------------------------------------------------- */
-    var actorCliente        = addActorParticipant(pkg, diagram, "Cliente", 40, 90);
-    var uiReserva           = addParticipant(pkg, diagram, ":ReservationCreateComponent", "Interface", 180, 210);
-    var ctrlLocal           = addParticipant(pkg, diagram, ":IdbReservationsController", "Controller", 440, 200);
+    var actCliente        = addActorParticipant(pkg, diagram, "Cliente", 30, 80);
+    var bndReserva        = addParticipant(pkg, diagram, ":ReservationsPageComponent",   "Boundary",  130, 200);
+    var bndMyRes          = addParticipant(pkg, diagram, ":MyReservationsPageComponent", "Boundary",  350, 210);
 
-    var entLocalPending     = addEntityParticipant(pkg, diagram, ":LocalPendingReservation", 690, 190);
-    var entLocalInventory   = addEntityParticipant(pkg, diagram, ":LocalInventory",          930, 150);
+    var ctrlNet           = addParticipant(pkg, diagram, ":NetworkStatusService",   "Controller", 580, 180);
+    var ctrlLocal         = addParticipant(pkg, diagram, ":IdbReservationsService", "Controller", 780, 190);
+    var entLocalPending   = addEntityParticipant(pkg, diagram, ":PendingReservationItem", 990, 190);
 
-    var ctrlBackend         = addParticipant(pkg, diagram, ":ReservationService", "Controller", 1130, 180);
+    var ctrlApi           = addParticipant(pkg, diagram, ":ReservationApiService", "Controller", 1200, 180);
+    var ctrlRoutes        = addParticipant(pkg, diagram, ":ReservationRoutes",     "Controller", 1400, 160);
+    var ctrlBackend       = addParticipant(pkg, diagram, ":ReservationService",    "Controller", 1580, 175);
 
-    var entCentralReserva   = addEntityParticipant(pkg, diagram, ":Reservation",     1360, 130);
-    var entCentralItem      = addEntityParticipant(pkg, diagram, ":ReservationItem", 1540, 140);
-    var entCentralInventory = addEntityParticipant(pkg, diagram, ":Inventory",       1730, 130);
+    var entCentralReserva   = addEntityParticipant(pkg, diagram, ":Reservation",     1775, 130);
+    var entCentralItem      = addEntityParticipant(pkg, diagram, ":ReservationItem", 1925, 140);
+    var entCentralInventory = addEntityParticipant(pkg, diagram, ":Inventory",       2085, 130);
 
     var step = 1;
 
     /* -------------------------------------------------------------------------
-     * 2. FASE 1: REGISTRO OFFLINE (MODO DESCONECTADO)
+     * 2. MENSAJES: numeracion jerarquica IDENTICA al diagrama de Robustez del CU11
      * ------------------------------------------------------------------------- */
-    addMessage(actorCliente, uiReserva,
-        "1: prepararReserva(visitDate, items)", false, step++);
 
-    // Autollamada en Interface: deteccion reactiva de estado offline
-    addMessage(uiReserva, uiReserva,
-        "1.1: verificarConexion() [isOnline=false]", false, step++);
-
+    /* ---- FASE 1: REGISTRO OFFLINE (MODO DESCONECTADO) ---- */
+    addMessage(actCliente, bndReserva, "1: prepararReserva()", false, step++);
     /* FRAGMENTO OPT: Modo Desconectado / Sin Conexion
-     * Abarca: 1.2 a 1.9 (persistencia local en IndexedDB/SQLite y emision de comprobante) */
-    addCombinedFragment(pkg, diagram, "opt", "[Modo Desconectado / Sin Conexion]", 160, 1100, -180, -680);
+     * Abarca 1.1 a 1.7: verificacion de red, persistencia local y comprobante */
+    addCombinedFragment(pkg, diagram, "opt", "[Modo Desconectado / Sin Conexion]", 110, 1180, -180, -760);
 
-    addMessage(uiReserva, ctrlLocal,
-        "1.2: saveOfflineReservation(payload)", false, step++);
+    addMessage(bndReserva, ctrlNet, "1.1: effectiveOnline()", false, step++);
+    addMessage(ctrlNet, bndReserva, "1.2: connectivityState()", true, step++);
+    addMessage(bndReserva, ctrlLocal, "1.3: savePending()", false, step++);
+    addMessage(ctrlLocal, entLocalPending, "1.4: create()", false, step++);
+    addMessage(entLocalPending, ctrlLocal, "1.5: pendingRecord()", true, step++);
+    addMessage(ctrlLocal, bndReserva, "1.6: savedOffline()", true, step++);
+    addMessage(bndReserva, actCliente, "1.7: renderizarModalConfirmacion()", false, step++);
 
-    // Autollamada en Controller Local: validacion de existencias locales
-    addMessage(ctrlLocal, ctrlLocal,
-        "1.3: validarStockLocal()", false, step++);
-
-    addMessage(ctrlLocal, entLocalInventory,
-        "1.4: decrementLocalStock(variant_id, qty)", false, step++);
-
-    addMessage(entLocalInventory, ctrlLocal,
-        "1.5: return()", true, step++);
-
-    addMessage(ctrlLocal, entLocalPending,
-        "1.6: insertPendingReservation(PENDIENTE_SYNC)", false, step++);
-
-    addMessage(entLocalPending, ctrlLocal,
-        "1.7: return()", true, step++);
-
-    addMessage(ctrlLocal, uiReserva,
-        "1.8: return()", true, step++);
-
-    addMessage(uiReserva, actorCliente,
-        "1.9: renderizarTicketContingencia()", true, step++);
-
-    /* -------------------------------------------------------------------------
-     * 3. FASE 2: RECONEXION A INTERNET Y SINCRONIZACION AUTOMATICA
-     * ------------------------------------------------------------------------- */
+    /* ---- FASE 2: RECONEXION A INTERNET Y SINCRONIZACION ---- */
+    addMessage(actCliente, bndMyRes, "2: sincronizarPendientes()", false, step++);
     /* FRAGMENTO OPT: Reconexion a Internet Detectada
-     * Abarca: 2 a 2.16 (lectura de Outbox, llamada idempotente a API central y confirmacion) */
-    addCombinedFragment(pkg, diagram, "opt", "[Reconexion a Internet Detectada]", 160, 1880, -720, -1720);
+     * Abarca 2.1 a 2.19: lectura de pendientes, llamada idempotente y confirmacion */
+    addCombinedFragment(pkg, diagram, "opt", "[Reconexion a Internet Detectada]", 110, 2240, -820, -1980);
 
-    addMessage(uiReserva, ctrlLocal,
-        "2: detectarReconexionInternet()", false, step++);
+    addMessage(bndMyRes, ctrlLocal, "2.1: getPending()", false, step++);
+    addMessage(ctrlLocal, bndMyRes, "2.2: pendingList()", true, step++);
+    addMessage(bndMyRes, ctrlApi, "2.3: createReservation()", false, step++);
+    addMessage(ctrlApi, ctrlRoutes, "2.4: POST /reservations/", false, step++);
+    addMessage(ctrlRoutes, ctrlBackend, "2.5: create_reservation()", false, step++);
+    addMessage(ctrlBackend, ctrlBackend, "2.6: validateIdempotency()", false, step++);
+    addMessage(ctrlBackend, entCentralInventory, "2.7: with_for_update()", false, step++);
+    addMessage(entCentralInventory, ctrlBackend, "2.8: lockResult()", true, step++);
+    addMessage(ctrlBackend, entCentralReserva, "2.9: create()", false, step++);
+    addMessage(entCentralReserva, ctrlBackend, "2.10: reservationRecord()", true, step++);
+    /* FRAGMENTO LOOP: Por cada item de la reserva (2.11 a 2.12) */
+    addCombinedFragment(pkg, diagram, "loop", "[Por cada item reservado]", 1750, 2110, -1420, -1640);
 
-    // Autollamada en Controller Local: orquestacion de sincronizacion por lotes
-    addMessage(ctrlLocal, ctrlLocal,
-        "2.1: syncPendingReservations()", false, step++);
-
-    addMessage(ctrlLocal, entLocalPending,
-        "2.2: listPendingReservations()", false, step++);
-
-    addMessage(entLocalPending, ctrlLocal,
-        "2.3: return()", true, step++);
-
-    addMessage(ctrlLocal, ctrlBackend,
-        "2.4: POST /reservations/ (client_reservation_id)", false, step++);
-
-    // Autollamada en Backend Controller: idempotencia transaccional (UUIDv4)
-    addMessage(ctrlBackend, ctrlBackend,
-        "2.5: validateIdempotency()", false, step++);
-
-    addMessage(ctrlBackend, entCentralInventory,
-        "2.6: with_for_update(reserved_quantity += qty)", false, step++);
-
-    addMessage(entCentralInventory, ctrlBackend,
-        "2.7: return()", true, step++);
-
-    addMessage(ctrlBackend, entCentralReserva,
-        "2.8: create(Reservation)", false, step++);
-
-    addMessage(entCentralReserva, ctrlBackend,
-        "2.9: return()", true, step++);
-
-    /* FRAGMENTO LOOP: Por cada item de la reserva
-     * Abarca: 2.10 a 2.11 (creacion central de items en base de datos) */
-    addCombinedFragment(pkg, diagram, "loop", "[Por cada item reservado]", 1110, 1700, -1250, -1410);
-
-    addMessage(ctrlBackend, entCentralItem,
-        "2.10: create(ReservationItem)", false, step++);
-
-    addMessage(entCentralItem, ctrlBackend,
-        "2.11: return()", true, step++);
-
-    addMessage(ctrlBackend, ctrlLocal,
-        "2.12: HTTP 201 Created (CONFIRMADO_SERVER)", true, step++);
-
-    addMessage(ctrlLocal, entLocalPending,
-        "2.13: markAsSynced(client_reservation_id)", false, step++);
-
-    addMessage(entLocalPending, ctrlLocal,
-        "2.14: return()", true, step++);
-
-    addMessage(ctrlLocal, uiReserva,
-        "2.15: notificarSincronizacionExitosa()", true, step++);
-
-    addMessage(uiReserva, actorCliente,
-        "2.16: renderizarEstadoSincronizado()", true, step++);
+    addMessage(ctrlBackend, entCentralItem, "2.11: add()", false, step++);
+    addMessage(entCentralItem, ctrlBackend, "2.12: itemRecord()", true, step++);
+    addMessage(ctrlBackend, ctrlApi, "2.13: HTTP 201 Created", true, step++);
+    addMessage(ctrlApi, bndMyRes, "2.14: createdReservation()", true, step++);
+    addMessage(bndMyRes, ctrlLocal, "2.15: removePending()", false, step++);
+    addMessage(ctrlLocal, entLocalPending, "2.16: delete()", false, step++);
+    addMessage(entLocalPending, ctrlLocal, "2.17: deleted()", true, step++);
+    addMessage(ctrlLocal, bndMyRes, "2.18: pendingCleared()", true, step++);
+    addMessage(bndMyRes, actCliente, "2.19: renderizarResumenSincronizacion()", false, step++);
 
     /* Guardar y abrir diagrama de forma segura */
-    stretchActorLifeline(diagram, actorCliente, -2400);
+    stretchActorLifeline(diagram, actCliente, -2400);
     diagram.Update();
     if (Repo != null) {
         Repo.SaveDiagram(diagram.DiagramID);

@@ -4,9 +4,9 @@
 // FashionStore — Plataforma SaaS Multitenant (Sistemas 2)
 //
 // Componentes y Estereotipos Oficiales (Plantilla de Cátedra ICONIX):
-//   Actor: Encargado de Sucursal
+//   Actor: Encargado
 //   Boundary: ReservationsPageComponent, ResolveConflictModal (Object, «boundary»)
-//   Control: SweeperService, ListConflictsService, ResolveConflictService (Object, «control»)
+//   Control: ExpirationService, ReservationService (Object, «control»)
 //   Entity: Reservation, ReservationItem, Inventory (Object, «entity»)
 //
 // Reglas Metodológicas Estrictas:
@@ -100,13 +100,12 @@ function Main() {
     }
 
     // 1. Crear Elementos con Estereotipos ICONIX
-    var actorEncargado  = crearElementoConEsterotipo(pkg, "Encargado de Sucursal", "Actor", "");
+    var actorEncargado  = crearElementoConEsterotipo(pkg, "Encargado", "Actor", "");
     var uiPanel         = crearElementoConEsterotipo(pkg, "ReservationsPageComponent", "Object", "boundary");
     var uiModal         = crearElementoConEsterotipo(pkg, "ResolveConflictModal", "Object", "boundary");
 
-    var ctrlSweeper     = crearElementoConEsterotipo(pkg, "SweeperService", "Object", "control");
-    var ctrlList        = crearElementoConEsterotipo(pkg, "ListConflictsService", "Object", "control");
-    var ctrlResolve     = crearElementoConEsterotipo(pkg, "ResolveConflictService", "Object", "control");
+    var ctrlSweeper     = crearElementoConEsterotipo(pkg, "ExpirationService", "Object", "control");
+    var ctrlSvc         = crearElementoConEsterotipo(pkg, "ReservationService", "Object", "control");
 
     var entReserva      = crearElementoConEsterotipo(pkg, "Reservation", "Object", "entity");
     var entItem         = crearElementoConEsterotipo(pkg, "ReservationItem", "Object", "entity");
@@ -121,9 +120,8 @@ function Main() {
     colocarElemento(diagram, uiPanel,        240, 320, -180, -260);
     colocarElemento(diagram, uiModal,        240, 320,  -40, -120);
 
-    colocarElemento(diagram, ctrlSweeper,    460, 540,  -40, -120);
-    colocarElemento(diagram, ctrlList,       460, 540, -180, -260);
-    colocarElemento(diagram, ctrlResolve,    680, 760, -180, -260);
+    colocarElemento(diagram, ctrlSweeper,    460, 540, -180, -260);
+    colocarElemento(diagram, ctrlSvc,        680, 760, -180, -260);
 
     colocarElemento(diagram, entReserva,     240, 320, -320, -400);
     colocarElemento(diagram, entItem,        460, 540, -320, -400);
@@ -139,24 +137,24 @@ function Main() {
     crearMensaje(ctrlSweeper, uiPanel, "1.5: HTTP 200 OK");
 
     // Flujo 2: Carga de Bandeja de Conflictos y Diagnóstico de Percha
-    crearMensaje(uiPanel, ctrlList, "2: listBranchConflicts()");
-    crearMensaje(ctrlList, entReserva, "2.1: filter()");
-    crearMensaje(ctrlList, entInventory, "2.2: calcularDisponibilidadPercha()");
-    crearMensaje(ctrlList, uiPanel, "2.3: retornarConflictosConStock()");
+    crearMensaje(uiPanel, ctrlSvc, "2: listBranchConflicts()");
+    crearMensaje(ctrlSvc, entReserva, "2.1: filter()");
+    crearMensaje(ctrlSvc, entInventory, "2.2: calcularDisponibilidadPercha()");
+    crearMensaje(ctrlSvc, uiPanel, "2.3: retornarConflictosConStock()");
     crearMensaje(uiPanel, actorEncargado, "2.4: renderizarDiagnosticoPercha()");
 
     // Flujo 3: Apertura de Modal y Selección de Vía de Resolución
     crearMensaje(actorEncargado, uiPanel, "3: abrirReservaVencida()");
     crearMensaje(uiPanel, uiModal, "3.1: mostrarOpcionesResolucion()");
     crearMensaje(actorEncargado, uiModal, "3.2: seleccionarVia()");
-    crearMensaje(uiModal, ctrlResolve, "3.3: resolveConflict()");
+    crearMensaje(uiModal, ctrlSvc, "3.3: resolveConflict()");
 
     // Validaciones transaccionales en Controller con with_for_update
-    crearMensaje(ctrlResolve, ctrlResolve, "3.4: validarJustificacion()");
-    crearMensaje(ctrlResolve, entInventory, "3.5: validarStockDisponibleActual()");
-    crearMensaje(ctrlResolve, entReserva, "3.6: actualizarEstadoYAuditoria()");
-    crearMensaje(ctrlResolve, entItem, "3.7: reasignarVarianteSustituta()");
-    crearMensaje(ctrlResolve, uiModal, "3.8: confirmarResolucionExitosa()");
+    crearMensaje(ctrlSvc, ctrlSvc, "3.4: validarJustificacion()");
+    crearMensaje(ctrlSvc, entInventory, "3.5: validarStockDisponibleActual()");
+    crearMensaje(ctrlSvc, entReserva, "3.6: actualizarEstadoYAuditoria()");
+    crearMensaje(ctrlSvc, entItem, "3.7: reasignarVarianteSustituta()");
+    crearMensaje(ctrlSvc, uiModal, "3.8: confirmarResolucionExitosa()");
     crearMensaje(uiModal, uiPanel, "3.9: refrescarBandejaConflictos()");
     crearMensaje(uiPanel, actorEncargado, "3.10: mostrarMensajeExito()");
 

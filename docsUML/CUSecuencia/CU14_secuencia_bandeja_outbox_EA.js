@@ -4,7 +4,7 @@
  * DESCRIPCION: Inspeccion, arqueo de efectivo en gaveta física, verificacion de estado 
  *              contra el servidor central (POST /api/sales/offline/check-status), 
  *              sincronizacion unitaria y depuracion de transacciones consolidadas.
- * ACTOR: Cajero / Encargado
+ * ACTOR: Cajero
  * TIPO DE DIAGRAMA: Diagrama de Secuencia (Arquitectura BCE pura: Actor-Boundary-Control-Entity)
  * ENTORNO: Enterprise Architect 15.0+
  * LENGUAJE: JScript (Motor nativo WSH en Enterprise Architect)
@@ -183,7 +183,7 @@ function Main() {
         return;
     }
 
-    log("Iniciando generacion de Diagrama de Secuencia CU14 (Cajero / Encargado)...");
+    log("Iniciando generacion de Diagrama de Secuencia CU14 (Cajero)...");
 
     var pkg = getTargetPackage();
     if (pkg == null) return;
@@ -191,7 +191,7 @@ function Main() {
     var diagram = recreateDiagram(pkg);
 
     // 1. Participantes con Iconos Propios BCE (Actor, Boundary, Control, Entity)
-    var actorCajero    = addActorParticipant(pkg, diagram, "Cajero / Encargado",     40,  90);
+    var actorCajero    = addActorParticipant(pkg, diagram, "Cajero",     40,  90);
     var uiCaja         = addBCEParticipant(pkg, diagram, "CajaPageComponent",         "boundary", 200, 110);
     var uiModalTicket  = addBCEParticipant(pkg, diagram, "TicketContingenciaModal",  "boundary", 370, 120);
     var ctrlIdbSales   = addBCEParticipant(pkg, diagram, "IdbSalesService",          "control",  550, 110);
@@ -233,7 +233,7 @@ function Main() {
     addMessage(ctrlBackend, ctrlSalesApi, "3.5: HTTP 200 OK (status_map)", true, seq++);
     addMessage(ctrlSalesApi, uiCaja, "3.6: status_map", true, seq++);
     addMessage(uiCaja, ctrlIdbSales, "3.7: markAsSynced()", false, seq++);
-    addMessage(ctrlIdbSales, entLocalSale, "3.8: put(synced=true)", false, seq++);
+    addMessage(ctrlIdbSales, entLocalSale, "3.8: put()", false, seq++);
     addMessage(uiCaja, actorCajero, "3.9: renderizarEstadoConciliado()", true, seq++);
 
     // =========================================================================
@@ -249,7 +249,7 @@ function Main() {
     addMessage(ctrlBackend, ctrlSalesApi, "4.5: HTTP 201 Created", true, seq++);
     addMessage(ctrlSalesApi, uiCaja, "4.6: Sale", true, seq++);
     addMessage(uiCaja, ctrlIdbSales, "4.7: markAsSynced()", false, seq++);
-    addMessage(ctrlIdbSales, entLocalSale, "4.8: put(synced=true)", false, seq++);
+    addMessage(ctrlIdbSales, entLocalSale, "4.8: put()", false, seq++);
     addMessage(uiCaja, actorCajero, "4.9: notificarSincronizacionExitosa()", true, seq++);
 
     // =========================================================================

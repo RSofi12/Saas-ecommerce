@@ -4,8 +4,8 @@
  * DESCRIPCION: Procesa la devolución física de prendas vendidas en mostrador aplicando la
  *              Política de Negocio 2 (P-Ten-03):
  *              - Actores: Cliente (iniciador presencial y decisor) y Cajero (operador de caja y verificador físico).
- *              - Fronteras: CajaPageComponent (POS base), ModalDevolucionPrenda (inspección y cotizador),
- *                ModalComprobanteNotaCredito (comprobante digital).
+ *              - Fronteras: CajaPageComponent (POS base), ReturnModalComponent (inspección y cotizador),
+ *                CreditNoteReceiptModal (comprobante digital).
  *              - Controladores: ReturnRoutes (FastAPI REST API Controller) y ReturnService (Domain Controller).
  *              - Entidades: Sale, Company, Inventory, GarmentReturn.
  *              - Evaluación física obligatoria de etiqueta intacta (good_with_tags) y plazo hábil (max_days).
@@ -214,7 +214,7 @@ function main() {
      * 1. PARTICIPANTES BCE (DISTRIBUCION HORIZONTAL)
      * Actores -> Boundaries -> Controllers -> Entities
      * Cliente, Cajero
-     * :CajaPageComponent, :ModalDevolucionPrenda, :ModalComprobanteNotaCredito
+     * :CajaPageComponent, :ReturnModalComponent, :CreditNoteReceiptModal
      * :ReturnRoutes, :ReturnService
      * :Sale, :Company, :Inventory, :GarmentReturn
      * ------------------------------------------------------------------------- */
@@ -222,8 +222,8 @@ function main() {
     var actorCajero   = addActorParticipant(pkg, diagram, "Cajero",   150,  80);
 
     var uiCaja        = addParticipant(pkg, diagram, ":CajaPageComponent",          "Interface",  270, 160);
-    var uiModalDev    = addParticipant(pkg, diagram, ":ModalDevolucionPrenda",      "Interface",  460, 180);
-    var uiModalNC     = addParticipant(pkg, diagram, ":ModalComprobanteNotaCredito","Interface",  670, 190);
+    var uiModalDev    = addParticipant(pkg, diagram, ":ReturnModalComponent",      "Interface",  460, 180);
+    var uiModalNC     = addParticipant(pkg, diagram, ":CreditNoteReceiptModal","Interface",  670, 190);
 
     var ctrlRoutes    = addParticipant(pkg, diagram, ":ReturnRoutes",  "Controller", 890, 140);
     var ctrlService   = addParticipant(pkg, diagram, ":ReturnService", "Controller", 1060, 140);
@@ -238,8 +238,8 @@ function main() {
     /* -------------------------------------------------------------------------
      * 2. FASE 1: SOLICITUD PRESENCIAL DEL CLIENTE Y APERTURA DE MODAL
      * ------------------------------------------------------------------------- */
-    addMessage(actorCliente, actorCajero,
-        "1: solicitarDevolucionPrenda(ticket, prenda)", false, step++);
+    addMessage(actorCliente, uiCaja,
+        "1: solicitarDevolucionPrenda()", false, step++);
 
     addMessage(actorCajero, uiCaja,
         "2: abrirModalDevolucion()", false, step++);
@@ -251,80 +251,80 @@ function main() {
      * 3. FASE 2: BUSQUEDA DE COMPROBANTE Y COTIZACION DE RETENCION EN TIEMPO REAL
      * ------------------------------------------------------------------------- */
     addMessage(actorCajero, uiModalDev,
-        "3: ingresarTicketYPrenda(sale_id, variant_id)", false, step++);
+        "3: ingresarTicketYPrenda()", false, step++);
 
     addMessage(uiModalDev, ctrlRoutes,
-        "3.1: POST /api/returns/quote(sale_id, variant_id)", false, step++);
+        "3.1: POST /api/returns/quote", false, step++);
 
     addMessage(ctrlRoutes, ctrlService,
-        "3.2: quote_garment_return(sale_id, variant_id)", false, step++);
+        "3.2: quote_garment_return()", false, step++);
 
     addMessage(ctrlService, entSale,
-        "3.3: filter(Sale.id == sale_id, tenant_id)", false, step++);
+        "3.3: filter()", false, step++);
 
     addMessage(entSale, ctrlService,
-        "3.4: return(sale, sale_items)", true, step++);
+        "3.4: return()", true, step++);
 
     addMessage(ctrlService, entCompany,
-        "3.5: _get_tenant_return_policy(company)", false, step++);
+        "3.5: _get_tenant_return_policy()", false, step++);
 
     addMessage(entCompany, ctrlService,
-        "3.6: return(retention_rate, max_days)", true, step++);
+        "3.6: return()", true, step++);
 
     addMessage(ctrlService, ctrlService,
-        "3.7: calcularRetencionYReembolsoNeto(price, retention_rate)", false, step++);
+        "3.7: calcularRetencionYReembolsoNeto()", false, step++);
 
     addMessage(ctrlService, ctrlRoutes,
-        "3.8: return(ReturnQuoteResponse)", true, step++);
+        "3.8: return()", true, step++);
 
     addMessage(ctrlRoutes, uiModalDev,
-        "3.9: return(ReturnQuoteResponse)", true, step++);
+        "3.9: return()", true, step++);
 
     addMessage(uiModalDev, actorCajero,
-        "3.10: mostrarDesgloseRetencion(retencion, reembolso_neto)", true, step++);
+        "3.10: mostrarDesgloseRetencion()", true, step++);
 
     /* -------------------------------------------------------------------------
      * 4. FASE 3: ACUERDO CON EL CLIENTE Y SELECCION DE MODALIDAD
      * ------------------------------------------------------------------------- */
-    addMessage(actorCajero, actorCliente,
-        "3.11: informarRetencionYConsultarModalidad(R=20%-50%, neto)", false, step++);
+    addMessage(uiModalDev, actorCajero,
+        "3.11: mostrarOpcionesModalidad()", false, step++);
 
-    addMessage(actorCliente, actorCajero,
-        "4: aceptarRetencionYElegirModalidad(NOTA_CREDITO | EFECTIVO)", false, step++);
+    addMessage(actorCajero, uiModalDev,
+        "4: seleccionarModalidadReembolso()", false, step++);
 
     /* -------------------------------------------------------------------------
      * 5. FASE 4: CONFIRMACION Y VALIDACION DE CONDICION (FRAGMENTO ALT)
      * ------------------------------------------------------------------------- */
     addMessage(actorCajero, uiModalDev,
-        "5: confirmarDevolucion(condition, refund_method, reason)", false, step++);
+        "5: confirmarDevolucion()", false, step++);
 
     addMessage(uiModalDev, ctrlRoutes,
-        "5.1: POST /api/returns(payload)", false, step++);
+        "5.1: POST /api/returns", false, step++);
 
     addMessage(ctrlRoutes, ctrlService,
-        "5.2: process_garment_return(payload)", false, step++);
+        "5.2: process_garment_return()", false, step++);
 
     /* FRAGMENTO ALT: Validacion de Prenda y Plazo
      * [Prenda con Etiqueta Intacta y Plazo Vigente] vs [Condicion No Apta / Plazo Vencido] */
     addCombinedFragment(pkg, diagram, "alt", "[Prenda con Etiqueta Intacta y Plazo Vigente]", 870, 1780, -980, -1350);
 
     addMessage(ctrlService, ctrlService,
-        "5.3: validarCondicionPrenda(good_with_tags)", false, step++);
+        "5.3: validarCondicionPrenda()", false, step++);
 
     addMessage(ctrlService, ctrlService,
-        "5.4: validarPlazoDevolucion(sale_date, max_days)", false, step++);
+        "5.4: validarPlazoDevolucion()", false, step++);
 
     /* -------------------------------------------------------------------------
      * 6. FASE 5: REINGRESO DE STOCK ATOMICO (with_for_update)
      * ------------------------------------------------------------------------- */
     addMessage(ctrlService, entInventory,
-        "5.5: with_for_update(variant_id, branch_id)", false, step++);
+        "5.5: with_for_update()", false, step++);
 
     addMessage(entInventory, ctrlService,
-        "5.6: return(inventory_row)", true, step++);
+        "5.6: return()", true, step++);
 
     addMessage(ctrlService, entInventory,
-        "5.7: incrementQuantity(quantity += 1)", false, step++);
+        "5.7: incrementQuantity()", false, step++);
 
     addMessage(entInventory, ctrlService,
         "5.8: return()", true, step++);
@@ -337,10 +337,10 @@ function main() {
     addCombinedFragment(pkg, diagram, "alt", "[Modalidad NOTA_CREDITO]", 870, 1780, -1370, -1640);
 
     addMessage(ctrlService, ctrlService,
-        "5.9: generate_credit_note_code(tenant_id) [NC-YYYYMMDD-XXXX]", false, step++);
+        "5.9: generate_credit_note_code() [NC-YYYYMMDD-XXXX]", false, step++);
 
     addMessage(ctrlService, entReturn,
-        "5.10: create(GarmentReturn(credit_note_code, retention_rate, refund_amount))", false, step++);
+        "5.10: create()", false, step++);
 
     addMessage(entReturn, ctrlService,
         "5.11: commit()", true, step++);
@@ -349,19 +349,19 @@ function main() {
      * 8. FASE 7: RESPUESTA, EMISION DE COMPROBANTE Y ENTREGA AL CLIENTE
      * ------------------------------------------------------------------------- */
     addMessage(ctrlService, ctrlRoutes,
-        "5.12: return(GarmentReturnResponse)", true, step++);
+        "5.12: return()", true, step++);
 
     addMessage(ctrlRoutes, uiModalDev,
-        "5.13: return(GarmentReturnResponse)", true, step++);
+        "5.13: return()", true, step++);
 
     addMessage(uiModalDev, uiModalNC,
-        "5.14: abrirComprobante(credit_note_code, refund_amount)", false, step++);
+        "5.14: abrirComprobante()", false, step++);
 
     addMessage(uiModalNC, actorCajero,
         "5.15: renderizarNotaCreditoYRecibo()", true, step++);
 
-    addMessage(actorCajero, actorCliente,
-        "6: entregarComprobanteYReembolso(NC / efectivo)", false, step++);
+    addMessage(uiModalNC, actorCliente,
+        "6: entregarComprobanteReembolso()", false, step++);
 
     /* Guardar y abrir diagrama de forma segura */
     stretchActorLifeline(diagram, actorCliente, -2600);
