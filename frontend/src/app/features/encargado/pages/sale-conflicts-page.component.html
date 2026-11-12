@@ -211,22 +211,7 @@
           </label>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <!-- Vía 1: Stock Negativo -->
-            <button
-              type="button"
-              (click)="resolutionType.set('negative_stock')"
-              class="flex flex-col text-left p-3.5 rounded-xl border-2 transition-all"
-              [ngClass]="resolutionType() === 'negative_stock' ? 'border-amber-500 bg-amber-50/60 shadow-sm' : 'border-slate-200 hover:border-slate-300 bg-white'"
-            >
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-bold text-amber-900">Vía 1</span>
-                <span class="h-2 w-2 rounded-full" [ngClass]="resolutionType() === 'negative_stock' ? 'bg-amber-500' : 'bg-transparent'"></span>
-              </div>
-              <p class="mt-1 font-semibold text-sm text-slate-900">Stock Negativo</p>
-              <p class="mt-1 text-xs text-slate-500">Prenda física ya entregada. Autoriza saldo temporal (-1) y solicita reposición.</p>
-            </button>
-
-            <!-- Vía 2: Sustitución -->
+            <!-- Vía 1: Sustitución Acordada -->
             <button
               type="button"
               (click)="resolutionType.set('substitute')"
@@ -234,14 +219,14 @@
               [ngClass]="resolutionType() === 'substitute' ? 'border-emerald-500 bg-emerald-50/60 shadow-sm' : 'border-slate-200 hover:border-slate-300 bg-white'"
             >
               <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-bold text-emerald-900">Vía 2</span>
+                <span class="text-xs font-bold text-emerald-900">Vía 1</span>
                 <span class="h-2 w-2 rounded-full" [ngClass]="resolutionType() === 'substitute' ? 'bg-emerald-500' : 'bg-transparent'"></span>
               </div>
-              <p class="mt-1 font-semibold text-sm text-slate-900">Sustitución</p>
-              <p class="mt-1 text-xs text-slate-500">Reasigna la venta a otra variante/talla con existencias reales en sucursal.</p>
+              <p class="mt-1 font-semibold text-sm text-slate-900">Sustitución Acordada</p>
+              <p class="mt-1 text-xs text-slate-500">Sustitución acordada por otra prenda de igual valor o talla disponible en sucursal.</p>
             </button>
 
-            <!-- Vía 3: Nota de Crédito -->
+            <!-- Vía 2: Nota de Crédito -->
             <button
               type="button"
               (click)="resolutionType.set('credit_note')"
@@ -249,11 +234,26 @@
               [ngClass]="resolutionType() === 'credit_note' ? 'border-purple-500 bg-purple-50/60 shadow-sm' : 'border-slate-200 hover:border-slate-300 bg-white'"
             >
               <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-bold text-purple-900">Vía 3</span>
+                <span class="text-xs font-bold text-purple-900">Vía 2</span>
                 <span class="h-2 w-2 rounded-full" [ngClass]="resolutionType() === 'credit_note' ? 'bg-purple-500' : 'bg-transparent'"></span>
               </div>
-              <p class="mt-1 font-semibold text-sm text-slate-900">Nota de Crédito</p>
-              <p class="mt-1 text-xs text-slate-500">Anulación total y emisión de Nota de Crédito digital por el 100% (cero penalidad).</p>
+              <p class="mt-1 font-semibold text-sm text-slate-900">Nota de Crédito (100%)</p>
+              <p class="mt-1 text-xs text-slate-500">Emisión digital de Nota de Crédito por el 100% del importe pagado (código NC-...).</p>
+            </button>
+
+            <!-- Vía 3: Reembolso Completo / Stock Negativo -->
+            <button
+              type="button"
+              (click)="resolutionType.set('negative_stock')"
+              class="flex flex-col text-left p-3.5 rounded-xl border-2 transition-all"
+              [ngClass]="resolutionType() === 'negative_stock' ? 'border-amber-500 bg-amber-50/60 shadow-sm' : 'border-slate-200 hover:border-slate-300 bg-white'"
+            >
+              <div class="flex items-center justify-between w-full">
+                <span class="text-xs font-bold text-amber-900">Vía 3</span>
+                <span class="h-2 w-2 rounded-full" [ngClass]="resolutionType() === 'negative_stock' ? 'bg-amber-500' : 'bg-transparent'"></span>
+              </div>
+              <p class="mt-1 font-semibold text-sm text-slate-900">Reembolso / Stock Negativo</p>
+              <p class="mt-1 text-xs text-slate-500">Reembolso completo o asentamiento de saldo temporal (-1) con reposición.</p>
             </button>
           </div>
         </div>

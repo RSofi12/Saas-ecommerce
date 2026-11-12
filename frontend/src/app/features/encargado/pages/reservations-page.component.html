@@ -82,7 +82,7 @@
       [ngClass]="activeTab() === 'conflicts' ? 'border-rose-600 text-rose-700 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700'"
       (click)="activeTab.set('conflicts')"
     >
-      <span>Bandeja de Conflictos / Expiradas</span>
+      <span>Conflictos de Reservas y Diagnóstico de Percha</span>
       @if (conflictsCount > 0) {
         <span class="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">{{ conflictsCount }}</span>
       }
@@ -384,8 +384,8 @@
                   class="mt-1"
                 />
                 <div>
-                  <p class="text-sm font-semibold text-slate-900">Reactivar Apartado Original</p>
-                  <p class="text-xs text-slate-500">Extiende el plazo y re-bloquea las unidades en inventario reservado.</p>
+                  <p class="text-sm font-semibold text-slate-900">Opción A: Reactivar por 24h adicionales</p>
+                  <p class="text-xs text-slate-500">Reactivar reserva si el cliente asiste y la prenda sigue físicamente en percha.</p>
                 </div>
               </label>
 
@@ -411,7 +411,7 @@
                 </div>
               </label>
 
-              <!-- Opción 3: Cierre Definitivo -->
+              <!-- Opción 3: Cierre Definitivo / Liberar Stock -->
               <label
                 class="flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition"
                 [ngClass]="{
@@ -428,8 +428,8 @@
                   class="mt-1"
                 />
                 <div>
-                  <p class="text-sm font-semibold text-rose-900">Cierre Definitivo / Anular Reserva</p>
-                  <p class="text-xs text-slate-500">Cancela la reserva por desistimiento del cliente o falta de acuerdo.</p>
+                  <p class="text-sm font-semibold text-rose-900">Opción B: Liberar formalmente el stock al inventario general</p>
+                  <p class="text-xs text-slate-500">Libera el stock formalmente al inventario general para venta al público y anula la reserva.</p>
                 </div>
               </label>
             </div>

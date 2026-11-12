@@ -98,6 +98,8 @@ export class IdbCatalogService {
     category_id?: string;
     size_id?: string;
     color_id?: string;
+    min_price?: string | number;
+    max_price?: string | number;
   }): Promise<CatalogProduct[]> {
     const db = await this.getDb();
 
@@ -134,6 +136,24 @@ export class IdbCatalogService {
           products = products.filter((p) =>
             p.variants?.some((v) => v.color_id === filters.color_id && v.status === 'active'),
           );
+        }
+
+        if (filters?.min_price !== undefined && filters.min_price !== '') {
+          const min = Number(filters.min_price);
+          if (!isNaN(min)) {
+            products = products.filter((p) =>
+              p.variants?.some((v) => Number(v.price) >= min && v.status === 'active'),
+            );
+          }
+        }
+
+        if (filters?.max_price !== undefined && filters.max_price !== '') {
+          const max = Number(filters.max_price);
+          if (!isNaN(max)) {
+            products = products.filter((p) =>
+              p.variants?.some((v) => Number(v.price) <= max && v.status === 'active'),
+            );
+          }
         }
 
         resolve(products);

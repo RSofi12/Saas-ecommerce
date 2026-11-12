@@ -12,6 +12,10 @@ import { HlmCardImports } from '../../../components/card/src';
 import { HlmInputImports } from '../../../components/input/src';
 import { NetworkStatusService } from '../../../core/offline/network-status.service';
 import { IdbSalesService, PendingOfflineSale } from '../../../core/offline/idb-sales.service';
+import { IdbCatalogService } from '../../../core/offline/idb-catalog.service';
+import { IdbReservationsService, PendingOfflineReservation } from '../../../core/offline/idb-reservations.service';
+import { ReservationApiService } from '../../shared/services/reservation-api.service';
+import { CreateReservationRequest } from '../../shared/models/reservation.model';
 import { getErrorMessage } from '../../../core/utils/http-error.util';
 import { requestWithToast } from '../../../core/utils/request-toast.util';
 import { CatalogProduct, CatalogProductVariant } from '../../shared/models/catalog.model';
@@ -52,11 +56,15 @@ type SelectedSaleItem = {
 export class CajaPageComponent {
   private readonly catalogApi = inject(CatalogApiService);
   private readonly salesApi = inject(SalesApiService);
+  private readonly reservationApi = inject(ReservationApiService);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   protected readonly network = inject(NetworkStatusService);
   protected readonly idbSales = inject(IdbSalesService);
+  protected readonly idbCatalog = inject(IdbCatalogService);
+  protected readonly idbReservations = inject(IdbReservationsService);
 
+  protected readonly syncingCatalog = signal(false);
   protected readonly searchTerm = signal('');
   protected readonly products = signal<CatalogProduct[]>([]);
   protected readonly selectedItems = signal<SelectedSaleItem[]>([]);
@@ -100,7 +108,7 @@ export class CajaPageComponent {
   // =========================================================================
   // LOGICA DEL CU14 Y CU15: Bandeja Local y Sincronización en Lote Centralizada
   // =========================================================================
-  protected readonly activeTab = signal<'tpv' | 'outbox'>('tpv');
+  protected readonly activeTab = signal<'tpv' | 'reservas' | 'outbox'>('tpv');
   protected readonly outboxSales = signal<PendingOfflineSale[]>([]);
   protected readonly syncingOutbox = signal(false);
   protected readonly verifyingOutbox = signal(false);
@@ -108,6 +116,24 @@ export class CajaPageComponent {
   protected readonly lastBatchSyncSummary = signal<BatchSyncSummary | null>(null);
   protected readonly lastBatchSyncDetails = signal<BatchSyncItemResult[]>([]);
   protected readonly showBatchSyncSummary = signal(false);
+
+  // =========================================================================
+  // LOGICA DEL CU11: Registrar Reserva de Prendas Offline en Mostrador
+  // =========================================================================
+  protected readonly offlineReservations = signal<PendingOfflineReservation[]>([]);
+  protected readonly pendingReservationsCount = computed(() => this.offlineReservations().filter((r) => !r.synced).length);
+  protected readonly resCustomerName = signal('');
+  protected readonly resCustomerPhone = signal('');
+  protected readonly resCustomerEmail = signal('');
+  protected readonly resVisitDate = signal(new Date().toISOString().slice(0, 10));
+  protected readonly resSelectedProduct = signal<CatalogProduct | null>(null);
+  protected readonly resSelectedVariant = signal<CatalogProductVariant | null>(null);
+  protected readonly resQuantity = signal(1);
+  protected readonly resNotes = signal('');
+  protected readonly resApartando = signal(false);
+  protected readonly resSyncing = signal(false);
+  protected readonly lastOfflineReservation = signal<PendingOfflineReservation | null>(null);
+  protected readonly showResReceiptModal = signal(false);
 
   protected readonly pendingSales = computed(() => this.outboxSales().filter((s) => !s.synced));
   protected readonly syncedSales = computed(() => this.outboxSales().filter((s) => s.synced));
@@ -118,11 +144,17 @@ export class CajaPageComponent {
     this.pendingSales().reduce((sum, s) => sum + s.total_amount, 0).toFixed(2)
   );
 
-  protected switchTab(tab: 'tpv' | 'outbox'): void {
+  protected switchTab(tab: 'tpv' | 'reservas' | 'outbox'): void {
     this.activeTab.set(tab);
     if (tab === 'outbox') {
       this.refreshOutbox();
+    } else if (tab === 'reservas') {
+      this.refreshReservations();
     }
+  }
+
+  protected refreshReservations(): void {
+    this.offlineReservations.set(this.idbReservations.getPending());
   }
 
   protected refreshOutbox(): void {
@@ -281,7 +313,7 @@ export class CajaPageComponent {
           );
         } else {
           toast.success(
-            `Lote sincronizado exitosamente: ${summary.applied} aplicadas, ${summary.duplicates_ignored} duplicadas descartadas.`
+            `Todas las operaciones sincronizadas con éxito (${summary.applied} aplicadas, ${summary.duplicates_ignored} duplicadas descartadas con idempotencia).`
           );
         }
       }
@@ -399,15 +431,46 @@ export class CajaPageComponent {
     this.cashReceived.set(current + amount);
   }
 
+  protected async syncCatalog(): Promise<void> {
+    this.syncingCatalog.set(true);
+    try {
+      const branchId = this.branchId();
+      const resp = await firstValueFrom(
+        this.catalogApi.getOfflineCatalogPack(branchId ?? undefined)
+      );
+      if (resp.data) {
+        await this.idbCatalog.saveOfflinePack(resp.data);
+        this.products.set(resp.data.products);
+        toast.success('Catálogo local sincronizado con éxito');
+      }
+    } catch (err) {
+      toast.error('No se pudo sincronizar el catálogo local.');
+    } finally {
+      this.syncingCatalog.set(false);
+    }
+  }
+
   protected async searchProducts(): Promise<void> {
     const branchId = this.branchId();
     this.loadingProducts.set(true);
     try {
-      const response = await firstValueFrom(
-        this.catalogApi.listProducts({ q: this.searchTerm() || undefined, branch_id: branchId ?? undefined })
-      );
-      this.products.set((response.data ?? []) as CatalogProduct[]);
+      if (this.isOfflineEffective()) {
+        const offlineProds = await this.idbCatalog.getOfflineProducts({ q: this.searchTerm() || undefined });
+        this.products.set(offlineProds);
+      } else {
+        const response = await firstValueFrom(
+          this.catalogApi.listProducts({ q: this.searchTerm() || undefined, branch_id: branchId ?? undefined })
+        );
+        this.products.set((response.data ?? []) as CatalogProduct[]);
+      }
     } catch (error) {
+      try {
+        const offlineProds = await this.idbCatalog.getOfflineProducts({ q: this.searchTerm() || undefined });
+        if (offlineProds.length > 0) {
+          this.products.set(offlineProds);
+          return;
+        }
+      } catch {}
       toast.error(getErrorMessage(error, 'No se pudieron cargar los productos.'));
       this.products.set([]);
     } finally {
@@ -833,5 +896,160 @@ export class CajaPageComponent {
 
   protected closeExchangeReceiptModal(): void {
     this.showExchangeReceiptModal.set(false);
+  }
+
+  // =========================================================================
+  // MÉTODOS DEL CU11: Registrar Reserva de Prendas Offline en Mostrador
+  // =========================================================================
+  protected selectResProduct(prod: CatalogProduct): void {
+    this.resSelectedProduct.set(prod);
+    if (prod.variants && prod.variants.length > 0) {
+      this.resSelectedVariant.set(prod.variants[0]);
+    } else {
+      this.resSelectedVariant.set(null);
+    }
+  }
+
+  protected selectResVariant(variant: CatalogProductVariant): void {
+    this.resSelectedVariant.set(variant);
+  }
+
+  protected async apartarPrendaLocalmente(): Promise<void> {
+    const customer = this.resCustomerName().trim();
+    if (!customer) {
+      toast.error('Ingresa los datos del cliente presencial (Nombre completo).');
+      return;
+    }
+
+    const prod = this.resSelectedProduct();
+    const variant = this.resSelectedVariant();
+    if (!prod || !variant) {
+      toast.error('Selecciona una prenda y talla para apartar.');
+      return;
+    }
+
+    const qty = Math.max(1, Number(this.resQuantity()) || 1);
+    const branchId = this.branchId() || '8ba6f37b-10d8-4fde-8b39-a1eee44f1922';
+    const clientReservationId = crypto.randomUUID();
+    const code = 'RES-OFF-' + Math.random().toString(16).substring(2, 10).toUpperCase();
+
+    const visitDate = this.resVisitDate() || new Date().toISOString().slice(0, 10);
+    const visitDateObj = new Date(visitDate);
+    visitDateObj.setDate(visitDateObj.getDate() + 1);
+    const expiresAt = visitDateObj.toISOString().slice(0, 10);
+
+    const price = Number(variant.price) || 0;
+    const totalEst = price * qty;
+
+    const reservationPayload: CreateReservationRequest = {
+      branch_id: branchId,
+      visit_date: visitDate,
+      items: [{ variant_id: variant.id, quantity: qty }],
+      client_reservation_id: clientReservationId,
+    };
+
+    const offlineItem: PendingOfflineReservation = {
+      client_reservation_id: clientReservationId,
+      payload: reservationPayload,
+      reservation_code: code,
+      branch_id: branchId,
+      branch_name: this.branchName(),
+      customer_name: customer,
+      customer_phone: this.resCustomerPhone().trim() || undefined,
+      customer_email: this.resCustomerEmail().trim() || undefined,
+      visit_date: visitDate,
+      expires_at: expiresAt,
+      items_summary: `${qty}x ${prod.name} (${variant.size_name || 'Talla Única'})`,
+      total_estimated: totalEst,
+      status: 'PENDIENTE_SYNC',
+      created_at: new Date().toISOString(),
+      synced: false,
+      items: [
+        {
+          variant_id: variant.id,
+          product_name: prod.name,
+          variant_sku: variant.sku,
+          size_name: variant.size_name,
+          color_name: variant.color_name,
+          unit_price: price,
+          quantity: qty,
+        },
+      ],
+    };
+
+    this.resApartando.set(true);
+    try {
+      // 1. Guardar en la cola local de IndexedDB
+      this.idbReservations.savePending(offlineItem);
+      this.lastOfflineReservation.set(offlineItem);
+      this.showResReceiptModal.set(true);
+
+      toast.success(
+        `Prenda apartada localmente con éxito (Código: ${code}, UUIDv4: ${clientReservationId}). Guardada en cola local de IndexedDB.`
+      );
+
+      this.refreshReservations();
+
+      // Limpiar formulario parcial
+      this.resCustomerName.set('');
+      this.resCustomerPhone.set('');
+      this.resCustomerEmail.set('');
+
+      // 2. Si la conexión está restablecida (Online), intentar sincronizar automáticamente
+      if (!this.isOfflineEffective()) {
+        void this.syncOfflineReservations();
+      }
+    } finally {
+      this.resApartando.set(false);
+    }
+  }
+
+  protected async syncOfflineReservations(): Promise<void> {
+    if (this.isOfflineEffective()) {
+      toast.error('No se puede sincronizar: el terminal está en modo desconectado.');
+      return;
+    }
+
+    const pending = this.offlineReservations().filter((r) => !r.synced);
+    if (pending.length === 0) {
+      toast.info('No hay reservas de mostrador pendientes de sincronización.');
+      return;
+    }
+
+    this.resSyncing.set(true);
+    let syncedCount = 0;
+    try {
+      for (const item of pending) {
+        try {
+          await firstValueFrom(this.reservationApi.createReservation(item.payload));
+          this.idbReservations.markAsSynced(item.client_reservation_id);
+          syncedCount++;
+        } catch (err) {
+          this.idbReservations.markAsError(
+            item.client_reservation_id,
+            getErrorMessage(err, 'Error al consolidar reserva')
+          );
+        }
+      }
+
+      this.refreshReservations();
+      if (syncedCount > 0) {
+        toast.success(
+          `Sincronización completada: ${syncedCount} reserva(s) consolidada(s) con el servidor central.`
+        );
+      }
+    } finally {
+      this.resSyncing.set(false);
+    }
+  }
+
+  protected removeOfflineReservation(clientReservationId: string): void {
+    this.idbReservations.removePending(clientReservationId);
+    this.refreshReservations();
+    toast.success('Reserva local descartada.');
+  }
+
+  protected closeResReceiptModal(): void {
+    this.showResReceiptModal.set(false);
   }
 }

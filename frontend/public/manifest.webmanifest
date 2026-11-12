@@ -1,0 +1,26 @@
+{
+  "name": "FashionStore — SaaS Multitenant",
+  "short_name": "FashionStore",
+  "description": "Plataforma E-Commerce SaaS Multitenant y Punto de Venta (POS)",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/logo-fashionstore.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-fashionstore.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

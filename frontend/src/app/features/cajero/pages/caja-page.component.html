@@ -9,8 +9,8 @@
             <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span> Modo Contingencia Offline
           </span>
         } @else {
-          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200">
-            <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Servidor Conectado
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300">
+            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> CONEXIÓN RESTABLECIDA
           </span>
         }
       </div>
@@ -43,6 +43,22 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-12.728 0m0 0l2.829-2.829m-2.829 2.829L3 21m2.829-5.657a5 5 0 010-7.072m0 0l2.829 2.829" />
         </svg>
         {{ simulatedOffline() ? 'Restablecer Online' : 'Simular Offline' }}
+      </button>
+
+      <!-- Botón Sincronizar Catálogo (CU07) -->
+      <button
+        hlmBtn
+        type="button"
+        variant="outline"
+        size="sm"
+        (click)="syncCatalog()"
+        [disabled]="syncingCatalog()"
+        class="text-xs border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition font-medium"
+      >
+        <svg class="mr-1.5 h-3.5 w-3.5 text-emerald-600" [class.animate-spin]="syncingCatalog()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>{{ syncingCatalog() ? 'Sincronizando...' : 'Sincronizar Catálogo' }}</span>
       </button>
 
       <button hlmBtn type="button" variant="outline" size="sm" (click)="searchProducts()" [disabled]="loadingProducts()" class="text-xs">
@@ -84,7 +100,7 @@
     </div>
   </header>
 
-  <!-- Selector de Pestañas: TPV Principal vs Bandeja Outbox Local (CU14) -->
+  <!-- Selector de Pestañas: TPV Principal vs Reservas de Mostrador (CU11) vs Bandeja Outbox Local (CU14) -->
   <div class="flex items-center justify-between border-b border-slate-200">
     <nav class="flex space-x-2" aria-label="Pestañas de Caja">
       <button
@@ -99,6 +115,25 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
         Terminal de Cobro (TPV)
+      </button>
+
+      <button
+        type="button"
+        (click)="switchTab('reservas')"
+        class="inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition"
+        [ngClass]="activeTab() === 'reservas'
+          ? 'border-indigo-600 text-indigo-700'
+          : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800'"
+      >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Reservas de Mostrador
+        @if (pendingReservationsCount() > 0) {
+          <span class="ml-1 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800 border border-indigo-200">
+            {{ pendingReservationsCount() }}
+          </span>
+        }
       </button>
 
       <button
@@ -121,7 +156,11 @@
       </button>
     </nav>
 
-    @if (activeTab() === 'outbox') {
+    @if (activeTab() === 'reservas') {
+      <div class="text-xs text-indigo-600 font-mono hidden sm:block">
+        CU11 · Apartados Presenciales Offline (IndexedDB)
+      </div>
+    } @else if (activeTab() === 'outbox') {
       <div class="text-xs text-slate-500 font-mono hidden sm:block">
         IndexedDB Storage · SQLite Offline Cache
       </div>
@@ -136,7 +175,7 @@
           <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
         </svg>
         <div class="text-xs sm:text-sm">
-          <span class="font-bold">Política Inviolable de Contingencia (P-Ten-05):</span> La terminal se encuentra operando sin conexión al servidor central. Los cobros electrónicos (Stripe / QR) quedan bloqueados por seguridad contable. La venta se asienta de contado en <strong class="underline font-bold">EFECTIVO</strong>, rebaja el stock local y genera un comprobante de contingencia con identificador <strong class="font-mono">UUIDv4</strong> para sincronización central posterior (CU15).
+          <span class="font-bold">MODO DESCONECTADO (OFFLINE-FIRST) — Política Inviolable de Contingencia (P-Ten-05):</span> La terminal se encuentra operando sin conexión al servidor central. Los cobros electrónicos (Stripe / QR) quedan bloqueados por seguridad contable. La venta se asienta de contado en <strong class="underline font-bold">EFECTIVO</strong>, rebaja el stock local y genera un comprobante de contingencia con identificador <strong class="font-mono">UUIDv4</strong> para sincronización central posterior (CU15).
         </div>
       </div>
     </div>
@@ -388,7 +427,7 @@
               @if (submitting()) {
                 <span class="inline-block animate-spin mr-2">⟳</span> Procesando...
               } @else if (isOfflineEffective()) {
-                ⚡ Emitir Ticket de Contingencia Offline
+                ⚡ Emitir Venta en Efectivo (Offline)
               } @else {
                 Cobrar y Emitir Comprobante
               }
@@ -400,7 +439,314 @@
   </section>
   }
 
-  <!-- VISTA 2: BANDEJA LOCAL DE OPERACIONES PENDIENTES (CU14: OUTBOX PWA / SQLITE) -->
+  <!-- VISTA 3: RESERVAS DE MOSTRADOR EN MODO DESCONECTADO (CU11) -->
+  @if (activeTab() === 'reservas') {
+    <div class="space-y-6 animate-fadeIn">
+      <!-- Encabezado y Acciones de Reservas -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-slate-900">Reservas de Mostrador — Apartado Offline (CU11)</h2>
+            <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-200">
+              IndexedDB · Cola Local
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">
+            Aparta prendas para clientes presenciales cuando la tienda está desconectada. Cada apartado genera un <strong class="font-mono text-slate-700">UUIDv4</strong> de contingencia y bloquea el stock localmente hasta su sincronización central.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Sincronizar Reservas Pendientes -->
+          <button
+            hlmBtn
+            type="button"
+            size="sm"
+            class="bg-indigo-600 text-white hover:bg-indigo-700 text-xs shadow-sm font-medium"
+            [disabled]="isOfflineEffective() || pendingReservationsCount() === 0 || resSyncing()"
+            (click)="syncOfflineReservations()"
+          >
+            @if (resSyncing()) {
+              <span class="inline-block animate-spin mr-1.5">⟳</span> Sincronizando...
+            } @else {
+              <svg class="mr-1.5 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Sincronizar Reservas ({{ pendingReservationsCount() }})
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Layout de Formulario de Apartado: 2 Columnas -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Columna Izquierda: Selección de Prenda del Catálogo Local (7 cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-700">1</span>
+                Prenda a Apartar (Catálogo Local)
+              </h3>
+              <span class="text-xs text-slate-500 font-mono">{{ products().length }} prendas en memoria local</span>
+            </div>
+
+            <!-- Buscador rápido -->
+            <div class="relative mb-4">
+              <input
+                type="text"
+                [value]="searchTerm()"
+                (input)="searchTerm.set($any($event.target).value)"
+                (keyup.enter)="searchProducts()"
+                placeholder="Buscar prenda por nombre o código..."
+                class="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-xs placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <!-- Lista de Prendas para Selección -->
+            <div class="max-h-[380px] overflow-y-auto space-y-2 pr-1">
+              @for (prod of products(); track prod.id) {
+                <div
+                  (click)="selectResProduct(prod)"
+                  class="cursor-pointer rounded-lg border p-3 transition hover:border-indigo-300 hover:bg-indigo-50/30"
+                  [ngClass]="resSelectedProduct()?.id === prod.id ? 'border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-500' : 'border-slate-200 bg-white'"
+                >
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                      @if (prod.image_url) {
+                        <img [src]="prod.image_url" [alt]="prod.name" class="h-12 w-12 rounded object-cover border border-slate-200" />
+                      } @else {
+                        <div class="h-12 w-12 rounded bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold border border-slate-200">
+                          Prenda
+                        </div>
+                      }
+                      <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-slate-900 truncate">{{ prod.name }}</h4>
+                        <p class="text-[11px] text-slate-500">{{ prod.category_name || 'Moda Textil' }}</p>
+                      </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <span class="text-xs font-bold text-slate-900">Bs {{ prod.variants?.[0]?.price || '0.00' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Variantes / Tallas si este producto está seleccionado -->
+                  @if (resSelectedProduct()?.id === prod.id && prod.variants && prod.variants.length > 0) {
+                    <div class="mt-3 pt-2 border-t border-indigo-100 flex flex-wrap gap-1.5 items-center">
+                      <span class="text-[11px] font-semibold text-indigo-900 mr-1">Talla:</span>
+                      @for (v of prod.variants; track v.id) {
+                        <button
+                          type="button"
+                          (click)="selectResVariant(v); $event.stopPropagation()"
+                          class="rounded px-2.5 py-1 text-[11px] font-bold transition border"
+                          [ngClass]="resSelectedVariant()?.id === v.id
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'"
+                        >
+                          {{ v.size_name || 'Talla' }} · Bs {{ v.price }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Ficha del Cliente Presencial y Botón Apartar (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-700">2</span>
+                Datos del Cliente Presencial
+              </h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">Identificación para comprobante y entrega en mostrador</p>
+            </div>
+
+            <!-- Prenda seleccionada badge -->
+            @if (resSelectedProduct() && resSelectedVariant()) {
+              <div class="rounded-lg bg-indigo-50/70 border border-indigo-200 p-3">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-indigo-950 truncate max-w-[200px]">{{ resSelectedProduct()?.name }}</span>
+                  <span class="font-mono font-bold text-indigo-700">Bs {{ resSelectedVariant()?.price }}</span>
+                </div>
+                <div class="mt-1 flex items-center gap-2 text-[11px] text-indigo-800">
+                  <span>Talla: <strong>{{ resSelectedVariant()?.size_name || 'Única' }}</strong></span>
+                  <span>·</span>
+                  <span>SKU: <strong class="font-mono">{{ resSelectedVariant()?.sku }}</strong></span>
+                </div>
+              </div>
+            } @else {
+              <div class="rounded-lg bg-slate-50 border border-dashed border-slate-300 p-3 text-center text-xs text-slate-500">
+                Selecciona una prenda y talla en el panel izquierdo
+              </div>
+            }
+
+            <!-- Inputs del Cliente -->
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre Completo del Cliente *</label>
+                <input
+                  type="text"
+                  [ngModel]="resCustomerName()"
+                  (ngModelChange)="resCustomerName.set($event)"
+                  placeholder="Ej. Carlos Mendoza"
+                  class="w-full rounded-lg border border-slate-300 py-2 px-3 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Teléfono / Celular WhatsApp</label>
+                <input
+                  type="text"
+                  [ngModel]="resCustomerPhone()"
+                  (ngModelChange)="resCustomerPhone.set($event)"
+                  placeholder="Ej. 77123456"
+                  class="w-full rounded-lg border border-slate-300 py-2 px-3 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha de Visita / Retiro</label>
+                  <input
+                    type="date"
+                    [ngModel]="resVisitDate()"
+                    (ngModelChange)="resVisitDate.set($event)"
+                    class="w-full rounded-lg border border-slate-300 py-2 px-3 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Cantidad a Apartar</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    [ngModel]="resQuantity()"
+                    (ngModelChange)="resQuantity.set(Number($event) || 1)"
+                    class="w-full rounded-lg border border-slate-300 py-2 px-3 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <!-- Resumen Contable Estimado -->
+              <div class="rounded-lg bg-slate-50 p-3 border border-slate-200 text-xs space-y-1">
+                <div class="flex justify-between text-slate-600">
+                  <span>Sucursal:</span>
+                  <span class="font-bold text-slate-800">{{ branchName() }}</span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                  <span>Total Estimado Reserva:</span>
+                  <span class="font-bold text-slate-900">
+                    Bs {{ ((Number(resSelectedVariant()?.price) || 0) * resQuantity()).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- BOTÓN SAGRADO CU11: Apartar Prenda Localmente -->
+              <button
+                hlmBtn
+                type="button"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-xs sm:text-sm shadow-md rounded-xl transition disabled:opacity-50"
+                [disabled]="!resSelectedVariant() || !resCustomerName().trim() || resApartando()"
+                (click)="apartarPrendaLocalmente()"
+              >
+                @if (resApartando()) {
+                  <span class="inline-block animate-spin mr-1.5">⟳</span> Apartando...
+                } @else {
+                  <span>⚡ Apartar Prenda Localmente</span>
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Reservas en Cola Local de IndexedDB -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold text-slate-800">Cola Local de Reservas en Mostrador</h3>
+            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {{ offlineReservations().length }} total
+            </span>
+          </div>
+        </div>
+
+        @if (offlineReservations().length === 0) {
+          <div class="py-8 text-center text-xs text-slate-500">
+            No existen reservas de mostrador registradas en la memoria local de esta terminal.
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">Código</th>
+                  <th class="py-2.5 px-3">Cliente Presencial</th>
+                  <th class="py-2.5 px-3">Prenda Apartada</th>
+                  <th class="py-2.5 px-3">Fecha Visita</th>
+                  <th class="py-2.5 px-3">Total Est.</th>
+                  <th class="py-2.5 px-3">Estado</th>
+                  <th class="py-2.5 px-3 text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                @for (res of offlineReservations(); track res.client_reservation_id) {
+                  <tr class="hover:bg-slate-50/70 transition">
+                    <td class="py-2.5 px-3">
+                      <div class="font-bold text-slate-900">{{ res.reservation_code }}</div>
+                      <div class="font-mono text-[10px] text-slate-400">{{ res.client_reservation_id }}</div>
+                    </td>
+                    <td class="py-2.5 px-3">
+                      <div class="font-medium text-slate-900">{{ res.customer_name }}</div>
+                      <div class="text-[10px] text-slate-500">{{ res.customer_phone || 'Sin teléfono' }}</div>
+                    </td>
+                    <td class="py-2.5 px-3">
+                      <div class="font-medium text-slate-800">{{ res.items_summary }}</div>
+                    </td>
+                    <td class="py-2.5 px-3">
+                      <div>{{ res.visit_date }}</div>
+                      <div class="text-[10px] text-slate-400">Vence: {{ res.expires_at }}</div>
+                    </td>
+                    <td class="py-2.5 px-3 font-bold text-slate-900">
+                      Bs {{ res.total_estimated.toFixed(2) }}
+                    </td>
+                    <td class="py-2.5 px-3">
+                      @if (res.synced) {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
+                          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Sincronizada
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200">
+                          <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span> PENDIENTE_SYNC
+                        </span>
+                      }
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                      <button
+                        type="button"
+                        class="text-rose-500 hover:text-rose-700 text-xs p-1"
+                        title="Descartar de cola local"
+                        (click)="removeOfflineReservation(res.client_reservation_id)"
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
   @if (activeTab() === 'outbox') {
     <div class="space-y-6 animate-fadeIn">
       <!-- 3 Tarjetas Métricas de Arqueo y Estado Outbox -->
@@ -417,7 +763,7 @@
           </div>
           <div class="mt-3 flex items-baseline gap-2">
             <span class="text-2xl font-bold tracking-tight text-slate-900">Bs {{ totalPendingCash() }}</span>
-            <span class="text-xs text-slate-500">BOB</span>
+            <span class="text-xs text-slate-500 font-medium">en gaveta offline</span>
           </div>
           <p class="mt-1 text-xs text-slate-500">Cobrado al contado según Política P-Ten-05</p>
         </div>
@@ -425,7 +771,7 @@
         <!-- Tarjeta 2: Operaciones en Cola -->
         <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Comprobantes en Bandeja</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Ventas en Cola de Contingencia</span>
             <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -434,7 +780,7 @@
           </div>
           <div class="mt-3 flex items-baseline gap-2">
             <span class="text-2xl font-bold tracking-tight text-slate-900">{{ pendingSales().length }}</span>
-            <span class="text-xs font-semibold text-amber-700">pendientes</span>
+            <span class="text-xs font-semibold text-amber-700">operaci{{ pendingSales().length === 1 ? 'ón pendiente' : 'ones pendientes' }}</span>
             <span class="text-xs text-slate-400">·</span>
             <span class="text-xs text-emerald-700 font-medium">{{ syncedSales().length }} sincronizadas</span>
           </div>
@@ -639,7 +985,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <!-- Sincronizar Todo el Lote -->
+          <!-- Sincronizar Todo el Lote (CU15) -->
           <button
             hlmBtn
             type="button"
@@ -654,7 +1000,7 @@
               <svg class="mr-1.5 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              Sincronizar Lote ({{ pendingSales().length }})
+              Sincronizar Lote Pendiente ({{ pendingSales().length }})
             }
           </button>
 
@@ -1488,6 +1834,74 @@
 
         <button hlmBtn type="button" class="w-full bg-slate-900 text-white text-xs hover:bg-slate-800" (click)="closeExchangeReceiptModal()">
           Aceptar y Cerrar
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Comprobante Térmico de Apartado de Prenda en Mostrador (CU11) -->
+  @if (showResReceiptModal() && lastOfflineReservation()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-fadeIn">
+      <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200 p-6 space-y-4 font-mono text-xs">
+        <div class="text-center border-b border-dashed border-slate-300 pb-3">
+          <div class="h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 mx-auto flex items-center justify-center mb-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-sm text-slate-900">FASHIONSTORE SAAS</h3>
+          <p class="text-[11px] text-slate-500 font-sans">Sucursal: {{ lastOfflineReservation()!.branch_name }}</p>
+          <p class="text-[10px] text-indigo-600 font-bold uppercase mt-1">*** COMPROBANTE DE RESERVA EN MOSTRADOR ***</p>
+        </div>
+
+        <div class="space-y-1.5 py-1 text-[11px]">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Código Reserva:</span>
+            <span class="font-bold text-slate-900">{{ lastOfflineReservation()!.reservation_code }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Cliente Presencial:</span>
+            <span class="font-bold text-slate-800">{{ lastOfflineReservation()!.customer_name }}</span>
+          </div>
+          @if (lastOfflineReservation()!.customer_phone) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Teléfono:</span>
+              <span>{{ lastOfflineReservation()!.customer_phone }}</span>
+            </div>
+          }
+          <div class="flex justify-between">
+            <span class="text-slate-500">Prenda:</span>
+            <span class="font-semibold text-slate-900 truncate max-w-[170px]">{{ lastOfflineReservation()!.items_summary }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Fecha de Retiro:</span>
+            <span>{{ lastOfflineReservation()!.visit_date }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Válida Hasta:</span>
+            <span>{{ lastOfflineReservation()!.expires_at }}</span>
+          </div>
+          <div class="flex justify-between border-t border-dashed border-slate-300 pt-2 font-bold text-xs text-slate-900">
+            <span>Total Estimado:</span>
+            <span>Bs {{ lastOfflineReservation()!.total_estimated.toFixed(2) }}</span>
+          </div>
+          <div class="pt-2 text-[10px] text-slate-400 break-all">
+            UUIDv4: {{ lastOfflineReservation()!.client_reservation_id }}
+          </div>
+        </div>
+
+        <!-- Leyenda Sagrada ICONIX -->
+        <div class="rounded-lg bg-amber-50 p-2.5 border border-amber-200 text-center text-[10px] text-amber-900 font-sans font-medium">
+          “Reserva Offline - Sujeta a sincronización al reanudar conexión”
+        </div>
+
+        <button
+          hlmBtn
+          type="button"
+          class="w-full bg-slate-900 text-white text-xs hover:bg-slate-800 font-sans py-2"
+          (click)="closeResReceiptModal()"
+        >
+          Cerrar Comprobante
         </button>
       </div>
     </div>
