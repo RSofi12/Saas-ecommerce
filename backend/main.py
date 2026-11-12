@@ -62,6 +62,7 @@ async def health():
     return {"status": "ok"}
 
 import os
+import tempfile
 from fastapi.staticfiles import StaticFiles
 
 # CORS
@@ -74,9 +75,21 @@ app.add_middleware(
 )
 
 # Servir archivos estáticos locales de subidas (imágenes de prendas y variantes)
-uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
-os.makedirs(uploads_dir, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+try:
+    uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+except (PermissionError, OSError):
+    uploads_dir = os.path.join(tempfile.gettempdir(), "uploads")
+    try:
+        os.makedirs(uploads_dir, exist_ok=True)
+    except Exception:
+        uploads_dir = None
+
+if uploads_dir and os.path.exists(uploads_dir):
+    try:
+        app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+    except Exception:
+        pass
 
 # Routers estructurados por paquetes de dominio (ICONIX)
 api_router = APIRouter(prefix="/api")
