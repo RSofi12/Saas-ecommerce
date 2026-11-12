@@ -2,7 +2,7 @@ import math
 import os
 import random
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
@@ -406,19 +406,27 @@ class CustomerSegmentationService:
 
         # Si tenemos al menos 10 clientes con compras reales, usamos datos reales
         if len(customer_sales) >= 10:
-            now = datetime.now()
             records = []
             for uid, user_sales in customer_sales.items():
                 dates = [s.created_at for s in user_sales if s.created_at]
-                max_date = max(dates) if dates else now
-                recency = max(1, (now - max_date).days)
+                if dates:
+                    max_date = max(dates)
+                    if max_date.tzinfo is not None:
+                        now_cmp = datetime.now(timezone.utc)
+                        max_cmp = max_date.astimezone(timezone.utc)
+                    else:
+                        now_cmp = datetime.now()
+                        max_cmp = max_date
+                    recency = max(1, (now_cmp - max_cmp).days)
+                else:
+                    recency = 1
                 frequency = len(user_sales)
                 monetary = sum(float(s.total_amount) for s in user_sales)
 
                 # Devoluciones y cambios vinculados a las ventas de este usuario
                 sale_ids = [s.id for s in user_sales]
                 returns_count = db.query(GarmentReturn).filter(GarmentReturn.sale_id.in_(sale_ids)).count()
-                exchanges_count = db.query(GarmentExchange).filter(GarmentExchange.original_sale_id.in_(sale_ids)).count()
+                exchanges_count = db.query(GarmentExchange).filter(GarmentExchange.sale_id.in_(sale_ids)).count()
 
                 return_rate = min(1.0, (returns_count + exchanges_count) / max(1, frequency))
 

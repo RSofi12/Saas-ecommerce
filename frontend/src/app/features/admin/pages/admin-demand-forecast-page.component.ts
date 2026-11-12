@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideActivity,
@@ -19,6 +20,7 @@ import {
   lucideSlidersHorizontal,
   lucideSparkles,
   lucideTrendingUp,
+  lucideUsers,
 } from '@ng-icons/lucide';
 
 import {
@@ -39,7 +41,7 @@ import { getErrorMessage } from '../../../core/utils/http-error.util';
 @Component({
   selector: 'app-admin-demand-forecast-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIcon],
+  imports: [CommonModule, FormsModule, NgIcon, RouterLink, RouterLinkActive],
   providers: [
     provideIcons({
       lucideActivity,
@@ -58,6 +60,7 @@ import { getErrorMessage } from '../../../core/utils/http-error.util';
       lucideSlidersHorizontal,
       lucideSparkles,
       lucideTrendingUp,
+      lucideUsers,
     }),
   ],
   templateUrl: './admin-demand-forecast-page.component.html',

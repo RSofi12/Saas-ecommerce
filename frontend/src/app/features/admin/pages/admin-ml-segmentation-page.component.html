@@ -1,4 +1,32 @@
 <div class="space-y-6 pb-12">
+  <!-- Navegación de Pestañas Machine Learning (CU22, CU23, CU24) -->
+  <nav class="flex border-b border-border/80 gap-2 mb-2">
+    <a
+      routerLink="/app/admin/ml-dataset"
+      routerLinkActive="border-primary text-primary font-semibold"
+      class="border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+    >
+      <ng-icon name="lucideSparkles" class="h-4 w-4"></ng-icon>
+      <span>Dataset Sintético (CU22)</span>
+    </a>
+    <a
+      routerLink="/app/admin/demand-forecast"
+      routerLinkActive="border-primary text-primary font-semibold"
+      class="border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+    >
+      <ng-icon name="lucideTrendingUp" class="h-4 w-4"></ng-icon>
+      <span>Demanda por Talla (CU23)</span>
+    </a>
+    <a
+      routerLink="/app/admin/ml-segmentation"
+      routerLinkActive="border-primary text-primary font-semibold"
+      class="border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+    >
+      <ng-icon name="lucideUsers" class="h-4 w-4"></ng-icon>
+      <span>Segmentación K-Means (CU24)</span>
+    </a>
+  </nav>
+
   <!-- Encabezado Principal y Telemetría -->
   <div class="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
     <div>
