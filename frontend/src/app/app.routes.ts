@@ -9,6 +9,13 @@ import {
 
 export const routes: Routes = [
   {
+    path: 'branches',
+    loadComponent: () =>
+      import('./features/branches/pages/branches-map-page.component').then(
+        (m) => m.BranchesMapPageComponent,
+      ),
+  },
+  {
     path: 'auth/login',
     loadComponent: () =>
       import('./features/shared/pages/login-page.component').then(
@@ -204,6 +211,23 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'dashboard',
+            redirectTo: '',
+            pathMatch: 'full',
+          },
+          {
+            path: 'conflicts',
+            loadComponent: () =>
+              import('./features/encargado/pages/sale-conflicts-page.component').then(
+                (m) => m.SaleConflictsPageComponent,
+              ),
+          },
+          {
+            path: 'sale-conflicts',
+            redirectTo: 'conflicts',
+            pathMatch: 'full',
+          },
+          {
             path: 'catalog',
             loadComponent: () =>
               import('./features/admin/pages/admin-catalog-page.component').then(
@@ -274,6 +298,10 @@ export const routes: Routes = [
               import('./features/admin/pages/admin-demand-forecast-page.component').then(
                 (m) => m.AdminDemandForecastPageComponent,
               ),
+          },
+          {
+            path: 'analytics',
+            redirectTo: 'ml-dataset',
           },
           {
             path: 'ml-dataset',

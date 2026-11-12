@@ -48,7 +48,7 @@ export class LandingPageComponent {
     {
       name: 'Plan Básico',
       badge: 'Boutique Inicial',
-      price: '',
+      price: '$29',
       period: 'USD/mes',
       highlightText: 'Primer mes GRATIS (Prueba de 30 días)',
       description: 'Ideal para boutiques independientes y tiendas que inician su digitalización.',
@@ -68,7 +68,7 @@ export class LandingPageComponent {
     {
       name: 'Plan Profesional',
       badge: '★ Más Elegido',
-      price: '',
+      price: '$99',
       period: 'USD/mes',
       highlightText: 'Incluye Módulo IA Generativa',
       description: 'Para marcas y cadenas de moda en expansión que buscan maximizar ventas.',
@@ -88,7 +88,7 @@ export class LandingPageComponent {
     {
       name: 'Plan Empresarial',
       badge: 'Multitienda & Franquicia',
-      price: '',
+      price: '$199',
       period: 'USD/mes',
       highlightText: 'Soporte y SLA Prioritario 24/7',
       description: 'Solución corporativa para grandes retailers textiles y franquicias.',

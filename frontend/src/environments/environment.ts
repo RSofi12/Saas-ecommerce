@@ -48,7 +48,7 @@ export const environment = {
     'dct_ecommerce_QZtgfQYtsNcdcedjtHBqrfDMqkUMCFVEwKSzqdzTkVTgSPLlqGPwlOzXrDoxQFyX',
   stripePublishableKey:
     runtimeConfig.stripePublishableKey ||
-    'pk_test_51PwuiM08hp2qIPTJ9P4c108993LSovebHw9lQQeABXF3zkN71Upef4jMuPMgLPjJDWOpL5N2I94cMtze0nOxg9IP00Jo5RqrJ7',
+    'pk_live_51UTOELGmMrXC5go2i4whWZEscqPnR0l6YXCJ77TMSQhsA1S09BxmjecK8HlH4BuTCdsGeOVAsQ67NYiq16lSIDCJ00bXKMjXZ7',
 
   firebase: { ...defaultFirebaseConfig, ...runtimeConfig.firebase },
   firebaseVapidKey:
