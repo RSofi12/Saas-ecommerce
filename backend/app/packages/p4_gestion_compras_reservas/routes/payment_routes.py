@@ -129,3 +129,40 @@ async def stripe_webhook_route(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     return {"received": True}
+
+
+@router.post("/test-confirm-order/{order_id}")
+def test_confirm_order_for_dev(
+    order_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles(RolEnum.administrador, RolEnum.superadmin, RolEnum.cliente)),
+):
+    """
+    Endpoint auxiliar para pruebas y defensas: Simula la confirmación exitosa de Stripe
+    marcando payment_status='paid' respetando la Política de Negocio 3 (habilitar despacho).
+    """
+    from decimal import Decimal
+    from app.packages.p4_gestion_compras_reservas.models.cart import Cart
+    from app.packages.p4_gestion_compras_reservas.models.cart_item import CartItem
+    from app.packages.p4_gestion_compras_reservas.models.order import Order
+    from app.packages.p4_gestion_compras_reservas.schemas.cart_schema import CartStatusEnum
+    from app.packages.p4_gestion_compras_reservas.schemas.order_schema import PaymentStatusEnum, OrderStatusEnum
+    
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Orden no encontrada")
+    order.payment_status = PaymentStatusEnum.paid
+    order.status = OrderStatusEnum.paid
+
+    cart = db.query(Cart).filter(Cart.user_id == order.user_id).first()
+    if cart:
+        cart.status = CartStatusEnum.active
+        db.query(CartItem).filter(CartItem.cart_id == cart.id).delete(synchronize_session=False)
+        cart.subtotal = Decimal("0.00")
+        cart.discount_amount = Decimal("0.00")
+        cart.total_amount = Decimal("0.00")
+
+    db.commit()
+    db.refresh(order)
+    return response(status_code=200, message="Pago confirmado exitosamente (Simulación Stripe)", data={"order_id": str(order.id), "payment_status": order.payment_status.value})
+

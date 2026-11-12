@@ -37,7 +37,7 @@ router = APIRouter(prefix="/reservations", tags=["Reservations"])
 async def list_my_reservations_route(
     db: Session = Depends(get_db),
     tenant_id: UUID | None = Depends(get_tenant_id_from_header),
-    current_user: dict = Depends(require_roles(RolEnum.cliente)),
+    current_user: dict = Depends(require_roles(RolEnum.cliente, RolEnum.cajero, RolEnum.encargado, RolEnum.administrador)),
 ):
     reservations = list_reservations(db, UUID(current_user["sub"]), tenant_id=tenant_id)
     return response(status_code=200, message="Reservas obtenidas exitosamente", data=reservations)
@@ -110,7 +110,7 @@ async def get_reservation_route(
     reservation_id: UUID,
     db: Session = Depends(get_db),
     tenant_id: UUID | None = Depends(get_tenant_id_from_header),
-    current_user: dict = Depends(require_roles(RolEnum.cliente)),
+    current_user: dict = Depends(require_roles(RolEnum.cliente, RolEnum.cajero, RolEnum.encargado, RolEnum.administrador)),
 ):
     reservation = get_reservation(db, UUID(current_user["sub"]), reservation_id, tenant_id=tenant_id)
     if not reservation:
@@ -124,7 +124,7 @@ async def create_reservation_route(
     payload: ReservationCreate,
     db: Session = Depends(get_db),
     tenant_id: UUID | None = Depends(get_tenant_id_from_header),
-    current_user: dict = Depends(require_roles(RolEnum.cliente)),
+    current_user: dict = Depends(require_roles(RolEnum.cliente, RolEnum.cajero, RolEnum.encargado, RolEnum.administrador)),
 ):
     try:
         reservation = create_reservation(db, UUID(current_user["sub"]), payload, tenant_id=tenant_id)
@@ -138,7 +138,7 @@ async def cancel_reservation_route(
     reservation_id: UUID,
     db: Session = Depends(get_db),
     tenant_id: UUID | None = Depends(get_tenant_id_from_header),
-    current_user: dict = Depends(require_roles(RolEnum.cliente)),
+    current_user: dict = Depends(require_roles(RolEnum.cliente, RolEnum.cajero, RolEnum.encargado, RolEnum.administrador)),
 ):
     try:
         reservation = cancel_reservation(db, UUID(current_user["sub"]), reservation_id, tenant_id=tenant_id)
@@ -154,7 +154,7 @@ async def decide_reservation_route(
     reservation_id: UUID,
     payload: ReservationDecisionRequest,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_roles(RolEnum.cliente)),
+    current_user: dict = Depends(require_roles(RolEnum.cliente, RolEnum.cajero, RolEnum.encargado, RolEnum.administrador)),
 ):
     try:
         reservation = decide_reservation(db, UUID(current_user["sub"]), reservation_id, payload.purchase)
@@ -170,7 +170,7 @@ async def decide_reservation_route(
 async def transfer_reservation_to_cart_route(
     reservation_id: UUID,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(require_roles(RolEnum.cliente)),
+    current_user: dict = Depends(require_roles(RolEnum.cliente, RolEnum.cajero, RolEnum.encargado, RolEnum.administrador)),
 ):
     try:
         cart = transfer_reservation_service(db, UUID(current_user["sub"]), reservation_id)

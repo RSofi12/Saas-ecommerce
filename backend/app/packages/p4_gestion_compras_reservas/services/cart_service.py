@@ -201,7 +201,8 @@ def remove_cart_item(db: Session, user_id: UUID, item_id: UUID) -> CartRead:
 
 
 def clear_cart(db: Session, user_id: UUID) -> CartRead:
-    cart = _get_mutable_cart(db, user_id)
+    cart = _get_active_cart(db, user_id)
+    cart.status = CartStatusEnum.active
     db.query(CartItem).filter(CartItem.cart_id == cart.id).delete(synchronize_session=False)
     refresh_cart_totals(db, cart)
     db.commit()

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { toast } from '@spartan-ng/brain/sonner';
@@ -25,7 +25,7 @@ import { DetectorMediapipeComponent } from '../../shared/components/detector-med
 @Component({
   selector: 'app-product-detail-page',
   standalone: true,
-  imports: [CommonModule, HlmButton, VirtualTryOnComponent, DetectorRopaComponent, DetectorMediapipeComponent, ...HlmBadgeImports, ...HlmCardImports],
+  imports: [CommonModule, RouterLink, HlmButton, VirtualTryOnComponent, DetectorRopaComponent, DetectorMediapipeComponent, ...HlmBadgeImports, ...HlmCardImports],
   templateUrl: './product-detail-page.component.html',
 })
 export class ProductDetailPageComponent {

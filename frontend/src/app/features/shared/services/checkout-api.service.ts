@@ -52,6 +52,10 @@ export class CheckoutApiService {
     return this.api.post<ApiResponse<OrderDispatchResponse>>(`/orders/${orderId}/dispatch`, payload);
   }
 
+  testConfirmOrder(orderId: string) {
+    return this.api.post<ApiResponse<{ order_id: string; payment_status: string }>>(`/payments/test-confirm-order/${orderId}`, {});
+  }
+
   trackOrder(trackingNumber: string) {
     return this.api.get<ApiResponse<Order>>(`/orders/tracking/${trackingNumber}`);
   }

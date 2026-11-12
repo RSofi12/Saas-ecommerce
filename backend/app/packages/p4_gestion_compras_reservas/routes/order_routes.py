@@ -16,6 +16,7 @@ from app.packages.p4_gestion_compras_reservas.services.order_service import (
     dispatch_order,
     get_order,
     get_order_by_tracking,
+    list_all_orders,
     list_orders,
     list_orders_by_branch,
     mark_order_ready,
@@ -41,11 +42,20 @@ async def list_branch_orders_route(
     db: Session = Depends(get_db),
     tenant_id: UUID | None = Depends(get_tenant_id_from_header),
     current_branch_id: UUID | None = Depends(get_current_branch_id),
-    _: dict = Depends(require_roles(RolEnum.encargado)),
+    current_user: User = Depends(get_current_user),
+    _: dict = Depends(require_roles(RolEnum.encargado, RolEnum.administrador, RolEnum.superadmin)),
 ):
+    effective_tenant_id = tenant_id or current_user.tenant_id
+    if current_user.rol in {RolEnum.administrador, RolEnum.superadmin}:
+        return response(
+            status_code=200,
+            message="Pedidos de empresa obtenidos exitosamente",
+            data=list_all_orders(db, tenant_id=effective_tenant_id, branch_id=current_branch_id),
+        )
+
     if current_branch_id is None:
         raise HTTPException(status_code=422, detail="El encargado no tiene sucursal asignada")
-    return response(status_code=200, message="Pedidos de sucursal obtenidos", data=list_orders_by_branch(db, current_branch_id, tenant_id=tenant_id))
+    return response(status_code=200, message="Pedidos de sucursal obtenidos", data=list_orders_by_branch(db, current_branch_id, tenant_id=effective_tenant_id))
 
 
 @router.get("/tracking/{tracking_number}")

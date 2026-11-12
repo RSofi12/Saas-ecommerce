@@ -107,6 +107,17 @@ def list_orders_by_branch(db: Session, branch_id: UUID, tenant_id: UUID | None =
     return [_serialize_order(db, order).model_dump() for order in orders]
 
 
+def list_all_orders(db: Session, tenant_id: UUID | None = None, branch_id: UUID | None = None):
+    expire_due_orders(db)
+    query = db.query(Order)
+    if tenant_id:
+        query = query.filter(Order.tenant_id == tenant_id)
+    if branch_id:
+        query = query.filter(Order.pickup_branch_id == branch_id)
+    orders = query.order_by(Order.created_at.desc()).all()
+    return [_serialize_order(db, order).model_dump() for order in orders]
+
+
 def get_order(db: Session, user_id: UUID, order_id: UUID, tenant_id: UUID | None = None):
     expire_due_orders(db)
     query = db.query(Order).filter(Order.id == order_id, Order.user_id == user_id)
@@ -311,7 +322,12 @@ def create_stripe_payment(
     try:
         import stripe
         if not settings.stripe_secret_key:
-            raise ValueError("Stripe no está configurado")
+            raise ValueError("Stripe no está configurado (falta STRIPE_SECRET_KEY en backend/.env)")
+        if settings.stripe_secret_key.startswith("pk_"):
+            raise ValueError(
+                "Configuración incorrecta de Stripe: STRIPE_SECRET_KEY en backend/.env tiene una clave pública ('pk_...'). "
+                "Debe ser la clave secreta que empieza con 'sk_test_...' (obténla en https://dashboard.stripe.com/test/apikeys)."
+            )
         stripe.api_key = settings.stripe_secret_key
         amount = int((order.total_amount * Decimal("100")).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
         metadata = {
@@ -319,13 +335,24 @@ def create_stripe_payment(
             "tenant_id": str(order.tenant_id or ""),
             "delivery_type": order.delivery_type or "RETIRO_TIENDA",
         }
-        intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency=settings.stripe_currency.lower(),
-            metadata=metadata,
-            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
-            idempotency_key=attempt.idempotency_key,
-        )
+        # Create PaymentIntent with fallback to card payment_method_types
+        intent_kwargs = {
+            "amount": amount,
+            "currency": settings.stripe_currency.lower(),
+            "metadata": metadata,
+        }
+        try:
+            intent = stripe.PaymentIntent.create(
+                **intent_kwargs,
+                automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
+                idempotency_key=attempt.idempotency_key,
+            )
+        except stripe.error.InvalidRequestError:
+            intent = stripe.PaymentIntent.create(
+                **intent_kwargs,
+                payment_method_types=["card"],
+                idempotency_key=f"{attempt.idempotency_key}_card",
+            )
         attempt.stripe_payment_intent_id = intent.id
         order.stripe_payment_intent_id = intent.id
         db.commit()
@@ -382,7 +409,12 @@ def create_stripe_payment_for_order(db: Session, user_id: UUID, order_id: UUID, 
         import stripe
 
         if not settings.stripe_secret_key:
-            raise ValueError("Stripe no está configurado")
+            raise ValueError("Stripe no está configurado (falta STRIPE_SECRET_KEY en backend/.env)")
+        if settings.stripe_secret_key.startswith("pk_"):
+            raise ValueError(
+                "Configuración incorrecta de Stripe: STRIPE_SECRET_KEY en backend/.env tiene una clave pública ('pk_...'). "
+                "Debe ser la clave secreta que empieza con 'sk_test_...' (obténla en https://dashboard.stripe.com/test/apikeys)."
+            )
         stripe.api_key = settings.stripe_secret_key
 
         existing_intent_id = order.stripe_payment_intent_id or (
@@ -400,13 +432,24 @@ def create_stripe_payment_for_order(db: Session, user_id: UUID, order_id: UUID, 
                 "tenant_id": str(order.tenant_id or ""),
                 "delivery_type": order.delivery_type or "RETIRO_TIENDA",
             }
-            intent = stripe.PaymentIntent.create(
-                amount=amount,
-                currency=order.currency.lower(),
-                metadata=metadata,
-                automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
-                idempotency_key=attempt.idempotency_key,
-            )
+            # Create PaymentIntent with fallback to card payment_method_types
+            intent_kwargs = {
+                "amount": amount,
+                "currency": order.currency.lower(),
+                "metadata": metadata,
+            }
+            try:
+                intent = stripe.PaymentIntent.create(
+                    **intent_kwargs,
+                    automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
+                    idempotency_key=attempt.idempotency_key,
+                )
+            except stripe.error.InvalidRequestError:
+                intent = stripe.PaymentIntent.create(
+                    **intent_kwargs,
+                    payment_method_types=["card"],
+                    idempotency_key=f"{attempt.idempotency_key}_card",
+                )
             attempt.stripe_payment_intent_id = intent.id
             order.stripe_payment_intent_id = intent.id
             db.commit()

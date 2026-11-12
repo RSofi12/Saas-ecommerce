@@ -68,7 +68,7 @@ def _get_inventory_for_update(db: Session, variant_id, branch_id) -> Inventory |
     return (
         db.query(Inventory)
         .filter(Inventory.variant_id == variant_id, Inventory.branch_id == branch_id)
-        .with_for_update()
+        .with_for_update(skip_locked=True)
         .first()
     )
 
@@ -167,7 +167,7 @@ def _get_reservation_for_user(db: Session, reservation_id: UUID, user_id: UUID) 
     )
 
 
-def expire_due_reservations(db: Session):
+def expire_due_reservations(db: Session, limit: int = 10):
     today = date.today()
     reservations = (
         db.query(Reservation)
@@ -176,6 +176,7 @@ def expire_due_reservations(db: Session):
             Reservation.status.in_((*ACTIVE_RESERVATION_STATUSES, ReservationStatusEnum.attended)),
             Reservation.expires_at <= today,
         )
+        .limit(limit)
         .all()
     )
 
@@ -240,20 +241,18 @@ def expire_transferred_reservations(db: Session):
 
 
 def list_reservations(db: Session, user_id: UUID, tenant_id: UUID | None = None):
-    expire_due_reservations(db)
     query = db.query(Reservation).filter(Reservation.user_id == user_id)
     if tenant_id:
         query = query.filter(Reservation.tenant_id == tenant_id)
-    reservations = query.order_by(Reservation.created_at.desc()).all()
+    reservations = query.order_by(Reservation.created_at.desc()).limit(10).all()
     return [_serialize_reservation(db, reservation).model_dump() for reservation in reservations]
 
 
 def list_reservations_by_branch(db: Session, branch_id: UUID, tenant_id: UUID | None = None):
-    expire_due_reservations(db)
     query = db.query(Reservation).filter(Reservation.branch_id == branch_id)
     if tenant_id:
         query = query.filter(Reservation.tenant_id == tenant_id)
-    reservations = query.order_by(Reservation.created_at.desc()).all()
+    reservations = query.order_by(Reservation.created_at.desc()).limit(5).all()
     return [_serialize_reservation(db, reservation).model_dump() for reservation in reservations]
 
 
@@ -551,7 +550,7 @@ def list_branch_conflicts(db: Session, branch_id: UUID, tenant_id: UUID | None =
     if tenant_id:
         query = query.filter(Reservation.tenant_id == tenant_id)
 
-    reservations = query.order_by(Reservation.created_at.desc()).all()
+    reservations = query.order_by(Reservation.created_at.desc()).limit(5).all()
     results = []
     for res in reservations:
         items_stock = []
