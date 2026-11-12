@@ -308,7 +308,7 @@ def list_sales_by_branch(db: Session, branch_id: UUID | None = None, user_id: UU
         query = query.filter(Sale.branch_id == branch_id)
     if user_id is not None:
         query = query.filter(Sale.user_id == user_id)
-    sales = [_serialize_sale(db, sale).model_dump() for sale in query.order_by(Sale.created_at.desc()).all()]
+    sales = [_serialize_sale(db, sale).model_dump() for sale in query.order_by(Sale.created_at.desc()).limit(100).all()]
 
     orders_query = db.query(Order).filter(Order.status == "paid", Order.pickup_branch_id.is_not(None))
     if tenant_id is not None:
@@ -316,8 +316,14 @@ def list_sales_by_branch(db: Session, branch_id: UUID | None = None, user_id: UU
     if branch_id is not None:
         orders_query = orders_query.filter(Order.pickup_branch_id == branch_id)
     orders = []
-    for order in orders_query.order_by(Order.created_at.desc()).all():
-        branch_name = db.query(Branch.name).filter(Branch.id == order.pickup_branch_id).scalar() or str(order.pickup_branch_id)
+    
+    # Pre-cache branch names, size names and color names to eliminate N+1 queries
+    branch_map = {b.id: b.name for b in db.query(Branch.id, Branch.name).all()}
+    size_map = {s.id: s.name for s in db.query(Size.id, Size.name).all()}
+    color_map = {c.id: c.name for c in db.query(Color.id, Color.name).all()}
+
+    for order in orders_query.order_by(Order.created_at.desc()).limit(100).all():
+        branch_name = branch_map.get(order.pickup_branch_id, str(order.pickup_branch_id))
         orders.append(SaleRead.model_validate({
             "id": order.id,
             "branch_id": order.pickup_branch_id,
@@ -343,8 +349,8 @@ def list_sales_by_branch(db: Session, branch_id: UUID | None = None, user_id: UU
                 "unit_price": item.unit_price, "original_unit_price": item.unit_price, "discount_amount": Decimal("0.00"),
                 "line_total": item.line_total, "product_id": item.product_id, "product_name": item.product_name,
                 "variant_sku": item.variant_sku, "size_id": item.size_id, "color_id": item.color_id,
-                "size_name": item.size_id and db.query(Size.name).filter(Size.id == item.size_id).scalar(),
-                "color_name": item.color_id and db.query(Color.name).filter(Color.id == item.color_id).scalar(),
+                "size_name": size_map.get(item.size_id),
+                "color_name": color_map.get(item.color_id),
                 "image_url": item.image_url, "image_public_id": item.image_public_id,
             } for item in order.items],
         }).model_dump())
