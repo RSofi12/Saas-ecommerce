@@ -32,8 +32,8 @@ def list_plans(
         basic = Plan(
             name="BASICO",
             code="basic",
-            description="Plan esencial para boutiques individuales. Incluye hasta 3 sucursales activas y gestión estándar de inventario y ventas POS.",
-            max_branches=3,
+            description="Plan esencial para boutiques individuales. Incluye hasta 2 sucursales activas y gestión estándar de inventario y ventas POS.",
+            max_branches=2,
             has_ai_access=False,
             price_monthly=29.00,
         )
@@ -48,8 +48,8 @@ def list_plans(
         enterprise = Plan(
             name="EMPRESARIAL",
             code="enterprise",
-            description="Plan corporativo para grandes cadenas y franquicias. Incluye hasta 223 sucursales activas, analítica predictiva avanzada, Gemini IA y copias de seguridad continuas.",
-            max_branches=223,
+            description="Plan corporativo para grandes cadenas y franquicias. Incluye hasta 20 sucursales activas, analítica predictiva avanzada, Gemini IA y soporte dedicado.",
+            max_branches=20,
             has_ai_access=True,
             price_monthly=199.00,
         )
@@ -57,14 +57,14 @@ def list_plans(
         db.commit()
         plans = [basic, pro, enterprise]
     else:
-        # Aseguramos que el plan enterprise exista y tenga hasta 223 sucursales
+        # Aseguramos que el plan enterprise exista y tenga hasta 20 sucursales
         enterprise_plan = next((p for p in plans if p.code in ["enterprise", "empresarial"]), None)
         if not enterprise_plan:
             enterprise_plan = Plan(
                 name="EMPRESARIAL",
                 code="enterprise",
-                description="Plan corporativo para grandes cadenas y franquicias. Incluye hasta 223 sucursales activas, analítica predictiva avanzada, Gemini IA y copias de seguridad continuas.",
-                max_branches=223,
+                description="Plan corporativo para grandes cadenas y franquicias. Incluye hasta 20 sucursales activas, analítica predictiva avanzada, Gemini IA y soporte dedicado.",
+                max_branches=20,
                 has_ai_access=True,
                 price_monthly=199.00,
                 is_active=True,
@@ -73,9 +73,9 @@ def list_plans(
             db.commit()
             db.refresh(enterprise_plan)
             plans.append(enterprise_plan)
-        elif enterprise_plan.max_branches < 223:
-            enterprise_plan.max_branches = 223
-            enterprise_plan.description = "Plan corporativo para grandes cadenas y franquicias. Incluye hasta 223 sucursales activas, analítica predictiva avanzada, Gemini IA y copias de seguridad continuas."
+        else:
+            enterprise_plan.max_branches = 20
+            enterprise_plan.description = "Plan corporativo para grandes cadenas y franquicias. Incluye hasta 20 sucursales activas, analítica predictiva avanzada, Gemini IA y soporte dedicado."
             db.commit()
             db.refresh(enterprise_plan)
 

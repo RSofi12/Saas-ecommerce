@@ -20,7 +20,7 @@ En la comercialización de moda, calzado y confección textil bajo un modelo Saa
 ```mermaid
 flowchart TD
     subgraph SaaS_Policies["I. Políticas de la Plataforma SaaS (Superadmin)"]
-        SP1["P-SaaS-01: Cuotas y Límites de Planes (Básico: 3 suc. | Pro: 10 suc. | Empresarial: Sin límite)"]
+        SP1["P-SaaS-01: Cuotas y Límites de Planes (Básico: 2 suc. | Pro: 10 suc. | Empresarial: 20 suc.)"]
         SP2["P-SaaS-02: Políticas de Backup y Respaldo por Nivel de Suscripción"]
         SP3["P-SaaS-03: Aislamiento Lógico Estricto Multitenant (tenant_id obligatorio)"]
         SP4["P-SaaS-04: Contratación y No Reembolso de Cuotas Mensuales Consumidas"]
@@ -50,7 +50,7 @@ El Superadmin gobierna la plataforma SaaS ofreciendo 3 planes oficiales configur
 
 | Característica / Beneficio | Plan BÁSICO | Plan PROFESIONAL | Plan EMPRESARIAL |
 | :--- | :---: | :---: | :---: |
-| **Sucursales Físicas Activas** | **Hasta 3 sucursales** | **Hasta 10 sucursales** | **Ilimitadas (o hasta 25)** |
+| **Sucursales Físicas Activas** | **Hasta 2 sucursales** | **Hasta 10 sucursales** | **Hasta 20 sucursales** |
 | **Catálogo de Prendas y Tallas** | Ilimitado | Ilimitado | Ilimitado |
 | **PWA y Operaciones Offline** | Sí (IDB / SQLite) | Sí (IDB / SQLite) | Sí (IDB / SQLite) |
 | **Pasarela de Pagos Stripe** | Sí | Sí | Sí |

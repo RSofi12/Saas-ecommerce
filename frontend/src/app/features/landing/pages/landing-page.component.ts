@@ -93,7 +93,7 @@ export class LandingPageComponent {
       highlightText: 'Soporte y SLA Prioritario 24/7',
       description: 'Solución corporativa para grandes retailers textiles y franquicias.',
       features: [
-        'Hasta 25 sucursales centralizadas',
+        'Hasta 20 sucursales centralizadas',
         'Acceso completo a todos los modelos de IA',
         'Sincronización multi-sucursal en tiempo real',
         'Asistente de reposición inteligente entre locales',

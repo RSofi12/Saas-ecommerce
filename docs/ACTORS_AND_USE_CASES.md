@@ -237,12 +237,12 @@ flowchart TB
 - **Precondición:** Empresas dadas de alta en el sistema.
 - **Flujo Normal:**
   1. El Superadmin selecciona una empresa y pulsa "Gestionar Plan".
-  2. Selecciona entre **Plan Básico (máx. 3 sucursales)**, **Plan Profesional (máx. 10 sucursales con IA)** o **Plan Empresarial (ilimitadas con backup continuo)**.
+  2. Selecciona entre **Plan Básico (máx. 2 sucursales)**, **Plan Profesional (máx. 10 sucursales con IA)** o **Plan Empresarial (máx. 20 sucursales con IA avanzada)**.
   3. El Controlador calcula la vigencia (mensual/anual) y actualiza la cuota máxima permitida en `Subscription`.
   4. El Controlador persiste los límites y actualiza los flags de módulos habilitados.
   5. La Frontera confirma la asignación del plan.
 - **Flujos Alternativos:**
-  - *3. A1 [Downgrade Guard]:* Si la empresa tiene 5 sucursales activas e intenta degradar a Básico (máx. 3), el Controlador bloquea la acción hasta desactivar las sucursales excedentes.
+  - *3. A1 [Downgrade Guard]:* Si la empresa tiene 3 sucursales activas e intenta degradar a Básico (máx. 2), el Controlador bloquea la acción hasta desactivar las sucursales excedentes.
 - **Postcondición:** Cuotas comerciales vigentes a nivel de base de datos.
 
 #### CU03: Iniciar Sesión Multitenant con JWT y Claims de Tenant
@@ -270,11 +270,11 @@ flowchart TB
   1. El administrador ingresa a "Sucursales" y solicita crear una nueva tienda física.
   2. Ingresa nombre, ciudad, dirección, coordenadas GPS (latitud/longitud), teléfono y horario.
   3. El Controlador cuenta las sucursales activas actuales de la empresa en `Branch`.
-  4. El Controlador compara la cantidad contra la cuota permitida por su plan (`max_branches`: 3, 10 o ilimitado).
+  4. El Controlador compara la cantidad contra la cuota permitida por su plan (`max_branches`: 2, 10 o 20).
   5. Al haber cupo disponible, el Controlador persiste la sucursal asignando su `tenant_id`.
-  6. La Frontera actualiza la lista y dibuja el widget de consumo de cuota (ej. 2/3 activas).
+  6. La Frontera actualiza la lista y dibuja el widget de consumo de cuota (ej. 1/2 activas).
 - **Flujos Alternativos:**
-  - *4. A1:* Cuota copada (ej. 3 de 3 en Básico) $\rightarrow$ El Controlador bloquea con HTTP 403 y la Frontera sugiere subir a Plan Profesional.
+  - *4. A1:* Cuota copada (ej. 2 de 2 en Básico) $\rightarrow$ El Controlador bloquea con HTTP 403 y la Frontera sugiere subir a Plan Profesional.
 - **Postcondición:** Sucursal operativa respetando los límites contractuales del SaaS.
 
 ---

@@ -26,16 +26,16 @@ def seed_saas_data():
             basic_plan = Plan(
                 name="BASICO",
                 code="basic",
-                max_branches=3,
+                max_branches=2,
                 has_ai_access=False,
                 price_monthly=Decimal("29.00"),
                 is_active=True,
             )
             db.add(basic_plan)
-            print("   -> Creado Plan BASICO (max 3 sucursales, sin IA)")
+            print("   -> Creado Plan BASICO (max 2 sucursales, sin IA)")
         else:
-            basic_plan.max_branches = 3
-            print("   -> Plan BASICO actualizado (max 3 sucursales)")
+            basic_plan.max_branches = 2
+            print("   -> Plan BASICO actualizado (max 2 sucursales)")
 
         pro_plan = db.query(Plan).filter(Plan.code == "pro").first()
         if not pro_plan:
@@ -50,6 +50,7 @@ def seed_saas_data():
             db.add(pro_plan)
             print("   -> Creado Plan PROFESIONAL (max 10 sucursales, con IA y analitica)")
         else:
+            pro_plan.max_branches = 10
             print("   -> Plan PROFESIONAL ya existe")
 
         enterprise_plan = db.query(Plan).filter(Plan.code == "enterprise").first()
@@ -57,15 +58,16 @@ def seed_saas_data():
             enterprise_plan = Plan(
                 name="EMPRESARIAL",
                 code="enterprise",
-                max_branches=25,
+                max_branches=20,
                 has_ai_access=True,
                 price_monthly=Decimal("199.00"),
                 is_active=True,
             )
             db.add(enterprise_plan)
-            print("   -> Creado Plan EMPRESARIAL (max 25 sucursales, con IA y backup continuo)")
+            print("   -> Creado Plan EMPRESARIAL (max 20 sucursales, con IA y backup continuo)")
         else:
-            print("   -> Plan EMPRESARIAL ya existe")
+            enterprise_plan.max_branches = 20
+            print("   -> Plan EMPRESARIAL actualizado (max 20 sucursales)")
 
         db.commit()
         db.refresh(basic_plan)

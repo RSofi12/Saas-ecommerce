@@ -19,7 +19,7 @@ SET row_security = off;
 INSERT INTO plans (id, name, code, max_branches, has_ai_access, price_monthly, is_active, description, created_at, updated_at) VALUES
   ('4c96ab24-1e05-4f74-a7e2-708546dfe183', 'BASICO', 'basic', 2, FALSE, 29.00, TRUE, 'Plan esencial para boutiques independientes y tiendas emergentes con catálogo digital, control de inventario y punto de venta POS offline.', '2026-10-25T23:25:23.521639+00:00', NULL),
   ('d8c1de2c-1184-4f5e-8bbd-0264ed3b5e2d', 'PROFESIONAL', 'pro', 10, TRUE, 99.00, TRUE, 'Plan avanzado para marcas y cadenas de moda en expansión con analítica predictiva, gestión de despachos y asistente de voz Gemini IA.', '2026-10-25T23:25:23.521639+00:00', NULL),
-  ('3d0cf803-e62b-4dca-809b-451ab9a9b3f0', 'EMPRESARIAL', 'enterprise', 223, TRUE, 199.00, TRUE, 'Plan corporativo para grandes cadenas y franquicias textiles. Incluye sucursales ilimitadas, analítica predictiva avanzada, Gemini IA y soporte dedicado.', '2026-11-10T23:11:15.164695+00:00', '2026-11-11T01:36:33.188908+00:00');
+  ('3d0cf803-e62b-4dca-809b-451ab9a9b3f0', 'EMPRESARIAL', 'enterprise', 20, TRUE, 199.00, TRUE, 'Plan corporativo para grandes cadenas y franquicias textiles con hasta 20 sucursales, analitica predictiva avanzada, Gemini IA y soporte dedicado.', '2026-11-10T23:11:15.164695+00:00', '2026-11-12T01:50:00.000000+00:00');
 
 -- ----------------------------------------------------------------------------
 -- TABLA: companies (3 registros)

@@ -46,7 +46,7 @@ Antes de responder, planificar o generar código, consulta estos documentos en o
 * **Políticas de Negocio Inviolables:**
   - **Cambio de Prenda (CU19):** Si el cliente cambia una prenda por otra talla o modelo de mayor precio (ej. M a Bs 50 por L a Bs 70), el cambio se consolida **únicamente si el cliente abona la diferencia** (Bs 20). Si no abona, se cancela la operación y se devuelve la prenda o el pago.
   - **Devolución de Prenda (CU20):** Se retiene entre el 20% y 50% por costos operativos y se reembolsa entre el 50% y 80% del valor pagado (en efectivo o nota de crédito).
-  - **Límites de Suscripción (CU02/CU04):** Plan Básico permite máximo 2 sucursales activas (sin IA generativa); Plan Profesional permite hasta 10 sucursales y módulo de IA.
+  - **Límites de Suscripción (CU02/CU04):** Plan Básico permite máximo 2 sucursales activas (sin IA generativa); Plan Profesional permite hasta 10 sucursales y módulo de IA; Plan Empresarial permite hasta 20 sucursales con IA avanzada.
   - **Despacho Digital (CU12):** El envío de prendas o entrega digital se efectúa únicamente cuando el pago con Stripe está confirmado (`status = 'paid'`).
   - **Ventas Offline (CU16):** Obligatoriamente de contado (efectivo), con generación de UUIDv4 en el cliente y estado `PENDIENTE_SYNC`.
 * **Idempotencia Transaccional (CU18):**

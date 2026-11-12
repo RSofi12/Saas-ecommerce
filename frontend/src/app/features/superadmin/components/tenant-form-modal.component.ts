@@ -187,7 +187,7 @@ import { Company, CompanyCreateDto } from '../../../core/models/company.model';
                   <p class="text-xs text-slate-500 mt-2">Grandes retailers textiles, franquicias y multitienda.</p>
                   <ul class="mt-3 space-y-1 text-xs text-slate-600">
                     <li class="flex items-center gap-1.5 font-medium text-slate-700">
-                      <span class="text-emerald-600 font-bold">✓</span> Hasta 223 sucursales activas
+                      <span class="text-emerald-600 font-bold">✓</span> Hasta 20 sucursales activas
                     </li>
                     <li class="flex items-center gap-1.5 font-medium text-amber-800">
                       <span class="text-amber-600 font-bold">✓</span> Suite completa IA, ML y Soporte 24/7

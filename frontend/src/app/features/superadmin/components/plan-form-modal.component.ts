@@ -122,7 +122,7 @@ import { CompanyService } from '../../../core/services/company.service';
                   />
                   <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">sedes</span>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1">Límite duro de sedes físicas activas (ej. 223)</p>
+                <p class="text-[11px] text-slate-400 mt-1">Límite duro de sedes físicas activas (ej. 20)</p>
               </div>
 
               <!-- Precio Mensual -->

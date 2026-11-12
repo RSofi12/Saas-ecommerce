@@ -19,7 +19,7 @@ class TestCU02SubscriptionManagement:
     Suite de verificación formal para CU02:
     - Ciclo de vida completo de suscripciones (Asignar, Actualizar fechas, Estado VENCIDA y Renovación).
     - Comprobación de que una suscripción VENCIDA restringe la creación de sucursales en get_branch_quota.
-    - Cuotas del Plan Empresarial hasta 223 sucursales.
+    - Cuotas del Plan Empresarial hasta 20 sucursales.
     """
 
     @pytest.fixture(scope="class")
@@ -31,7 +31,7 @@ class TestCU02SubscriptionManagement:
                 plan_basic = Plan(
                     name="Test Básico",
                     code="test_basic",
-                    max_branches=3,
+                    max_branches=2,
                     price_monthly=29.0,
                     has_ai_access=False,
                     is_active=True,
@@ -44,7 +44,7 @@ class TestCU02SubscriptionManagement:
                 plan_ent = Plan(
                     name="Test Empresarial",
                     code="test_enterprise",
-                    max_branches=223,
+                    max_branches=20,
                     price_monthly=199.0,
                     has_ai_access=True,
                     is_active=True,
@@ -133,7 +133,7 @@ class TestCU02SubscriptionManagement:
             assert quota["can_create_branch"] is True
             assert quota["remaining_slots"] == 3
 
-    def test_04_upgrade_to_enterprise_plan_with_223_branches(self, test_company_and_plans):
+    def test_04_upgrade_to_enterprise_plan_with_20_branches(self, test_company_and_plans):
         with SessionLocal() as db:
             company_id = test_company_and_plans["company_id"]
             ent_id = test_company_and_plans["ent_id"]
@@ -143,6 +143,6 @@ class TestCU02SubscriptionManagement:
             db.commit()
 
             quota = get_branch_quota(db, company_id)
-            assert quota["max_branches"] == 223
+            assert quota["max_branches"] == 20
             assert quota["has_ai_access"] is True
             assert quota["can_create_branch"] is True

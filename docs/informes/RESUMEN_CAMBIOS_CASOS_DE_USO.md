@@ -21,7 +21,7 @@ Este documento detalla exhaustivamente todos los cambios, mejoras, políticas de
 * **Objetivo:** Configuración de límites operativos de la plataforma según el plan contratado:
   - **Plan Básico:** Hasta 2 sucursales, sin acceso a IA generativa.
   - **Plan Profesional:** Hasta 10 sucursales, acceso completo al módulo de IA y analítica predictiva.
-  - **Plan Empresarial:** Sucursales ilimitadas y soporte dedicado.
+  - **Plan Empresarial:** Hasta 20 sucursales, acceso total a IA, analítica avanzada y soporte dedicado.
 * **Cambios Backend:**
   - Servicio `quota_service.py` que intercepta la creación de sucursales y consumo de APIs de IA para validar que el tenant no exceda los límites de su suscripción activa.
 * **Cambios Frontend:**
@@ -212,3 +212,4 @@ Para permitir auditorías académicas completas y pruebas de carga, la base de d
 3. **[`backend/main.py`](file:///d:/Proyectos%20si%202/SEGUNDO%20PARCIAL%20SI2/ecommerce-SI2/backend/main.py):** Orquestación FastAPI, router `/api` unificado, worker de expiración automática y fallback `/tmp/uploads` para Linux Render.
 4. **[`render.yaml`](file:///d:/Proyectos%20si%202/SEGUNDO%20PARCIAL%20SI2/ecommerce-SI2/render.yaml):** Blueprint oficial para despliegue en Render con arranque optimizado.
 5. **Rama Remota de Producción:** Rama **`prod`** en [`https://github.com/RSofi12/Saas-ecommerce.git`](https://github.com/RSofi12/Saas-ecommerce.git).
+
